@@ -25,4 +25,6 @@ Miscellaneous
   from an appropriate call to loudbus-methods.
 * `Makefile`
   Instructions for building everything.
-* `mkwrapper.c
+* `mkwrapper.c`
+  Instructions for converting funs into gimp-dbus.rkt (which probably 
+  shouldn't be in the repo).
