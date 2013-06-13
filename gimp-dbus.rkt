@@ -1,7 +1,6 @@
 #lang racket
 (require louDBus/unsafe)
 (provide
-         
          script-fu-round-corners
          file-xjt-load
          gimp-gradient-segment-set-right-color
