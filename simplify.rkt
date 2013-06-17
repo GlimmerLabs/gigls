@@ -8,7 +8,8 @@
          LoudGimp/makers)
 
 ; Primary functions that do need to be exported.
-(require LoudGimp/colors
+(require LoudGimp/alt
+         LoudGimp/colors
          LoudGimp/context
          LoudGimp/image
          LoudGimp/hacks
@@ -24,6 +25,7 @@
 
 (provide (all-defined-out)
          (all-from-out LoudGimp/gimp-dbus)
+         (all-from-out LoudGimp/alt)
          (all-from-out LoudGimp/colors)
          (all-from-out LoudGimp/context)
          (all-from-out LoudGimp/hacks)
