@@ -3,6 +3,28 @@
 (provide (all-defined-out))
 
 
+;;; Procedure:
+;;;   foreach!
+;;; Parameters:
+;;;   proc!, a unary procedure called only for its side effects
+;;;   lst, a list
+;;; Purpose:
+;;;   To call proc! for each element of lst.
+;;; Produces:
+;;;   [Nothing, called for the side effect]
+;;; Preconditions:
+;;;   proc! can be applied to each element of lst.
+;;; Postconditions:
+;;;   For each element, x, of lst, (proc! x) has been called.
+(define foreach! 
+  (lambda (proc! lst)
+    (cond
+      ((null? lst)
+       (void))
+      (else
+       (proc! (car lst))
+       (foreach! proc! (cdr lst))))))
+
 ; [From iascm/list/list-drop.scm]
 
 ;;; Procedure:
@@ -267,3 +289,6 @@
        (error/parameter-type 'list-take 1 'list-of-length-at-least-n (list lst n)))
       (else
        (_list-take lst n)))))
+
+
+
