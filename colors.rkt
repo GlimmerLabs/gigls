@@ -27,7 +27,6 @@
       (validate-param! name 'rgb rgb? params)
       (proc (car params)))))
 
-
 ;;; Procedure:
 ;;;   color?
 ;;; Parameters:
@@ -179,6 +178,25 @@
 
 (define rgb->hsv (guard-rgb-proc 'rgb->hsv _rgb->hsv))
 
+
+;;; Procedure:
+;;;   hsv?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if val could represent a hue-saturation-value color.
+;;; Produces:
+;;;   is-hsv?, a Boolean
+(define hsv?
+  (lambda (val)
+    (and (list? val)
+         (= (length val) 3)
+         (integer? (car val))
+         (<= 0 (car val) 360)
+         (real? (cadr val))
+         (<= 0 (cadr val) 1)
+         (real? (caddr val))
+         (<= 0 (caddr val) 1))))
 
 ;;; Procedure
 ;;;   hsv->rgb
