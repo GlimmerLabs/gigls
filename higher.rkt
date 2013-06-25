@@ -4,7 +4,32 @@
          higher-if      ^if
          higher-not     ^not
          higher-or      ^or
-         higher-true    ^true)
+         higher-true    ^true
+         left-section   l-s
+         right-section  r-s 
+         all)
+
+
+;;; Procedure:
+;;;   all
+;;; Parameters:
+;;;   pred?, a unary predicate
+;;;   lst, a list
+;;; Purpose:
+;;;   Determine if pred? holds for all the values in lst.
+;;; Produces:
+;;;   ok?, a Boolean
+;;; Preconditions:
+;;;   [Standard]
+;;; Postconditions:
+;;;   If there is an i such that (pred? (list-ref lst i))
+;;;     fails to hold, then ok? is false.
+;;;   Otherwise, ok? is true.
+(define all
+  (lambda (pred? lst)
+    (or (null? lst)
+        (and (pred? (car lst))
+             (all pred? (cdr lst))))))
 
 ;;; Procedures:
 ;;;   higher-and
@@ -132,4 +157,45 @@
 (define higher-true
   (lambda args #t))
 (define ^true higher-true)
+
+
+;;; Procedures:
+;;;   left-section 
+;;;   l-s
+;;; Parameters:
+;;;   binproc, a two-parameter procedure
+;;;   left, a value
+;;; Purpose:
+;;;   Creates a one-parameter procedure by filling in the first parameter
+;;    of binproc. 
+;;; Produces:
+;;;   unproc, a one-parameter procedure 
+;;; Preconditions:  
+;;;   left is a valid first parameter for binproc.
+;;; Postconditions:
+;;;   (unproc right) = (binproc left right)
+(define left-section
+  (lambda (binproc left)
+    (lambda (right) (binproc left right))))
+(define l-s left-section)
+
+;;; Procedures:
+;;;   right-section 
+;;;   r-s
+;;; Parameters:
+;;;   binproc, a two-parameter procedure
+;;;   right, a value
+;;; Purpose:
+;;;   Creates a one-parameter procedure by filling in the second parameter
+;;    of binproc. 
+;;; Produces:
+;;;   unproc, a one-parameter procedure 
+;;; Preconditions:  
+;;;   left is a valid first parameter for binproc.
+;;; Postconditions:
+;;;   (unproc left) = (binproc left right)
+(define right-section
+  (lambda (binproc right)
+    (lambda (left) (binproc left right))))
+(define r-s right-section)
 
