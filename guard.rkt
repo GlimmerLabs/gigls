@@ -1,32 +1,7 @@
 #lang racket
+
 (require LoudGimp/utils)
 (provide (all-defined-out))
-
-;;; Procedure:
-;;;   check-list?
-;;; Parameters:
-;;;   preds, a list of unary predicates
-;;;   vals, a list of values
-;;; Purpose:
-;;;   Checks each predicate against the corresponding value
-;;; Produces:
-;;;   check?, a Boolean
-;;; Preconditions:
-;;;   [No additional]
-;;; Postconditions:
-;;;   If (length params) != (length vals) then
-;;;     check? is false
-;;;   If there is an i such that ((list-ref params i) (list-ref vals i))
-;;;   does not hold, then
-;;;     check? is false
-;;;   Otherwise,
-;;;     check? is true
-(define check-list?
-  (lambda (preds vals)
-    (or (and (null? preds) (null? vals))
-        (and (pair? preds) (pair? vals)
-             ((car preds) (car vals))
-             (check-list? (cdr preds) (cdr vals))))))
 
 ;;; Procedure:
 ;;;   error/arity
@@ -57,6 +32,30 @@
                             "\n  in "
                             (value->string (cons proc-name params) 60))))))
 
+
+;;; Procedure:
+;;;   error/parameter-type
+;;; Parameters:
+;;;   proc-name, a symbol
+;;;   param-num, a non-negative integer
+;;;   param-type, a symbol
+;;;   params, a list
+;;; Purpose:
+;;;   Reports a parameter type error
+;;; Produces:
+;;;   [Nothing!  This procedure never returns.]
+(define error/parameter-type
+  (lambda (proc-name param-num param-type params)
+    (error (string-append (symbol->string proc-name)
+                          ": expects type <" 
+                          (symbol->string param-type)
+                          "> for "
+                          (integer->ordinal param-num)
+                          " parameter, given "
+                          (value->string (list-ref params (- param-num 1)) 40)
+                          "\n  in "
+                          (value->string (cons proc-name params) 60)))))
+
 ;;; Procedure:
 ;;;   error/misc
 ;;; Parameters:
@@ -76,29 +75,6 @@
     (error (string-append (symbol->string proc-name)
                           ": "
                           message
-                          "\n  in "
-                          (value->string (cons proc-name params) 60)))))
-
-;;; Procedure:
-;;;   error/parameter-type
-;;; Parameters:
-;;;   proc-name, a symbol
-;;;   param-num, a non-negative integer
-;;;   param-type, a symbol
-;;;   params, a list
-;;; Purpose:
-;;;   Reports a parameter type error
-;;; Produces:
-;;;   [Nothing!  This procedure never returns.]
-(define error/parameter-type
-  (lambda (proc-name param-num param-type params)
-    (error (string-append (symbol->string proc-name)
-                          ": expects type <"
-                          (symbol->string param-type)
-                          "> for "
-                          (integer->ordinal param-num)
-                          " parameter, given "
-                          (value->string (list-ref params (- param-num 1)) 40)
                           "\n  in "
                           (value->string (cons proc-name params) 60)))))
 
