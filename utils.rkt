@@ -1,6 +1,8 @@
 #lang racket
 
-(require LoudGimp/hacks)
+(require LoudGimp/hacks
+         LoudGimp/higher
+         LoudGimp/rgb); Note: used for color? which is currently a hack
 
 (provide (all-defined-out))
 
@@ -23,6 +25,52 @@
              (all-integer? (cdr lst))))))
 
 ;;; Procedure:
+;;;   check-list?
+;;; Parameters:
+;;;   preds, a list of unary predicates
+;;;   vals, a list of values
+;;; Purpose:
+;;;   Checks each predicate against the corresponding value
+;;; Produces:
+;;;   check?, a Boolean
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If (length params) != (length vals) then
+;;;     check? is false
+;;;   If there is an i such that ((list-ref params i) (list-ref vals i))
+;;;   does not hold, then
+;;;     check? is false
+;;;   Otherwise,
+;;;     check? is true
+(define check-list?
+  (lambda (preds vals)
+    (or (and (null? preds) (null? vals))
+        (and (pair? preds) (pair? vals)
+             ((car preds) (car vals))
+             (check-list? (cdr preds) (cdr vals))))))
+
+
+;;; Procedure:
+;;;   hsv?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if val could represent a hue-saturation-value color.
+;;; Produces:
+;;;   is-hsv?, a Boolean
+(define hsv?
+  (lambda (val)
+    (and (list? val)
+         (= (length val) 3)
+         (integer? (car val))
+         (<= 0 (car val) 360)
+         (real? (cadr val))
+         (<= 0 (cadr val) 1)
+         (real? (caddr val))
+         (<= 0 (caddr val) 1))))
+
+;;; Procedure:
 ;;;   integer->ordinal
 ;;; Parameters:
 ;;;   n, an integer
@@ -43,6 +91,27 @@
                        ((= last-digit 2) "nd")
                        ((= last-digit 3) "rd")
                        (else "th"))))))
+
+;;; Procedure:
+;;;   member?
+;;; Parameters:
+;;;   val, a Scheme value
+;;;   lst, a list
+;;; Purpose:
+;;;   Determine if val is an element of lst.
+;;; Produces:
+;;;   is-member? a Boolean
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If there is an i s.t. (equal? val (list-ref lst i))
+;;;     then is-member? is true (#t)
+;;;   Otherwise,
+;;;     is-member? is false (#f)
+(define member?
+  (lambda (val lst)
+    (and (member val lst) #t)))
+
 
 ;;; mod is my favorite shorthand for modulo
 (define mod modulo)
@@ -69,6 +138,7 @@
     (if (and (pair? result) (null? (cdr result)))
         (car result)
         result)))
+
 
 ;;; Procedure:
 ;;;   selection-op
