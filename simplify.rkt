@@ -11,9 +11,11 @@
 (require LoudGimp/alt
          LoudGimp/colors
          LoudGimp/context
+         LoudGimp/drawings
          LoudGimp/image
          LoudGimp/hacks
          LoudGimp/list
+         LoudGimp/positions
          LoudGimp/rgb
          LoudGimp/utils)
 
@@ -28,9 +30,12 @@
          (all-from-out LoudGimp/alt)
          (all-from-out LoudGimp/colors)
          (all-from-out LoudGimp/context)
+         (all-from-out LoudGimp/drawings)
          (all-from-out LoudGimp/hacks)
+         (all-from-out LoudGimp/higher)
          (all-from-out LoudGimp/image)
          (all-from-out LoudGimp/list)
+         (all-from-out LoudGimp/positions)
          (all-from-out LoudGimp/rgb)
          (all-from-out LoudGimp/utils))
 
