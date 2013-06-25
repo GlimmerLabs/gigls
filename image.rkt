@@ -10,6 +10,7 @@
          LoudGimp/context
          LoudGimp/hacks
          LoudGimp/list
+         LoudGimp/positions
          LoudGimp/rgb
          LoudGimp/utils)
 
@@ -227,7 +228,25 @@
   (lambda (val)
     (and (integer? val)
          (not (= 0 (car (gimp-image-is-valid val)))))))
-
+;;; Procedure:
+;;;   image-load
+;;; Parameters:
+;;;   fname, a string
+;;; Purpose:
+;;;   Loads the given image
+;;; Produces:
+;;;   img, an encapsulated image that corresponds to the image stored
+;;;     in the given file.
+;;; Preconditions:
+;;;   fname names a valid image file.
+(define image-load
+  (lambda (fname)
+    (cond
+      ((not (file-exists? fname))
+       (error "image-load: no such file" fname))
+      (else
+       (let* ((image (car (gimp-file-load 1 fname fname))))
+         image)))))
 ;;; Procedure:
 ;;;   image-name
 ;;; Parameters:
@@ -389,6 +408,54 @@
     (context-update-displays!)
     image))
 
+
+;;; Procedure:
+;;;   image-select-polygon!
+;;; Parameters:
+;;;   image, an image
+;;;   operation, one of the selection operations (ADD, SUBTRACT,
+;;;     INTERSECT, REPLACE)
+;;;   positions, a list of positions 
+;;;     OR
+;;;   pos1 ... posn, n positions
+;;; Purpose:
+;;;   Select the polygon bounded by the given positions.
+;;; Produces:
+;;;   image, the image
+(define _image-select-polygon!
+  (lambda (image operation first . rest)
+    (let* ((positions (if (null? rest) first (cons first rest)))
+           (floats (positions->floats positions))
+           (len (vector-length floats)))
+      (gimp-free-select image (vector-length floats) floats
+                        operation 1 0 0))))
+
+(define image-select-polygon!
+  (let ((operations (list ADD SUBTRACT INTERSECT REPLACE)))
+    (lambda (image operation first . rest)
+      (let* ((positions (if (null? rest) first (cons first rest)))
+             (params (list image operation positions)))
+        (cond
+          ((not (image? image))
+           (error/parameter-type 'image-select-polygon! 1 'image params))
+          ((not (member? operation operations))
+           (error/parameter-type 'image-select-polygon! 2 'selection-op params))
+          ((not (list? positions))
+           (error/parameter-type 'image-select-polygon! 3 
+                                 'list-of-positions params))
+          ((not (all position? positions))
+           (error/parameter-type 'image-select-polygon! 3
+                                 'list-of-positions  params))
+          ((or (null? positions) 
+               (null? (cdr positions)) 
+               (null? (cdr (cdr positions))))
+           (error/misc 'image-select-polygon!
+                       (string-append "Requires at least 3 positions, given "
+                                      (number->string (length positions)))
+                       params))
+          (else
+           (apply _image-select-polygon! params)))))))
+
 ;;; Procedure:
 ;;;   image-show
 ;;; Parameters:
@@ -396,7 +463,7 @@
 ;;; Purpose:
 ;;;   Displays the image (which may have been modified behind the scenes).
 ;;; Produces:
-;;;   image, the original image.
+;;;   image, the original image.gimp
 ;; Preconditions:
 ;;;   image must be a valid image (created by create-image or image-load).
 (define _image-show 
@@ -409,6 +476,28 @@
                     _image-show
                     'image
                     image?))
+
+;;; Procedure:
+;;;   image-stroke-selection!
+;;; Parameters:
+;;;   image, a gimp image
+;;; Purpose:
+;;;   Trace the edge of the selected region of the current image
+;;;   (in the active layer) using the current brush and foreground
+;;    color.
+;;; Produces:
+;;;   image, the updated image
+;;; Preconditions:
+;;;   image is a valid image
+;;; Postconditions:
+;;;   The image has been stroked, as in the stroke menu item.
+(define image-stroke-selection!
+  (lambda (image)
+    (cond 
+      ((not (image? image))
+       (error "image-stroke-selection!: invalid image" image))
+      (else
+       (gimp-edit-stroke (image-get-layer image))))))
 
 ;;; Procedure:
 ;;;   image-new
