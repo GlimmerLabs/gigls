@@ -115,7 +115,7 @@
 (define _context-set-fgcolor!
   (lambda (color)
     (process-gimp-result
-     (gimp-context-set-foreground (color->rgb-list color)))))
+     (gimp-context-set-foreground color))))
 
 (define context-set-fgcolor!
   (guard-unary-proc 'context-set-fgcolor!
