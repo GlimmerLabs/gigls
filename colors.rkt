@@ -6,7 +6,6 @@
 
 (provide (all-defined-out))
 
-
 ;;; Procedure:
 ;;;   guard-rgb-proc
 ;;; Parameters:
@@ -28,6 +27,7 @@
       (validate-param! name 'rgb rgb? params)
       (proc (car params)))))
 
+
 ;;; Procedure:
 ;;;   color?
 ;;; Parameters:
@@ -45,8 +45,6 @@
     (or (rgb? val) 
         (rgb-list? val) 
         (hsv? val))))
-
-; [From mscm/color/color-representation.scm]
 
 ;;; Procedure:
 ;;;   color-representation
@@ -159,45 +157,6 @@
   (lambda (color)
     (rgb-new (car color) (cadr color) (caddr color))))
 
-; [From mscm/rgb-list/rgb-list-p.scm]
-
-;;; Procedure
-;;;   rgb-list?
-;;; Parameters
-;;;   val, a scheme value
-;;; Purpose
-;;;   Check if val is an rgb color
-;;; Produces
-;;;   is-rgb-list, a boolean value
-;;; Preconditions
-;;;   [none]
-;;; Postconditions
-;;;   Returns #t if val is an rgb color represented as a list of
-;;;     the three components.
-;;;   Returns #f otherwise.
-(define rgb-list?
-  (lambda (val)
-    (and (list? val) (equal? (length val) 3) (all-integer? val))))
-
-;;; Procedure:
-;;;   hsv?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determines if val could represent a hue-saturation-value color.
-;;; Produces:
-;;;   is-hsv?, a Boolean
-(define hsv?
-  (lambda (val)
-    (and (list? val)
-         (= (length val) 3)
-         (integer? (car val))
-         (<= 0 (car val) 360)
-         (real? (cadr val))
-         (<= 0 (cadr val) 1)
-         (real? (caddr val))
-         (<= 0 (caddr val) 1))))
-
 ;;; Procedure:
 ;;;   rgb->hsv
 ;;; Parmeters:
@@ -252,6 +211,23 @@
         ((equal? hi 4) (rgb-new (* 255 t) (* 255 p) (* 255 v)))
         ((equal? hi 5) (rgb-new (* 255 v) (* 255 p) (* 255 q)))))))
 
+;;; Procedure
+;;;   rgb-list?
+;;; Parameters
+;;;   val, a scheme value
+;;; Purpose
+;;;   Check if val is an rgb color
+;;; Produces
+;;;   is-rgb-list, a boolean value
+;;; Preconditions
+;;;   [none]
+;;; Postconditions
+;;;   Returns #t if val is an rgb color represented as a list of
+;;;     the three components.
+;;;   Returns #f otherwise.
+(define rgb-list?
+  (lambda (val)
+    (and (list? val) (equal? (length val) 3) (all-integer? val))))
 
 ;;; Procedure:
 ;;;   rgb->rgb-list
