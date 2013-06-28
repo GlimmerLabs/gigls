@@ -10,4 +10,6 @@
     (lambda args
       (apply loudbus-call (cons altgimp (cons fun args))))))
 
-(define _rgb-red (alt-loudbus-helper '_rgb_red))
+(define ggimp-about (alt-loudbus-helper 'ggimp_about))
+(define ggimp-quit (alt-loudbus-helper 'ggimp_quit))
+(define ggimp-rgb-red (alt-loudbus-helper 'ggimp_rgb_red))
