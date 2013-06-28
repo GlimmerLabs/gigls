@@ -94,31 +94,21 @@ main (int argc, char *argv[])
   printf (
   	"#lang racket\n"
   	"(require louDBus/unsafe)\n"
+        "(provide (all-defined-out))\n\n"
 	);
-
-  // Build the list of provided functions
-  FILE *file = fopen (argv[1], "r");
-  printf ("(provide\n");
-  while (read_line_hack (file, line, LINESIZE))
-    {
-      replace_character (line, '_', '-');
-      printf ("         %s\n", line);
-    } // while
-  printf ("  )\n");
-  fclose (file);
 
   // Add the utility functions.  (Should some move to unsafe.rkt?)
   printf (
-"(define gimp (loudbus-proxy \"edu.grinnell.cs.glimmer.RAMStest\"\n"
-"                            \"/edu/grinnell/cs/glimmer/HARTRULES\"\n"
-"                            \"edu.grinnell.Glimmer.Test01\"))\n"
+"(define gimp (loudbus-proxy \"edu.grinnell.cs.glimmer.GimpDBus\"\n"
+"                            \"/edu/grinnell/cs/glimmer/gimp\"\n"
+"                            \"edu.grinnell.cs.glimmer.pdb\"))\n"
 "(define loudbus-helper\n"
 "  (lambda (fun)\n"
 "    (lambda args\n"
-"      (apply loudbus-call (cons gimp (cons fun args))))))\n"
+"      (apply loudbus-call (cons gimp (cons fun args))))))\n\n"
     );
 
-  file = fopen (argv[1], "r");
+  FILE *file = fopen (argv[1], "r");
   while (read_line_hack (file, line, LINESIZE))
     {
       // Verify that the line is nonempty.
