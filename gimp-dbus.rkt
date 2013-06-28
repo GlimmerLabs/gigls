@@ -1,1211 +1,7 @@
 #lang racket
 (require louDBus/unsafe)
-(provide
-         script-fu-round-corners
-         file-xjt-load
-         gimp-gradient-segment-set-right-color
-         plug-in-emboss
-         file-ps-save
-         file-png-get-defaults
-         gimp-layer-is-floating-sel
-         gimp-layer-resize
-         plug-in-colormap-remap
-         gimp-pencil
-         file-tiff-save2
-         gimp-item-get-linked
-         gimp-text-layer-set-kerning
-         gimp-vectors-new-from-text-layer
-         gimp-gimprc-set
-         plug-in-vpropagate
-         plug-in-smooth-palette
-         gimp-selection-bounds
-         script-fu-speed-text
-         plug-in-softglow
-         gimp-image-floating-sel-attached-to
-         gimp-context-get-sample-merged
-         gimp-context-set-sample-criterion
-         python-fu-palette-offset
-         file-png-load
-         gimp-context-get-sample-threshold
-         gimp-help-2-using-photography
-         gimp-selection-all
-         gimp-image-get-resolution
-         plug-in-curve-bend
-         file-raw-save
-         gimp-context-set-default-colors
-         gimp-context-set-feather
-         gimp-layer-flatten
-         gimp-item-detach-parasite
-         gimp-drawable-free-shadow
-         gimp-drawable-type-with-alpha
-         gimp-edit-named-copy
-         plug-in-despeckle
-         file-faxg3-load
-         file-gih-save
-         gimp-image-free-shadow
-         gimp-drawable-transform-scale
-         gimp-procedural-db-proc-val
-         plug-in-zealouscrop
-         gimp-brush-get-spacing
-         gimp-edit-named-cut
-         gimp-image-get-layer-by-name
-         gimp-help-2-concepts-usage
-         gimp-airbrush
-         file-openraster-load-thumb
-         gimp-drawable-update
-         gimp-patterns-set-popup
-         gimp-image-get-vectors
-         plug-in-laplace
-         gimp-layer-from-mask
-         gimp-progress-uninstall
-         gimp-item-get-visible
-         gimp-edit-fill
-         gimp-image-lower-item-to-bottom
-         script-fu-blend-anim
-         plug-in-sample-colorize
-         plug-in-shift
-         gimp-dodgeburn
-         file-pgm-save
-         gimp-edit-named-paste
-         script-fu-refresh
-         gimp-vectors-export-to-string
-         gimp-context-pop
-         gimp-vectors-bezier-stroke-conicto
-         gimp-floating-sel-to-layer
-         script-fu-title-header
-         plug-in-color-enhance
-         plug-in-displace
-         file-xmc-save
-         gimp-text-layer-get-hinting
-         gimp-shear
-         gimp-brush-get-info
-         gimp-vectors-import-from-string
-         gimp-get-color-configuration
-         gimp-text-get-extents
-         gimp-paintbrush
-         plug-in-decompose
-         gimp-item-is-vectors
-         gimp-palette-add-entry
-         gimp-help-2-using-simpleobjects
-         script-fu-spyrogimp
-         script-fu-textured-logo
-         gimp-image-grid-set-background-color
-         gimp-path-set-locked
-         file-pix-save
-         gimp-palettes-close-popup
-         plug-in-waves
-         script-fu-3d-outline-logo-alpha
-         file-bz2-load
-         gimp-channel-copy
-         gimp-context-set-sample-transparent
-         gimp-brush-get-angle
-         gimp-layer-new-from-drawable
-         gimp-edit-paste
-         gimp-text-layer-set-line-spacing
-         plug-in-spheredesigner
-         gimp-palette-rename
-         gimp-gradient-segment-get-middle-pos
-         gimp-context-get-opacity
-         gimp-buffer-rename
-         gimp-vectors-import-from-file
-         plug-in-rgb-noise
-         gimp-palettes-get-palette-entry
-         gimp-procedural-db-proc-arg
-         gimp-image-add-vectors
-         file-fli-save
-         gimp-item-transform-2d
-         python-fu-console
-         gimp-brush-duplicate
-         file-ico-load-thumb
-         gimp-image-get-item-position
-         gimp-context-set-font
-         gimp-edit-copy-visible
-         gimp-image-unset-active-channel
-         script-fu-textured-logo-alpha
-         gimp-online-developer-web-site
-         gimp-unit-get-abbreviation
-         file-pcx-load
-         gimp-smudge
-         plug-in-the-old-egg
-         gimp-context-set-brush-aspect-ratio
-         plug-in-edge
-         gimp-drawable-transform-shear
-         gimp-layer-get-opacity
-         script-fu-glowing-logo
-         gimp-text-layer-get-letter-spacing
-         gimp-palettes-get-palette
-         gimp-context-set-dynamics
-         gimp-text-layer-get-color
-         file-tiff-load
-         plug-in-sparkle
-         script-fu-sota-chrome-it
-         python-fu-gradient-save-as-css
-         gimp-layer-get-apply-mask
-         gimp-channel-set-show-masked
-         gimp-context-get-ink-blob-angle
-         script-fu-comic-logo
-         gimp-context-get-transform-recursion
-         script-fu-chrome-logo-alpha
-         gimp-image-get-active-vectors
-         gimp-item-get-name
-         gimp-progress-get-window-handle
-         gimp-image-grid-set-offset
-         gimp-vectors-export-to-file
-         script-fu-newsprint-text
-         gimp-image-attach-parasite
-         gimp-flip
-         python-fu-palette-to-gradient-repeating
-         gimp-context-get-sample-transparent
-         gimp-palette-new
-         gimp-convolve-default
-         script-fu-labels-gimp-org
-         plug-in-align-layers
-         gimp-edit-clear
-         gimp-image-set-component-active
-         gimp-context-set-antialias
-         gimp-text-layer-get-kerning
-         gimp-gradient-segment-range-set-blending-function
-         gimp-procedural-db-proc-exists
-         gimp-palette-delete
-         script-fu-alien-glow-right-arrow
-         plug-in-wind
-         file-uri-save
-         gimp-image-get-component-visible
-         gimp-buffer-delete
-         gimp-path-get-points
-         script-fu-grid-system
-         script-fu-slide
-         gimp-get-monitor-resolution
-         gimp-context-swap-colors
-         gimp-gradient-segment-set-right-pos
-         plug-in-iwarp
-         gimp-image-select-round-rectangle
-         file-header-save
-         gimp-help-concepts-paths
-         gimp-image-pick-correlate-layer
-         gimp-context-get-brush-aspect-ratio
-         script-fu-selection-to-image
-         file-ppm-save
-         script-fu-basic1-logo-alpha
-         gimp-text-layer-new
-         gimp-context-get-sample-criterion
-         plug-in-photocopy
-         gimp-image-get-colormap
-         file-bmp-save
-         plug-in-colormap-swap
-         script-fu-tile-blur
-         gimp-path-get-current
-         gimp-fuzzy-select-full
-         gimp-edit-paste-as-new
-         gimp-item-transform-rotate-simple
-         plug-in-autocrop-layer
-         gimp-attach-parasite
-         gimp-selection-combine
-         gimp-context-get-brush-size
-         file-xbm-save
-         gimp-path-get-tattoo
-         gimp-gradient-rename
-         gimp-buffer-get-bytes
-         gimp-vectors-bezier-stroke-cubicto
-         gimp-item-get-tattoo
-         gimp-item-is-layer
-         gimp-text-layer-set-letter-spacing
-         gimp-image-flip
-         plug-in-pixelize2
-         file-gif-save
-         plug-in-metadata-set-simple
-         gimp-item-transform-rotate
-         gimp-context-set-ink-blob-angle
-         gimp-gradients-sample-uniform
-         file-cel-load
-         script-fu-fuzzy-border
-         gimp-image-set-active-vectors
-         gimp-plugin-set-pdb-error-handler
-         gimp-help-using-photography
-         gimp-brush-set-spikes
-         script-fu-gradient-example
-         script-fu-starscape-logo
-         script-fu-alien-glow-logo-alpha
-         file-sunras-load
-         gimp-gradients-get-gradient-data
-         gimp-palette-set-columns
-         script-fu-difference-clouds
-         gimp-heal-default
-         gimp-gradient-get-number-of-segments
-         plug-in-drawable-compose
-         script-fu-beveled-pattern-button
-         gimp-context-set-paint-mode
-         script-fu-blended-logo
-         gimp-procedural-db-proc-info
-         gimp-display-is-valid
-         gimp-item-get-parent
-         plug-in-recompose
-         gimp-clone
-         gimp-selection-grow
-         gimp-image-set-colormap
-         gimp-gradient-segment-get-right-pos
-         gimp-layer-set-show-mask
-         script-fu-tube-button-label-gimp-org
-         plug-in-papertile
-         gimp-context-list-paint-methods
-         script-fu-flatland
-         gimp-image-raise-item
-         script-fu-t-o-p-logo-alpha
-         gimp-image-get-layer-by-tattoo
-         plug-in-sel-gauss
-         plug-in-ifscompose
-         gimp-progress-end
-         gimp-image-remove-channel
-         gimp-detach-parasite
-         gimp-help-using-docks
-         gimp-selection-sharpen
-         gimp-image-get-unit
-         plug-in-autostretch-hsv
-         plug-in-icc-profile-apply-rgb
-         gimp-image-get-guide-orientation
-         gimp-layer-new-from-visible
-         plug-in-ccanalyze
-         gimp-gradient-delete
-         gimp-layer-scale-full
-         plug-in-tile
-         plug-in-unit-editor
-         gimp-channel-set-opacity
-         gimp-image-clean-all
-         gimp-selection-is-empty
-         file-xjt-save
-         gimp-image-remove-layer
-         gimp-vectors-stroke-scale
-         gimp-context-get-ink-size
-         plug-in-rotate-colormap
-         gimp-image-grid-get-spacing
-         gimp-gradient-segment-range-redistribute-handles
-         gimp-item-set-linked
-         extension-gimp-help-browser
-         gimp-image-get-xcf-uri
-         gimp-vectors-bezier-stroke-new-ellipse
-         gimp-dynamics-get-list
-         gimp-drawable-transform-shear-default
-         gimp-fonts-set-popup
-         script-fu-copy-visible
-         gimp-get-parasite-list
-         gimp-image-convert-set-dither-matrix
-         file-csource-save
-         gimp-context-push
-         gimp-image-scale-full
-         gimp-image-select-rectangle
-         file-png-save
-         gimp-by-color-select-full
-         gimp-free-select
-         gimp-context-set-sample-threshold-int
-         plug-in-palettemap
-         gimp-gradient-segment-set-left-pos
-         gimp-gradient-segment-range-delete
-         gimp-drawable-transform-2d
-         plug-in-threshold-alpha
-         gimp-register-magic-load-handler
-         gimp-channel-get-color
-         gimp-context-get-pattern
-         gimp-drawable-merge-shadow
-         gimp-unit-get-identifier
-         script-fu-add-bevel
-         plug-in-gflare
-         plug-in-compose
-         gimp-context-set-ink-speed-sensitivity
-         script-fu-line-nova
-         script-fu-spinning-globe
-         gimp-image-thumbnail
-         script-fu-font-map
-         gimp-layer-get-show-mask
-         gimp-palette-is-editable
-         script-fu-weave
-         gimp-gradients-refresh
-         gimp-brushes-set-spacing
-         gimp-levels-auto
-         gimp-help-using-simpleobjects
-         gimp-image-insert-channel
-         plug-in-qbist
-         gimp-drawable-transform-flip
-         gimp-help-using-selections
-         plug-in-sharpen
-         gimp-context-get-feather-radius
-         gimp-convolve
-         gimp-text-layer-set-hint-style
-         gimp-context-set-ink-size
-         gimp-image-get-guide-position
-         file-gbr-load
-         gimp-unit-get-number-of-units
-         plug-in-metadata-import
-         file-gtm-save
-         gimp-image-undo-enable
-         gimp-image-delete-guide
-         gimp-item-attach-parasite
-         gimp-unit-get-digits
-         gimp-get-default-comment
-         gimp-path-stroke-current
-         gimp-text-layer-set-justification
-         gimp-gradient-segment-range-split-midpoint
-         plug-in-engrave
-         file-svg-load
-         gimp-text-layer-get-line-spacing
-         script-fu-alien-glow-bullet
-         plug-in-cml-explorer
-         plug-in-animationoptimize
-         gimp-gradient-segment-range-set-coloring-type
-         gimp-selection-value
-         gimp-text-layer-set-font
-         gimp-brush-set-hardness
-         gimp-brush-set-angle
-         gimp-item-transform-matrix
-         file-sgi-load
-         script-fu-carved-logo
-         script-fu-bovinated-logo
-         gimp-drawable-is-rgb
-         gimp-layer-remove-mask
-         gimp-image-undo-group-end
-         gimp-layer-set-mode
-         gimp-image-grid-set-style
-         gimp-image-get-selection
-         gimp-xcf-load
-         gimp-context-set-brush
-         gimp-image-resize-to-layers
-         plug-in-metadata-get
-         gimp-context-get-paint-method
-         plug-in-script-fu-text-console
-         gimp-layer-set-lock-alpha
-         gimp-palette-export-text
-         file-bz2-save
-         gimp-brush-get-radius
-         gimp-item-transform-perspective
-         script-fu-perspective-shadow
-         gimp-image-get-imported-uri
-         gimp-image-get-vectors-by-tattoo
-         gimp-image-height
-         gimp-image-undo-thaw
-         gimp-text-layer-get-markup
-         gimp-image-is-valid
-         gimp-image-convert-grayscale
-         gimp-palette-entry-get-color
-         plug-in-mblur-inward
-         gimp-help-concepts-usage
-         plug-in-lens-distortion
-         script-fu-bovinated-logo-alpha
-         file-fits-load
-         gimp-image-merge-down
-         script-fu-coffee-stain
-         extension-gimp-help
-         gimp-register-load-handler
-         gimp-drawable-transform-perspective
-         gimp-vectors-stroke-new-from-points
-         script-fu-addborder
-         gimp-text-layer-get-base-direction
-         plug-in-map-object
-         gimp-brush-get-shape
-         gimp-context-set-ink-blob-type
-         gimp-image-lower-item
-         plug-in-flame
-         plug-in-apply-canvas
-         gimp-image-get-layers
-         gimp-equalize
-         python-fu-foggify
-         gimp-drawable-set-image
-         file-pcx-save
-         gimp-display-get-window-handle
-         gimp-text-layer-get-justification
-         gimp-get-default-unit
-         gimp-context-set-feather-radius
-         script-fu-predator
-         gimp-rect-select
-         gimp-displays-flush
-         plug-in-convmatrix
-         gimp-posterize
-         gimp-context-set-defaults
-         file-tiff-save
-         gimp-progress-cancel
-         script-fu-circuit
-         plug-in-animationunoptimize
-         gimp-floating-sel-attach
-         plug-in-c-astretch
-         script-fu-paste-as-pattern
-         gimp-channel-get-show-masked
-         plug-in-unsharp-mask
-         gimp-context-get-ink-blob-type
-         gimp-plugin-domain-register
-         gimp-layer-scale
-         python-fu-eval
-         gimp-get-module-load-inhibit
-         plug-in-semiflatten
-         script-fu-basic1-logo
-         gimp-progress-install
-         file-xwd-load
-         script-fu-selection-round
-         gimp-context-get-ink-blob-aspect-ratio
-         file-pat-load
-         script-fu-blended-logo-alpha
-         gimp-vectors-copy
-         gimp-path-set-points
-         gimp-drawable-sub-thumbnail
-         gimp-text
-         gimp-progress-init
-         plug-in-destripe
-         script-fu-guide-new-percent
-         gimp-item-is-channel
-         gimp-patterns-popup
-         file-mng-save
-         gimp-drawable-is-indexed
-         gimp-context-get-dynamics
-         gimp-image-undo-is-enabled
-         gimp-path-import
-         gimp-smudge-default
-         file-wmf-load-thumb
-         gimp-brush-get-aspect-ratio
-         gimp-progress-pulse
-         gimp-context-set-transform-recursion
-         plug-in-noisify
-         gimp-text-get-extents-fontname
-         gimp-text-layer-set-base-direction
-         plug-in-metadata-export
-         gimp-fonts-get-list
-         gimp-brush-is-generated
-         gimp-gradient-get-uniform-samples
-         plug-in-neon
-         plug-in-animationplay
-         gimp-path-set-tattoo
-         gimp-image-add-channel
-         script-fu-swirly-pattern
-         script-fu-tube-subsubbutton-label-gimp-org
-         gimp-item-set-tattoo
-         plug-in-mail-image
-         gimp-drawable-transform-matrix-default
-         gimp-image-get-floating-sel
-         plug-in-gimpressionist
-         gimp-selection-invert
-         script-fu-t-o-p-logo
-         plug-in-sel2path
-         gimp-file-load-layer
-         gimp-brush-new
-         gimp-context-set-paint-method
-         script-fu-text-circle
-         script-fu-alien-neon-logo
-         gimp-buffer-get-height
-         file-cel-save
-         plug-in-sel2path-advanced
-         plug-in-web-browser
-         gimp-levels
-         gimp-brushes-get-brush
-         gimp-palettes-get-list
-         gimp-threshold
-         gimp-drawable-set-pixel
-         file-sunras-save
-         python-fu-slice
-         plug-in-mblur
-         gimp-text-layer-get-text
-         gimp-item-get-children
-         plug-in-script-fu-console
-         gimp-context-get-paint-mode
-         gimp-context-set-gradient
-         gimp-procedural-db-get-data-size
-         gimp-image-add-layer-mask
-         gimp-curves-spline
-         gimp-image-get-active-channel
-         gimp-help-2-using-selections
-         gimp-selection-feather
-         gimp-colorize
-         plug-in-animationoptimize-diff
-         script-fu-beveled-pattern-heading
-         file-xpm-load
-         script-fu-3d-outline-logo
-         gimp-item-transform-flip-simple
-         gimp-help-2-using-fileformats
-         gimp-layer-add-mask
-         plug-in-gauss-rle
-         plug-in-polar-coords
-         script-fu-unsharp-mask
-         gimp-item-transform-scale
-         script-fu-alien-glow-logo
-         gimp-edit-copy
-         gimp-procedural-db-get-data
-         python-fu-brush-from-text
-         script-fu-carve-it
-         gimp-palette-get-info
-         gimp-palette-entry-get-name
-         gimp-drawable-transform-flip-simple
-         script-fu-make-brush-elliptical
-         script-fu-make-brush-rectangular-feathered
-         plug-in-gfig
-         plug-in-pixelize
-         gimp-drawable-transform-rotate-default
-         gimp-image-select-polygon
-         gimp-drawable-transform-rotate-simple
-         gimp-drawable-bpp
-         gimp-clone-default
-         file-psd-load
-         gimp-vectors-stroke-flip
-         gimp-image-select-item
-         plug-in-randomize-hurl
-         gimp-by-color-select
-         plug-in-glasstile
-         gimp-item-get-image
-         script-fu-chalk-logo-alpha
-         gimp-temp-name
-         python-fu-palette-to-gradient
-         gimp-context-get-feather
-         gimp-round-rect-select
-         file-pdf-load
-         script-fu-xach-effect
-         script-fu-beveled-pattern-hrule
-         gimp-vectors-stroke-get-points
-         gimp-image-new
-         file-psd-load-thumb
-         gimp-gradient-is-editable
-         plug-in-spread
-         gimp-edit-named-copy-visible
-         gimp-context-set-background
-         gimp-item-is-valid
-         gimp-online-docs-web-site
-         file-png-save-defaults
-         gimp-unit-get-factor
-         gimp-context-set-interpolation
-         gimp-patterns-close-popup
-         script-fu-gradient-bevel-logo-alpha
-         gimp-plugin-icon-register
-         gimp-gradients-set-popup
-         gimp-get-parasite
-         gimp-desaturate-full
-         gimp-unit-set-deletion-flag
-         gimp-unit-get-plural
-         file-ico-load
-         plug-in-film
-         gimp-image-raise-item-to-top
-         gimp-layer-translate
-         gimp-unit-get-symbol
-         gimp-selection-load
-         gimp-gradients-sample-custom
-         gimp-brush-set-aspect-ratio
-         gimp-image-resize
-         gimp-path-to-selection
-         gimp-palette-export-php
-         gimp-path-delete
-         script-fu-make-brush-rectangular
-         gimp-image-list
-         gimp-edit-bucket-fill-full
-         gimp-vectors-stroke-get-point-at-dist
-         gimp-image-set-active-channel
-         script-fu-guide-new
-         gimp-image-get-parasite
-         plug-in-antialias
-         gimp-airbrush-default
-         gimp-gradient-segment-set-left-color
-         gimp-heal
-         gimp-item-delete
-         gimp-drawable-thumbnail
-         script-fu-3dtruchet
-         file-aa-save
-         gimp-selection-shrink
-         gimp-drawable-foreground-extract
-         plug-in-colors-channel-mixer
-         gimp-text-layer-get-hint-style
-         gimp-image-undo-freeze
-         gimp-palettes-refresh
-         gimp-image-duplicate
-         gimp-layer-get-edit-mask
-         gimp-image-get-channels
-         python-fu-palette-sort
-         file-gbr-save
-         script-fu-distress-selection
-         plug-in-make-seamless
-         gimp-perspective
-         gimp-progress-update
-         gimp-context-set-palette
-         plug-in-ripple
-         gimp-help-2-using-web
-         plug-in-fractal-trace
-         gimp-gradient-segment-get-left-pos
-         gimp-fuzzy-select
-         script-fu-chalk-logo
-         file-fli-info
-         gimp-drawable-fill
-         gimp-gradient-segment-set-middle-pos
-         gimp-context-get-sample-threshold-int
-         gimp-item-transform-shear
-         gimp-context-get-interpolation
-         script-fu-selection-rounded-rectangle
-         gimp-floating-sel-relax
-         gimp-image-get-channel-by-name
-         gimp-text-layer-set-font-size
-         plug-in-bump-map
-         gimp-fonts-popup
-         plug-in-icc-profile-info
-         file-sgi-save
-         gimp-layer-get-lock-alpha
-         gimp-edit-named-paste-as-new
-         gimp-brush-set-radius
-         gimp-vectors-stroke-translate
-         gimp-xcf-save
-         gimp-selection-layer-alpha
-         gimp-palette-entry-set-color
-         gimp-image-get-vectors-by-name
-         gimp-color-balance
-         gimp-vectors-stroke-close
-         plug-in-colorify
-         script-fu-crystal-logo
-         gimp-brush-set-shape
-         script-fu-render-map
-         gimp-selection-float
-         file-psp-load
-         gimp-context-set-transform-direction
-         file-dicom-load
-         gimp-fonts-close-popup
-         file-fits-save
-         gimp-item-set-name
-         gimp-palette-get-colors
-         file-pnm-load
-         plug-in-depth-merge
-         gimp-drawable-mask-intersect
-         file-print-gtk
-         gimp-item-transform-flip
-         gimp-image-is-dirty
-         gimp-layer-add-alpha
-         plug-in-curve-bend-Iterator
-         gimp-patterns-get-list
-         gimp-brush-is-editable
-         gimp-brush-get-hardness
-         gimp-drawable-mask-bounds
-         script-fu-button00
-         plug-in-whirl-pinch
-         gimp-brushes-get-brush-data
-         script-fu-selection-to-pattern
-         gimp-vectors-stroke-rotate
-         gimp-gradient-segment-range-blend-colors
-         plug-in-randomize-slur
-         plug-in-colortoalpha
-         plug-in-sinus
-         file-svg-load-thumb
-         gimp-image-add-vguide
-         gimp-transform-2d
-         gimp-file-load-layers
-         gimp-edit-stroke
-         gimp-context-set-foreground
-         gimp-floating-sel-rigor
-         script-fu-chrome-logo
-         plug-in-gauss-iir
-         gimp-palette-duplicate
-         gimp-palette-delete-entry
-         script-fu-beveled-pattern-arrow
-         gimp-text-layer-get-font-size
-         gimp-image-select-ellipse
-         gimp-image-base-type
-         gimp-file-load
-         script-fu-neon-logo
-         gimp-text-layer-get-indent
-         gimp-desaturate
-         gimp-vectors-bezier-stroke-new-moveto
-         gimp-image-crop
-         file-xwd-save
-         gimp-drawable-is-gray
-         file-pat-save
-         gimp-path-get-point-at-dist
-         gimp-image-undo-group-start
-         gimp-gradient-new
-         gimp-image-merge-visible-layers
-         gimp-text-layer-set-hinting
-         gimp-help-using-fileformats
-         gimp-image-delete
-         gimp-image-select-contiguous-color
-         gimp-context-get-brush-angle
-         gimp-image-set-tattoo-state
-         gimp-online-plug-in-web-site
-         gimp-image-get-channel-by-tattoo
-         gimp-item-is-drawable
-         gimp-item-is-group
-         file-png-save2
-         gimp-item-is-text-layer
-         gimp-pattern-get-info
-         file-gz-load
-         gimp-image-undo-disable
-         gimp-item-is-selection
-         script-fu-i26-gunya2
-         gimp-brush-get-pixels
-         script-fu-comic-logo-alpha
-         gimp-image-set-component-visible
-         gimp-layer-get-mask
-         script-fu-frosty-logo-alpha
-         gimp-palette-export-python
-         plug-in-flarefx
-         gimp-drawable-offsets
-         gimp-image-insert-vectors
-         file-tga-load
-         gimp-gimprc-query
-         plug-in-gradmap
-         gimp-image-add-hguide
-         gimp-vectors-to-selection
-         gimp-palette-get-columns
-         gimp-vectors-remove-stroke
-         gimp-context-set-sample-merged
-         gimp-image-get-parasite-list
-         gimp-context-set-ink-blob-aspect-ratio
-         gimp-histogram
-         file-pbm-save
-         gimp-brushes-close-popup
-         gimp-brushes-get-list
-         gimp-text-layer-set-language
-         gimp-dynamics-refresh
-         gimp-context-get-font
-         file-colorxhtml-save
-         gimp-context-get-transform-resize
-         gimp-image-add-layer
-         gimp-layer-resize-to-image-size
-         gimp-text-layer-set-color
-         script-fu-chip-away-logo-alpha
-         gimp-layer-create-mask
-         script-fu-set-cmap
-         gimp-palettes-set-popup
-         plug-in-dbbrowser
-         gimp-image-set-unit
-         plug-in-sobel
-         script-fu-swirl-tile
-         plug-in-decompose-registered
-         gimp-item-get-parasite
-         gimp-image-select-color
-         file-xpm-save
-         RamServer
-         script-fu-guides-remove
-         gimp-image-convert-indexed
-         plug-in-icc-profile-apply
-         file-jpeg-load
-         gimp-channel-get-opacity
-         gimp-context-get-ink-angle
-         gimp-help
-         gimp-layer-set-offsets
-         file-wmf-load
-         gimp-buffers-get-list
-         gimp-context-get-ink-tilt-sensitivity
-         gimp-channel-combine-masks
-         gimp-version
-         gimp-image-flatten
-         gimp-eraser-default
-         gimp-plugin-get-pdb-error-handler
-         plug-in-exchange
-         plug-in-icc-profile-file-info
-         gimp-context-set-brush-angle
-         file-glob
-         gimp-floating-sel-remove
-         file-xmc-load-thumb
-         gimp-patterns-refresh
-         file-psd-save
-         plug-in-blinds
-         gimp-context-get-gradient
-         gimp-image-get-filename
-         script-fu-frosty-logo
-         plug-in-nlfilt
-         gimp-image-convert-rgb
-         script-fu-land
-         script-fu-guides-from-selection
-         gimp-text-layer-get-antialias
-         file-pdf-save
-         gimp-vectors-new
-         gimp-display-delete
-         gimp-brush-rename
-         gimp-context-get-background
-         gimp-path-set-current
-         gimp-image-grid-get-foreground-color
-         file-openraster-load
-         gimp-item-is-layer-mask
-         gimp-edit-blend
-         plug-in-oilify-enhanced
-         file-gif-load-thumb
-         plug-in-metadata-set
-         gimp-brushes-get-spacing
-         gimp-gradients-get-list
-         plug-in-fractalexplorer
-         plug-in-illusion
-         gimp-selection-translate
-         script-fu-round-button
-         file-ico-save
-         gimp-unit-get-number-of-built-in-units
-         gimp-levels-stretch
-         file-png-set-defaults
-         gimp-item-get-lock-content
-         gimp-selection-save
-         gimp-vectors-stroke-flip-free
-         script-fu-alien-glow-button
-         gimp-palette-export-css
-         gimp-register-thumbnail-loader
-         gimp-context-set-ink-tilt-sensitivity
-         plug-in-metadata-encode-xmp
-         gimp-gradient-segment-get-left-color
-         plug-in-blur
-         gimp-eraser
-         plug-in-retinex
-         script-fu-tube-subbutton-label-gimp-org
-         gimp-vectors-get-strokes
-         file-pdf-load-thumb
-         gimp-help-using-web
-         gimp-image-set-filename
-         plug-in-plug-in-details
-         file-eps-load
-         gimp-paintbrush-default
-         gimp-context-set-brush-default-size
-         plug-in-script-fu-eval
-         gimp-patterns-get-pattern-data
-         gimp-drawable-has-alpha
-         plug-in-small-tiles
-         file-ps-load
-         gimp-image-grid-get-style
-         plug-in-solid-noise
-         gimp-context-get-brush
-         gimp-brush-delete
-         gimp-gradient-segment-get-blending-function
-         gimp-brushes-popup
-         script-fu-beveled-pattern-bullet
-         gimp-image-find-next-guide
-         gimp-image-width
-         plug-in-icc-profile-set
-         plug-in-plasma
-         gimp-layer-group-new
-         gimp-online-main-web-site
-         gimp-gradient-get-custom-samples
-         plug-in-applylens
-         gimp-layer-set-edit-mask
-         gimp-image-grid-set-spacing
-         gimp-gradient-segment-range-split-uniform
-         file-raw-load
-         gimp-gradient-segment-range-flip
-         gimp-image-set-resolution
-         plug-in-max-rgb
-         plug-in-dog
-         file-gih-load
-         plug-in-newsprint
-         script-fu-basic2-logo
-         gimp-plugin-menu-branch-register
-         script-fu-cool-metal-logo-alpha
-         gimp-message-set-handler
-         gimp-image-get-active-layer
-         plug-in-erode
-         file-dicom-save
-         gimp-message
-         plug-in-autocrop
-         file-pnm-save
-         script-fu-glossy-logo-alpha
-         gimp-channel-set-color
-         gimp-vectors-bezier-stroke-lineto
-         gimp-brushes-set-popup
-         gimp-patterns-get-pattern
-         gimp-brushes-refresh
-         plug-in-pagecurl
-         gimp-gradient-segment-range-replicate
-         gimp-context-set-pattern
-         plug-in-maze
-         gimp-pattern-get-pixels
-         gimp-selection-border
-         plug-in-randomize-pick
-         gimp-quit
-         script-fu-paste-as-brush
-         gimp-plugin-menu-register
-         plug-in-hsv-noise
-         plug-in-alienmap2
-         script-fu-chip-away-logo
-         gimp-drawable-transform-rotate
-         gimp-invert
-         gimp-image-scale
-         gimp-gradients-close-popup
-         gimp-context-get-foreground
-         plug-in-diffraction
-         file-xmc-load
-         gimp-vectors-stroke-interpolate
-         script-fu-selection-to-brush
-         plug-in-gauss-iir2
-         plug-in-scatter-hsv
-         script-fu-basic2-logo-alpha
-         script-fu-make-brush-elliptical-feathered
-         file-desktop-link-load
-         script-fu-lava
-         gimp-item-set-lock-content
-         gimp-text-layer-set-indent
-         gimp-brightness-contrast
-         gimp-register-save-handler
-         gimp-image-get-tattoo-state
-         gimp-file-save
-         file-pix-load
-         gimp-context-set-transform-resize
-         plug-in-video
-         gimp-dodgeburn-default
-         script-fu-reverse-layers
-         plug-in-gauss-rle2
-         gimp-path-get-locked
-         plug-in-nova
-         gimp-image-pick-color
-         plug-in-cartoon
-         gimp-path-list
-         gimp-text-fontname
-         gimp-channel-new-from-component
-         gimp-drawable-height
-         gimp-image-detach-parasite
-         gimp-context-get-ink-size-sensitivity
-         file-fli-load
-         gimp-fonts-refresh
-         script-fu-big-header-gimp-org
-         plug-in-rotate
-         plug-in-deinterlace
-         script-fu-alien-neon-logo-alpha
-         gimp-unit-get-deletion-flag
-         gimp-text-layer-get-font
-         gimp-drawable-transform-perspective-default
-         plug-in-grid
-         gimp-layer-get-mode
-         file-gz-save
-         gimp-buffer-get-width
-         plug-in-gauss
-         gimp-help-2-concepts-paths
-         script-fu-glowing-logo-alpha
-         script-fu-small-header-gimp-org
-         gimp-getpid
-         gimp-edit-cut
-         gimp-ellipse-select
-         gimp-text-layer-set-text
-         gimp-context-get-antialias
-         file-tga-save
-         gimp-image-get-uri
-         plug-in-dilate
-         gimp-context-set-sample-threshold
-         gimp-palettes-popup
-         gimp-drawable-get-pixel
-         gimp-text-layer-resize
-         extension-script-fu
-         gimp-layer-set-apply-mask
-         plug-in-imagemap
-         gimp-drawable-type
-         plug-in-borderaverage
-         gimp-image-get-active-drawable
-         gimp-procedural-db-set-data
-         gimp-palette-export-java
-         gimp-gradient-duplicate
-         script-fu-neon-logo-alpha
-         gimp-image-grid-get-background-color
-         plug-in-cubism
-         gimp-image-grid-get-offset
-         gimp-register-file-handler-mime
-         gimp-display-new
-         gimp-palette-entry-set-name
-         gimp-image-grid-set-foreground-color
-         plug-in-script-fu-server
-         file-ps-load-thumb
-         gimp-image-remove-layer-mask
-         script-fu-truchet
-         gimp-rotate
-         gimp-get-theme-dir
-         gimp-context-set-ink-size-sensitivity
-         gimp-image-set-active-layer
-         script-fu-camo-pattern
-         file-uri-load
-         gimp-hue-saturation
-         gimp-layer-new
-         script-fu-gradient-bevel-logo
-         plug-in-bump-map-tiled
-         gimp-brush-set-spacing
-         gimp-image-remove-vectors
-         plug-in-displace-polar
-         gimp-plugin-help-register
-         gimp-item-set-visible
-         gimp-file-save-thumbnail
-         script-fu-drop-shadow
-         script-fu-erase-rows
-         gimp-gradient-segment-get-right-color
-         file-jpeg-save
-         gimp-plugins-query
-         gimp-procedural-db-query
-         gimp-text-layer-get-language
-         file-bmp-load
-         gimp-message-get-handler
-         gimp-unit-get-singular
-         plug-in-oilify
-         file-ps-load-setargs
-         gimp-drawable-transform-2d-default
-         plug-in-mosaic
-         gimp-item-get-parasite-list
-         gimp-drawable-offset
-         plug-in-filter-pack
-         plug-in-guillotine
-         plug-in-hot
-         gimp-image-rotate
-         file-xbm-load
-         plug-in-warp
-         gimp-buffer-get-image-type
-         plug-in-screenshot
-         gimp-context-set-brush-size
-         gimp-gradient-segment-range-blend-opacity
-         gimp-image-reorder-item
-         plug-in-jigsaw
-         gimp-drawable-width
-         gimp-drawable-transform-matrix
-         file-gif-load
-         gimp-edit-stroke-vectors
-         gimp-context-set-ink-angle
-         script-fu-clothify
-         gimp-image-get-component-active
-         file-pdf-save-multi
-         plug-in-metadata-get-simple
-         script-fu-ripply-anim
-         file-openraster-save
-         gimp-displays-reconnect
-         gimp-curves-explicit
-         gimp-selection-none
-         gimp-floating-sel-anchor
-         script-fu-glossy-logo
-         script-fu-sota-chrome-logo
-         plug-in-vinvert
-         gimp-brush-get-spikes
-         gimp-context-set-opacity
-         plug-in-the-slimy-egg
-         plug-in-checkerboard
-         gimp-image-get-name
-         plug-in-lic
-         gimp-channel-new
-         gimp-procedural-db-dump
-         gimp-image-get-exported-uri
-         gimp-gradient-segment-range-move
-         script-fu-old-photo
-         gimp-vectors-stroke-get-length
-         plug-in-metadata-decode-xmp
-         gimp-drawable-transform-scale-default
-         gimp-gradient-segment-get-coloring-type
-         gimp-progress-set-text
-         gimp-gradients-popup
-         gimp-context-get-transform-direction
-         gimp-unit-new
-         script-fu-cool-metal-logo
-         script-fu-waves-anim
-         plug-in-icc-profile-set-rgb
-         plug-in-red-eye-removal
-         gimp-help-2-using-docks
-         gimp-scale
-         gimp-context-get-palette
-         gimp-drawable-transform-flip-default
-         gimp-text-layer-set-antialias
-         plug-in-normalize
-         gimp-layer-copy
-         plug-in-lighting
-         script-fu-burn-in-anim
-         gimp-layer-set-opacity
-         gimp-context-get-ink-speed-sensitivity
-         gimp-image-insert-layer
-         gimp-file-load-thumbnail
-         gimp-procedural-db-temp-name
-         gimp-get-path-by-tattoo
-         file-eps-save
-         gimp-edit-bucket-fill
-         script-fu-alien-glow-horizontal-ruler
-         gimp-channel-get-name
-         gimp-gradients-get-active
-         gimp-channel-set-tattoo
-         gimp-palette-get-foreground
-         gimp-image-get-cmap
-         gimp-layer-set-linked
-         gimp-drawable-parasite-find
-         gimp-brushes-list
-         gimp-image-lower-channel
-         gimp-patterns-set-pattern
-         gimp-convert-grayscale
-         gimp-drawable-parasite-detach
-         gimp-drawable-set-name
-         gimp-image-lower-vectors-to-bottom
-         gimp-parasite-attach
-         gimp-vectors-set-tattoo
-         gimp-drawable-set-linked
-         gimp-channel-ops-duplicate
-         gimp-vectors-get-linked
-         gimp-vectors-get-tattoo
-         gimp-vectors-parasite-attach
-         gimp-image-active-drawable
-         gimp-convert-indexed
-         gimp-drawable-get-name
-         gimp-layer-get-visible
-         gimp-palettes-set-palette
-         gimp-crop
-         gimp-drawable-get-image
-         gimp-drawable-is-layer
-         gimp-palette-get-background
-         gimp-undo-push-group-start
-         gimp-palette-swap-colors
-         gimp-layer-mask
-         gimp-layer-get-preserve-trans
-         gimp-drawable-parasite-list
-         gimp-image-get-channel-position
-         gimp-drawable-is-valid
-         gimp-gradients-set-active
-         gimp-channel-delete
-         gimp-vectors-get-visible
-         gimp-layer-get-tattoo
-         gimp-image-floating-selection
-         gimp-vectors-get-image
-         gimp-image-raise-layer
-         gimp-brushes-set-paint-mode
-         gimp-drawable-parasite-attach
-         gimp-blend
-         gimp-gradients-set-gradient
-         gimp-selection-clear
-         gimp-channel-set-visible
-         gimp-temp-PDB-name
-         gimp-image-get-vectors-position
-         gimp-palette-set-foreground
-         gimp-image-parasite-list
-         gimp-layer-set-tattoo
-         gimp-drawable-set-visible
-         gimp-drawable-get-tattoo
-         gimp-image-raise-channel
-         gimp-image-lower-layer
-         gimp-brushes-set-opacity
-         gimp-vectors-set-visible
-         gimp-palette-set-default-colors
-         gimp-convert-rgb
-         gimp-channel-get-visible
-         gimp-image-raise-vectors-to-top
-         gimp-vectors-is-valid
-         gimp-drawable-get-visible
-         gimp-image-lower-vectors
-         gimp-vectors-parasite-find
-         gimp-brushes-get-opacity
-         gimp-image-parasite-find
-         gimp-drawable-is-text-layer
-         gimp-image-raise-layer-to-top
-         gimp-layer-set-name
-         gimp-layer-set-preserve-trans
-         gimp-layer-delete
-         gimp-channel-ops-offset
-         gimp-parasite-list
-         gimp-channel-get-tattoo
-         gimp-vectors-set-linked
-         gimp-vectors-parasite-list
-         gimp-layer-get-linked
-         gimp-undo-push-group-end
-         gimp-drawable-set-tattoo
-         gimp-image-raise-vectors
-         gimp-brushes-set-brush
-         gimp-channel-set-name
-         gimp-palette-set-background
-         gimp-gradients-get-gradient
-         gimp-bucket-fill
-         gimp-image-get-layer-position
-         gimp-layer-get-name
-         gimp-drawable-is-layer-mask
-         gimp-parasite-detach
-         gimp-drawable-get-linked
-         gimp-image-parasite-attach
-         gimp-image-lower-layer-to-bottom
-         gimp-palette-refresh
-         gimp-drawable-is-channel
-         gimp-vectors-set-name
-         gimp-vectors-parasite-detach
-         gimp-parasite-find
-         gimp-patterns-list
-         gimp-drawable-delete
-         gimp-image-set-cmap
-         gimp-color-picker
-         gimp-drawable-bytes
-         gimp-image-parasite-detach
-         gimp-vectors-get-name
-         gimp-brushes-get-paint-mode
-         gimp-layer-set-visible
-  )
+(provide (all-defined-out))
+
 (define gimp (loudbus-proxy "edu.grinnell.cs.glimmer.GimpDBus"
                             "/edu/grinnell/cs/glimmer/gimp"
                             "edu.grinnell.cs.glimmer.pdb"))
@@ -1213,6 +9,7 @@
   (lambda (fun)
     (lambda args
       (apply loudbus-call (cons gimp (cons fun args))))))
+
 (define script-fu-round-corners (loudbus-helper 'script_fu_round_corners))
 (define file-xjt-load (loudbus-helper 'file_xjt_load))
 (define gimp-gradient-segment-set-right-color (loudbus-helper 'gimp_gradient_segment_set_right_color))
@@ -1248,6 +45,7 @@
 (define gimp-context-set-feather (loudbus-helper 'gimp_context_set_feather))
 (define gimp-layer-flatten (loudbus-helper 'gimp_layer_flatten))
 (define gimp-item-detach-parasite (loudbus-helper 'gimp_item_detach_parasite))
+(define munge-image (loudbus-helper 'munge_image))
 (define gimp-drawable-free-shadow (loudbus-helper 'gimp_drawable_free_shadow))
 (define gimp-drawable-type-with-alpha (loudbus-helper 'gimp_drawable_type_with_alpha))
 (define gimp-edit-named-copy (loudbus-helper 'gimp_edit_named_copy))
@@ -1316,11 +114,11 @@
 (define gimp-text-layer-set-line-spacing (loudbus-helper 'gimp_text_layer_set_line_spacing))
 (define plug-in-spheredesigner (loudbus-helper 'plug_in_spheredesigner))
 (define gimp-palette-rename (loudbus-helper 'gimp_palette_rename))
+(define plug-in-rgb-noise (loudbus-helper 'plug_in_rgb_noise))
 (define gimp-gradient-segment-get-middle-pos (loudbus-helper 'gimp_gradient_segment_get_middle_pos))
 (define gimp-context-get-opacity (loudbus-helper 'gimp_context_get_opacity))
 (define gimp-buffer-rename (loudbus-helper 'gimp_buffer_rename))
 (define gimp-vectors-import-from-file (loudbus-helper 'gimp_vectors_import_from_file))
-(define plug-in-rgb-noise (loudbus-helper 'plug_in_rgb_noise))
 (define gimp-palettes-get-palette-entry (loudbus-helper 'gimp_palettes_get_palette_entry))
 (define gimp-procedural-db-proc-arg (loudbus-helper 'gimp_procedural_db_proc_arg))
 (define gimp-image-add-vectors (loudbus-helper 'gimp_image_add_vectors))
@@ -1350,11 +148,12 @@
 (define gimp-text-layer-get-color (loudbus-helper 'gimp_text_layer_get_color))
 (define file-tiff-load (loudbus-helper 'file_tiff_load))
 (define plug-in-sparkle (loudbus-helper 'plug_in_sparkle))
-(define script-fu-sota-chrome-it (loudbus-helper 'script_fu_sota_chrome_it))
+(define ggimp-tile-stream-new (loudbus-helper 'ggimp_tile_stream_new))
 (define python-fu-gradient-save-as-css (loudbus-helper 'python_fu_gradient_save_as_css))
 (define gimp-layer-get-apply-mask (loudbus-helper 'gimp_layer_get_apply_mask))
 (define gimp-channel-set-show-masked (loudbus-helper 'gimp_channel_set_show_masked))
 (define gimp-context-get-ink-blob-angle (loudbus-helper 'gimp_context_get_ink_blob_angle))
+(define script-fu-sota-chrome-it (loudbus-helper 'script_fu_sota_chrome_it))
 (define script-fu-comic-logo (loudbus-helper 'script_fu_comic_logo))
 (define gimp-context-get-transform-recursion (loudbus-helper 'gimp_context_get_transform_recursion))
 (define script-fu-chrome-logo-alpha (loudbus-helper 'script_fu_chrome_logo_alpha))
@@ -1432,8 +231,9 @@
 (define file-cel-load (loudbus-helper 'file_cel_load))
 (define script-fu-fuzzy-border (loudbus-helper 'script_fu_fuzzy_border))
 (define gimp-image-set-active-vectors (loudbus-helper 'gimp_image_set_active_vectors))
-(define gimp-plugin-set-pdb-error-handler (loudbus-helper 'gimp_plugin_set_pdb_error_handler))
+(define GimpDBusServer (loudbus-helper 'GimpDBusServer))
 (define gimp-help-using-photography (loudbus-helper 'gimp_help_using_photography))
+(define gimp-plugin-set-pdb-error-handler (loudbus-helper 'gimp_plugin_set_pdb_error_handler))
 (define gimp-brush-set-spikes (loudbus-helper 'gimp_brush_set_spikes))
 (define script-fu-gradient-example (loudbus-helper 'script_fu_gradient_example))
 (define script-fu-starscape-logo (loudbus-helper 'script_fu_starscape_logo))
@@ -1622,6 +422,7 @@
 (define gimp-drawable-set-image (loudbus-helper 'gimp_drawable_set_image))
 (define file-pcx-save (loudbus-helper 'file_pcx_save))
 (define gimp-display-get-window-handle (loudbus-helper 'gimp_display_get_window_handle))
+(define irgb-red (loudbus-helper 'irgb_red))
 (define gimp-text-layer-get-justification (loudbus-helper 'gimp_text_layer_get_justification))
 (define gimp-get-default-unit (loudbus-helper 'gimp_get_default_unit))
 (define gimp-context-set-feather-radius (loudbus-helper 'gimp_context_set_feather_radius))
@@ -1692,6 +493,7 @@
 (define plug-in-gimpressionist (loudbus-helper 'plug_in_gimpressionist))
 (define gimp-selection-invert (loudbus-helper 'gimp_selection_invert))
 (define script-fu-t-o-p-logo (loudbus-helper 'script_fu_t_o_p_logo))
+(define silly (loudbus-helper 'silly))
 (define plug-in-sel2path (loudbus-helper 'plug_in_sel2path))
 (define gimp-file-load-layer (loudbus-helper 'gimp_file_load_layer))
 (define gimp-brush-new (loudbus-helper 'gimp_brush_new))
@@ -1969,6 +771,7 @@
 (define gimp-text-layer-set-color (loudbus-helper 'gimp_text_layer_set_color))
 (define script-fu-chip-away-logo-alpha (loudbus-helper 'script_fu_chip_away_logo_alpha))
 (define gimp-layer-create-mask (loudbus-helper 'gimp_layer_create_mask))
+(define ggimp-irgb-green (loudbus-helper 'ggimp_irgb_green))
 (define script-fu-set-cmap (loudbus-helper 'script_fu_set_cmap))
 (define gimp-palettes-set-popup (loudbus-helper 'gimp_palettes_set_popup))
 (define plug-in-dbbrowser (loudbus-helper 'plug_in_dbbrowser))
@@ -1979,7 +782,6 @@
 (define gimp-item-get-parasite (loudbus-helper 'gimp_item_get_parasite))
 (define gimp-image-select-color (loudbus-helper 'gimp_image_select_color))
 (define file-xpm-save (loudbus-helper 'file_xpm_save))
-(define RamServer (loudbus-helper 'RamServer))
 (define script-fu-guides-remove (loudbus-helper 'script_fu_guides_remove))
 (define gimp-image-convert-indexed (loudbus-helper 'gimp_image_convert_indexed))
 (define plug-in-icc-profile-apply (loudbus-helper 'plug_in_icc_profile_apply))
@@ -2021,9 +823,9 @@
 (define gimp-path-set-current (loudbus-helper 'gimp_path_set_current))
 (define gimp-image-grid-get-foreground-color (loudbus-helper 'gimp_image_grid_get_foreground_color))
 (define file-openraster-load (loudbus-helper 'file_openraster_load))
+(define plug-in-oilify-enhanced (loudbus-helper 'plug_in_oilify_enhanced))
 (define gimp-item-is-layer-mask (loudbus-helper 'gimp_item_is_layer_mask))
 (define gimp-edit-blend (loudbus-helper 'gimp_edit_blend))
-(define plug-in-oilify-enhanced (loudbus-helper 'plug_in_oilify_enhanced))
 (define file-gif-load-thumb (loudbus-helper 'file_gif_load_thumb))
 (define plug-in-metadata-set (loudbus-helper 'plug_in_metadata_set))
 (define gimp-brushes-get-spacing (loudbus-helper 'gimp_brushes_get_spacing))
@@ -2142,8 +944,9 @@
 (define plug-in-video (loudbus-helper 'plug_in_video))
 (define gimp-dodgeburn-default (loudbus-helper 'gimp_dodgeburn_default))
 (define script-fu-reverse-layers (loudbus-helper 'script_fu_reverse_layers))
-(define plug-in-gauss-rle2 (loudbus-helper 'plug_in_gauss_rle2))
 (define gimp-path-get-locked (loudbus-helper 'gimp_path_get_locked))
+(define plug-in-gauss-rle2 (loudbus-helper 'plug_in_gauss_rle2))
+(define ggimp-irgb-new (loudbus-helper 'ggimp_irgb_new))
 (define plug-in-nova (loudbus-helper 'plug_in_nova))
 (define gimp-image-pick-color (loudbus-helper 'gimp_image_pick_color))
 (define plug-in-cartoon (loudbus-helper 'plug_in_cartoon))
@@ -2184,9 +987,9 @@
 (define gimp-text-layer-resize (loudbus-helper 'gimp_text_layer_resize))
 (define extension-script-fu (loudbus-helper 'extension_script_fu))
 (define gimp-layer-set-apply-mask (loudbus-helper 'gimp_layer_set_apply_mask))
+(define plug-in-borderaverage (loudbus-helper 'plug_in_borderaverage))
 (define plug-in-imagemap (loudbus-helper 'plug_in_imagemap))
 (define gimp-drawable-type (loudbus-helper 'gimp_drawable_type))
-(define plug-in-borderaverage (loudbus-helper 'plug_in_borderaverage))
 (define gimp-image-get-active-drawable (loudbus-helper 'gimp_image_get_active_drawable))
 (define gimp-procedural-db-set-data (loudbus-helper 'gimp_procedural_db_set_data))
 (define gimp-palette-export-java (loudbus-helper 'gimp_palette_export_java))
@@ -2256,6 +1059,7 @@
 (define gimp-image-get-component-active (loudbus-helper 'gimp_image_get_component_active))
 (define file-pdf-save-multi (loudbus-helper 'file_pdf_save_multi))
 (define plug-in-metadata-get-simple (loudbus-helper 'plug_in_metadata_get_simple))
+(define ggimp-rgb-list (loudbus-helper 'ggimp_rgb_list))
 (define script-fu-ripply-anim (loudbus-helper 'script_fu_ripply_anim))
 (define file-openraster-save (loudbus-helper 'file_openraster_save))
 (define gimp-displays-reconnect (loudbus-helper 'gimp_displays_reconnect))
@@ -2268,6 +1072,7 @@
 (define gimp-brush-get-spikes (loudbus-helper 'gimp_brush_get_spikes))
 (define gimp-context-set-opacity (loudbus-helper 'gimp_context_set_opacity))
 (define plug-in-the-slimy-egg (loudbus-helper 'plug_in_the_slimy_egg))
+(define ggimp-irgb-blue (loudbus-helper 'ggimp_irgb_blue))
 (define plug-in-checkerboard (loudbus-helper 'plug_in_checkerboard))
 (define gimp-image-get-name (loudbus-helper 'gimp_image_get_name))
 (define plug-in-lic (loudbus-helper 'plug_in_lic))
@@ -2281,7 +1086,7 @@
 (define gimp-drawable-transform-scale-default (loudbus-helper 'gimp_drawable_transform_scale_default))
 (define gimp-gradient-segment-get-coloring-type (loudbus-helper 'gimp_gradient_segment_get_coloring_type))
 (define gimp-progress-set-text (loudbus-helper 'gimp_progress_set_text))
-(define gimp-gradients-popup (loudbus-helper 'gimp_gradients_popup))
+(define ggimp-irgb-red (loudbus-helper 'ggimp_irgb_red))
 (define gimp-context-get-transform-direction (loudbus-helper 'gimp_context_get_transform_direction))
 (define gimp-unit-new (loudbus-helper 'gimp_unit_new))
 (define script-fu-cool-metal-logo (loudbus-helper 'script_fu_cool_metal_logo))
@@ -2292,15 +1097,16 @@
 (define gimp-scale (loudbus-helper 'gimp_scale))
 (define gimp-context-get-palette (loudbus-helper 'gimp_context_get_palette))
 (define gimp-drawable-transform-flip-default (loudbus-helper 'gimp_drawable_transform_flip_default))
-(define gimp-text-layer-set-antialias (loudbus-helper 'gimp_text_layer_set_antialias))
+(define gimp-gradients-popup (loudbus-helper 'gimp_gradients_popup))
 (define plug-in-normalize (loudbus-helper 'plug_in_normalize))
 (define gimp-layer-copy (loudbus-helper 'gimp_layer_copy))
 (define plug-in-lighting (loudbus-helper 'plug_in_lighting))
-(define script-fu-burn-in-anim (loudbus-helper 'script_fu_burn_in_anim))
+(define gimp-text-layer-set-antialias (loudbus-helper 'gimp_text_layer_set_antialias))
 (define gimp-layer-set-opacity (loudbus-helper 'gimp_layer_set_opacity))
 (define gimp-context-get-ink-speed-sensitivity (loudbus-helper 'gimp_context_get_ink_speed_sensitivity))
 (define gimp-image-insert-layer (loudbus-helper 'gimp_image_insert_layer))
 (define gimp-file-load-thumbnail (loudbus-helper 'gimp_file_load_thumbnail))
+(define script-fu-burn-in-anim (loudbus-helper 'script_fu_burn_in_anim))
 (define gimp-procedural-db-temp-name (loudbus-helper 'gimp_procedural_db_temp_name))
 (define gimp-get-path-by-tattoo (loudbus-helper 'gimp_get_path_by_tattoo))
 (define file-eps-save (loudbus-helper 'file_eps_save))
