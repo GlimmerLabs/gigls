@@ -1,6 +1,14 @@
 # Applications we build
 mkwrapper
 
-# Backupfiles
+# Backup files
 *~
 *#
+*.swp
+
+# Compiled C files
+*.so
+*.o
+
+# Project-specific files and directories
+compiled
