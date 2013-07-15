@@ -11,7 +11,6 @@
          LoudGimp/higher
          LoudGimp/list
          LoudGimp/positions
-         LoudGimp/rgb
          LoudGimp/utils)
 
 
@@ -232,6 +231,29 @@
          (_drawing-shape-color drawing))
         (else
          (error "drawing-color: unknown drawing type" type))))))
+
+;;; Procedure:
+;;;   drawing-compose
+;;; Parameters:
+;;;   drawings, a list of drawings
+;;; Purpose:
+;;;   Create a new drawing by composing the drawings in drawings
+;;; Produces:
+;;;   composed, a drawing
+;;; Preconditions:
+;;;   (length drawings) >= 1
+(define _drawing-compose 
+  (lambda (drawings)
+    (apply _drawing-group drawings)))
+
+(define drawing-compose
+  (lambda (drawings)
+    (cond
+      ((null? drawings)
+       (error "drawing-compose: expects at least one parameter"))
+      ((not (all drawing? drawings))
+       (error "drawing-compose: called with at least one non-drawing"))
+      (else (_drawing-compose drawings)))))
 
 (define drawing-color
   (guard-drawing-proc 'drawing-color _drawing-color))
