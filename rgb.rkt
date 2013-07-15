@@ -285,7 +285,7 @@
 ;;;    to the Gimp's saturation while examining color.
 (define _rgb->saturation
   (lambda (col)
-    (let* ((color (color->rgb-list col))
+    (let* ((color (_rgb->rgb-list col))
           (cmax (apply max color))
           (cmin (apply min color)))
       (if (equal? cmax 0)
@@ -309,7 +309,7 @@
 ;;;    the Gimp's value while examining color.
 (define _rgb->value
   (lambda (col)
-    (let ((color (color->rgb-list col)))
+    (let ((color (_rgb->rgb-list col)))
       (/ (apply max color) 255))))
 
 (define rgb->value (guard-rgb-proc 'rgb->value _rgb->value))
