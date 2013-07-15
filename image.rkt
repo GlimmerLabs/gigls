@@ -4,20 +4,18 @@
 
 (require LoudGimp/guard
          LoudGimp/higher
-         LoudGimp/makers)
+         LoudGimp/makers
+         LoudGimp/mgimp)
 
 (require LoudGimp/colors
          LoudGimp/context
          LoudGimp/hacks
          LoudGimp/list
          LoudGimp/positions
-         LoudGimp/rgb
          LoudGimp/utils)
 
 (provide (all-defined-out))
 
-
-(define WHITE 16777215)
 
 ;;; Procedure:
 ;;;   image?
@@ -82,6 +80,115 @@
                     _image-clear-selection!
                     'image
                     image?))
+
+;;; Procedure:
+;;;   image-draw-arrow!
+;;; Parameters:
+;;;   image, an image
+;;;   type, a symbol
+;;;   from-col, a real number
+;;;   from-row, a real number
+;;;   to-col, a real number
+;;;   to-row, a real number
+;;;   head-width, a positive real number
+;;;   head-length, a positive real number
+;;; Purpose:
+;;;   Draw an arrow from (from-col,from-row) to (to-col,to-row), with a 
+;;;   head of the specified width and length.
+;;; Produces:
+;;;   image, the same image (now updated with an arrow)
+;;; Preconditions:
+;;;   (from-col,from-row) != (to-col,to-row)
+;;;   type must be one of 'line, 'filled, 'hollow, 'pointy, and
+;;;     'hollow-pointy
+(define _image-draw-arrow!
+  (lambda (image type from-col from-row to-col to-row head-width head-length)
+    (let* ((delta-col (- to-col from-col))
+           (delta-row (- to-row from-row))           
+           (distance (sqrt (+ (* delta-col delta-col) (* delta-row delta-row))))
+           (scale-col (/ delta-col distance))
+           (scale-row (/ delta-row distance))
+           (half-width (* head-width 0.5))
+           ; (c0,r0) gives a point head-length back along the line
+           (c0 (- to-col (* scale-col head-length)))
+           (r0 (- to-row (* scale-row head-length)))
+           ; hoff and voff give horizontal and vertical offsets to
+           ; arrow tail points
+           (hoff (* scale-row half-width))
+           (voff (* scale-col half-width))
+           ; (c1,r1) and (c2,r2)
+           (c1 (+ c0 hoff))
+           (r1 (- r0 voff))
+           (c2 (- c0 hoff))
+           (r2 (+ r0 voff))
+           ; (c3,r3) gives a point halfway to c0 r0
+           (c3 (- to-col (* scale-col head-length 0.5)))
+           (r3 (- to-row (* scale-row head-length 0.5))))
+      (cond
+        ((eq? type 'lines)
+         (image-draw-line! image from-col from-row to-col to-row)
+         (image-draw-line! image c1 r1 to-col to-row)
+         (image-draw-line! image c2 r2 to-col to-row))
+        ((eq? type 'hollow)
+         (image-draw-line! image from-col from-row c0 r0)
+         (image-draw-line! image c1 r1 to-col to-row)
+         (image-draw-line! image c2 r2 to-col to-row)
+         (image-draw-line! image c1 r1 c2 r2))
+        ((eq? type 'hollow-pointy)
+         (image-draw-line! image from-col from-row c3 r3)
+         (image-draw-line! image c1 r1 to-col to-row)
+         (image-draw-line! image c2 r2 to-col to-row)
+         (image-draw-line! image c1 r1 c3 r3)
+         (image-draw-line! image c2 r2 c3 r3))
+        ((or (eq? type 'filled) (eq? type 'pointy))
+         (let ((sel (image-selection-save image)))
+           (cond
+             ((eq? type 'filled)
+              (image-draw-line! image from-col from-row to-col to-row)
+              (image-select-polygon! image REPLACE ; should be INTERSECT, but needs work
+                                     (position-new c1 r1)
+                                     (position-new c2 r2)
+                                     (position-new to-col to-row)))
+             ((eq? type 'pointy)
+              (image-draw-line! image from-col from-row c3 r3)
+              (image-select-polygon! image REPLACE ; should be INTERSECT, but needs work
+                                     (position-new c1 r1)
+                                     (position-new c3 r3)
+                                     (position-new c2 r2)
+                                     (position-new to-col to-row))))
+           (gimp-selection-grow image 1)
+           (when (image-has-selection? image) (image-fill! image))
+           (image-selection-load! image sel)
+           (image-selection-drop! image sel)))
+        ((eq? type 'pointy)
+         (let ((sel (image-selection-save image)))
+           
+           (image-fill! image)
+           (image-selection-load! image sel)
+           (image-selection-drop! image sel)))
+        (else
+         (error/misc 'image-draw-arrow!
+                     (string-append "Invalid arrow type: "
+                                    (value->string type)
+                                    ", expects one of "
+                                    "lines, filled, hollow, "
+                                    "pointy, hollow-pointy")
+                     (list image type from-col from-row to-col to-row 
+                           head-width head-length)))))))
+
+(define image-draw-arrow!
+  (guard-proc 'image-draw-arrow!
+              _image-draw-arrow!
+              (list 'image 
+                    'arrow-type
+                    'real 'real 'real 'real 
+                    'positive-real 'positive-real)
+              (list image?
+                    (r-s member? 
+                         (list 'lines 'hollow 'filled 'pointy 'hollow-pointy))
+                    real? real? real? real?
+                    (and positive? real?) (and positive? real?))))
+
 
 ;;; Procedure:
 ;;;   image-draw-line!
@@ -180,6 +287,36 @@
                      (vector-ref (cadr layers) 0))
                 active))))))
 
+;;; Procedure:
+;;;   image-get-pixel
+;;; Parameters:
+;;;   image, an image
+;;;   col, an integer
+;;;   row, an integer
+;;; Purpose:
+;;;   Extract the pixel at (col,row) from image.
+;;; Produces:
+;;;   color, a color
+(define image-get-pixel
+  (lambda (image col row)
+    (let ((drawable (car (gimp-image-get-active-layer image))))
+      (cadr (gimp-drawable-get-pixel drawable col row)))))
+
+;;; Procedure:
+;;;   image-has-selection?
+;;; Parameters:
+;;;   image, an image
+;;; Purpose:
+;;;   Determine if anything is selected on the image
+;;; Produces:
+;;;   has-selection?, a Boolean
+(define _image-has-selection?
+  (lambda (image)
+    (zero? (car (gimp-selection-is-empty (image-id image))))))
+
+(define image-has-selection?
+  (guard-unary-proc 'image-has-selection? _image-has-selection?
+                    'image image?))
 
 ;;; Procedure:
 ;;;   image-height
@@ -300,6 +437,77 @@
                ((equal? name (image-name (vector-ref images pos)))
                 (vector-ref images pos))
                (else (kernel (+ pos 1)))))))))
+
+
+;;; Procedure:
+;;;   image-selection-drop!
+;;; Parameters:
+;;;   image, an image
+;;;   selection, a selection
+;;; Purpose:
+;;;   Remove a saved selection.  (Afterwards, it is invalid to try to
+;;;   reload the selection with image-selection-load!.)
+;;; Produces:
+;;;   [Nothing, called for the side effect]
+;;; Preconditions:
+;;;   selection must have been created with (image-selection-save image)
+;;;   selection must not have been previously dropped
+(define image-selection-drop!
+  (lambda (image selection)
+    (gimp-image-remove-channel image selection)
+    (void)))
+
+
+;;; Procedure:
+;;;   image-selection-load!
+;;; Parameters:
+;;;   image, an image
+;;;   selection, a selection
+;;; Purpose:
+;;;   Restore a previously saved selection
+;;; Produces:
+;;;   [Nothing; called for the side effect.]
+;;; Preconditions:
+;;;   selection must have been created with (image-save-selection image).
+;;;   selection must not have been previously deleted with image-drop-selection.
+(define image-selection-load!
+  (lambda (image selection)
+    (gimp-selection-load selection)
+    (void)))
+
+
+;;; Procedure:
+;;;   image-selection-save
+;;; Parameters:
+;;;   image, an image
+;;; Purpose:
+;;;   Get a value that represents the current selection of the image
+;;; Produces:
+;;;   selection, a value that represents the selection
+;;; Preconditions:
+;;;   image must be a valid image
+;;; Postconditions:
+;;;   The image is unaffected.
+;;;   (image-restore-selection image selection) will restore the selection.
+(define image-selection-save
+  (lambda (image)
+    (car (gimp-selection-save image))))
+
+;;; Procedure:
+;;;   image-set-pixel!
+;;; Parameters:
+;;;   image, an image
+;;;   col, a column
+;;;   row, a row
+;;;   color, an RGB color
+;;; Purpose:
+;;;   Sets the pixel at (col,row) to color.
+;;; Produces:
+;;;   [Nothing; called for the side effect]
+(define image-set-pixel!
+  (lambda (image col row color)
+    (let ((drawable (car (gimp-image-get-active-layer image))))
+        (gimp-drawable-set-pixel drawable col row 0 color))))
 
 ;;; Procedure:
 ;;;   image-select-all!
