@@ -1,9 +1,8 @@
 #lang racket
 
 (require LoudGimp/hacks
-         LoudGimp/higher
-         LoudGimp/rgb); Note: used for color? which is currently a hack
-
+         LoudGimp/higher)
+         
 (provide (all-defined-out))
 
 ;;; Procedure:
@@ -71,6 +70,8 @@
                        ((= last-digit 2) "nd")
                        ((= last-digit 3) "rd")
                        (else "th"))))))
+
+
 
 ;;; Procedure:
 ;;;   member?
@@ -217,6 +218,7 @@
                    (cons (car lst) (charlist-escape (cdr lst))))))))
       (lambda (str)
         (list->string (charlist-escape (string->list str)))))))
+
 
 ;;; Procedure:
 ;;;   value->string

@@ -3,8 +3,7 @@
 (require LoudGimp/gimp-dbus)
 
 ; Behind-the-scenes functions that don't need to be exported.
-(require LoudGimp/guard
-         LoudGimp/higher
+(require
          LoudGimp/makers)
 
 ; Primary functions that do need to be exported.
@@ -12,12 +11,16 @@
          LoudGimp/colors
          LoudGimp/context
          LoudGimp/drawings
+         LoudGimp/guard
          LoudGimp/image
          LoudGimp/hacks
+         LoudGimp/higher
          LoudGimp/list
+         LoudGimp/mgimp
+         LoudGimp/misc
          LoudGimp/positions
-         LoudGimp/rgb
-         LoudGimp/utils)
+         LoudGimp/utils
+         LoudGimp/turtles)
 
 ;;; File:
 ;;;   LoudGimp/simplify
@@ -31,11 +34,14 @@
          (all-from-out LoudGimp/colors)
          (all-from-out LoudGimp/context)
          (all-from-out LoudGimp/drawings)
+         (all-from-out LoudGimp/guard)
          (all-from-out LoudGimp/hacks)
          (all-from-out LoudGimp/higher)
          (all-from-out LoudGimp/image)
-         (all-from-out LoudGimp/list)
+         (all-from-out LoudGimp/list) 
+         (all-from-out LoudGimp/mgimp)
+         (all-from-out LoudGimp/misc)
          (all-from-out LoudGimp/positions)
-         (all-from-out LoudGimp/rgb)
-         (all-from-out LoudGimp/utils))
+         (all-from-out LoudGimp/utils)
+         (all-from-out LoudGimp/turtles))
 

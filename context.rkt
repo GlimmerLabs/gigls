@@ -1,6 +1,7 @@
 #lang racket
 (provide (all-defined-out))
 (require LoudGimp/gimp-dbus)
+(require louDBus/unsafe)
 (require LoudGimp/colors
          LoudGimp/guard
          LoudGimp/hacks
@@ -89,8 +90,7 @@
 ;;;   The background color is now the specified color.
 (define _context-set-bgcolor!
   (lambda (color)
-    (gimp-context-set-background (color->rgb-list color))
-    color))
+    (gimp-context-set-background  color)))
 
 (define context-set-bgcolor!
   (guard-unary-proc 'context-set-bgcolor!
@@ -153,25 +153,6 @@
       (else 
        (_context-set-brush! brush)))))
 
-
-; +--------------------------------+--------------------------------------------
-; | Listing Context-Related Values |
-; +--------------------------------+
-
-; [From gimp/context/context-get-color-names.scm]
-
-;;; Procedure:
-;;;   context-get-color-names
-;;; Parameters:
-;;;   [None]
-;;; Purpose:
-;;;   Get a vector of all the available color names.
-;;; Produces:
-;;;   names, a vector of strings
-;;; Partners:
-;;;   (context-find-color-names "NAME")
-;;;      Provides a way to find a list of names that include "NAME".
-(define context-get-color-names mgimp-get-color-names)
 
 ; [From gimp/context/context-list-brushes.scm]
 
@@ -209,43 +190,25 @@
         (else
          (apply _context-list-brushes restriction))))))
 
-; [From gimp/context/context-list-colors.scm]
+
 
 ;;; Procedure:
-;;;   context-list-colors
+;;;   context-list-color-names
 ;;; Parmeters:
-;;;   pattern, a nonempty string [optional]
+;;;  none
 ;;; Purpose:
-;;;   List all the colors (or all the colors that match pattern)
+;;;   List all the colors contained in the GIMP
 ;;; Produces:
 ;;;   colors, a list of strings
 ;;; Preconditions:
 ;;;   [Standard]
 ;;; Postconditions:
-;;;   For each reasonable i,
-;;;     (color-name? (list-ref colors i))
-;;;   If pattern is non null, each string in colors contains pattern.
-(define _context-list-colors
-  (let ((colors (vector->list (context-get-color-names))))
-    (lambda args
-      (if (null? args)
-          colors
-          (list-select colors 
-                       (lambda (color) (string-contains? color (car args))))))))
-  
-(define context-list-colors
-    (lambda args
-      (cond
-        ((null? args)
-         (_context-list-colors))
-        ((not (null? (cdr args)))
-         (error "context-list-colors: One 1 parameter permitted, received" 
-                args))
-        ((not (string? (car args)))
-         (error "context-list-colors: Parameters must be a string, received"
-                (car args)))
-        (else
-         (_context-list-colors (car args))))))
+;;;   All of the colors recognized by the GIMP
+;;; NOTE:
+;;;   Calls a function implimented as a GIMP plugin
+(define context-list-color-names
+  (lambda ()
+    (cadr (loudbus-call gimp 'ggimp_rgb_list))))
 
 ; [From gimp/context/context-list-fonts.scm]
 

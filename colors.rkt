@@ -1,31 +1,14 @@
-#lang racket
+  #lang racket
 
-(require LoudGimp/rgb)
-(require LoudGimp/utils)
-(require LoudGimp/guard)
+(require LoudGimp/mgimp)
+(require louDBus/unsafe)
+(require LoudGimp/gimp-dbus)
+(require LoudGimp/guard
+         LoudGimp/higher
+         LoudGimp/utils)
 
 (provide (all-defined-out))
 
-;;; Procedure:
-;;;   guard-rgb-proc
-;;; Parameters:
-;;;   name, a symbol
-;;;   proc, a procedure of the form (lambda (rgb) ___)
-;;; Purpose:
-;;;   Build a new version of proc that checks preconditions.
-;;; Produces:
-;;;   guarded-proc, a procedure of the form (lambda (rgb) _____)
-;;; Preconditions:
-;;;   [No additional]
-;;; Postconditions:
-;;;   If (rgb? val), (guarded-proc val) = (proc val)
-;;;   Otherwise, (guarded-proc val) throws an appropriate error
-(define guard-rgb-proc
-  (lambda (name proc)
-    (lambda params
-      (validate-unary! name params)
-      (validate-param! name 'rgb rgb? params)
-      (proc (car params)))))
 
 ;;; Procedure:
 ;;;   color?
@@ -45,23 +28,6 @@
         (rgb-list? val) 
         (hsv? val))))
 
-;;; Procedure:
-;;;   color-representation
-;;; Parameters:
-;;;   color, a color
-;;; Purpose:
-;;;   Determine what representation is used for color
-;;; Produces:
-;;;   representation, a symbol (or #f)
-(define color-representation
-  (lambda (color)
-    (cond
-      ((rgb? color) 'RGB)
-      ((rgb-list? color) 'RGB-LIST)
-      ((hsv? color) 'HSV)
-      (else #f))))
-
-; [From mscm/color/color-to-hsv.scm]
 
 ;;; Procedure:
 ;;;   color->hsv
@@ -80,6 +46,55 @@
        color)
       (else
        (rgb->hsv (color->rgb color))))))
+
+
+;;; Procedure:
+;;;   color-name?
+;;; Parameters:
+;;;   val, a string
+;;; Purpose:
+;;;   Determines if val names a color.
+;;; Produces:
+;;;   is-color-name?, a boolean
+(define color-name?
+  (lambda (val)
+    (and (string? val)
+         (vector-contains? (context-get-color-names) val))))
+
+;;; Procedure:
+;;;   color-name->rgb
+;;; Parameters:
+;;;   color-name, a string
+;;; Purpose:
+;;;   Convert a named color to an RGB color.
+;;; Produces:
+;;;   rgb, an RGB color as an integer
+;;; Preconditions:
+;;;   (color-name? cname) must hold
+;;; NOTE:
+;;;   Calls a function implimented as a GIMP plugin
+(define color-name->rgb
+  (lambda (color-name)
+    (car (loudbus-call gimp 'ggimp_rgb_parse color-name))))
+
+;;; Procedure:
+;;;   color-representation
+;;; Parameters:
+;;;   color, a color
+;;; Purpose:
+;;;   Determine what representation is used for color
+;;; Produces:
+;;;   representation, a symbol (or #f)
+(define color-representation
+  (lambda (color)
+    (cond
+      ((rgb? color) 'RGB)
+      ((rgb-list? color) 'RGB-LIST)
+      ((hsv? color) 'HSV)
+      (else #f))))
+
+; [From mscm/color/color-to-hsv.scm]
+
 
 ; [From mscm/color/color-to-rgb.scm]
 
@@ -140,43 +155,19 @@
   (lambda (color)
     (rgb->string (color->rgb color))))
 
-
+;;; Included in colors (not context) to avoid interdependencies
 ;;; Procedure:
-;;;   rgb-list->rgb
+;;;   context-get-color-names
 ;;; Parameters:
-;;;   color, an rgb-list
+;;;   [None]
 ;;; Purpose:
-;;;   Convert color to an rgb color.
-;;; Preconditions:
-;;;   color must be an rgb-list.  That is, it must be a list of three
-;;;     integers, all in the range [0..255].
-;;; Postconditions:
-;;;   rgb represents the same color as color.
-(define rgb-list->rgb
-  (lambda (color)
-    (rgb-new (car color) (cadr color) (caddr color))))
-
-;;; Procedure:
-;;;   rgb->hsv
-;;; Parmeters:
-;;;   rgb, an rgb color
-;;; Purpose:
-;;;   To convert an rgb color into an hsv color.
+;;;   Get a vector of all the available color names.
 ;;; Produces:
-;;;   hsv, a three-element list containing hue, saturation and value.
-;;; Preconditions
-;;;   rgb must be a valid rgb color.
-;;; Postconditions
-;;;   hsvcolor contains three floats which (with rounding) roughly correspond 
-;;;     to the hsv values given for that color in GIMP.  Values are not 
-;;;     rounded to preserve color fidelity when converting from rgb to hsv 
-;;;     and then back to rgb again.
-;;;  (hsv->rgb hsv) should produce color.
-(define _rgb->hsv
-  (lambda (color)
-    (list (_rgb->hue color) (_rgb->saturation color) (_rgb->value color))))
-
-(define rgb->hsv (guard-rgb-proc 'rgb->hsv _rgb->hsv))
+;;;   names, a vector of strings
+;;; Partners:
+;;;   (context-find-color-names "NAME")
+;;;      Provides a way to find a list of names that include "NAME".
+(define context-get-color-names mgimp-get-color-names)
 
 
 ;;; Procedure:
@@ -197,6 +188,20 @@
          (<= 0 (cadr val) 1)
          (real? (caddr val))
          (<= 0 (caddr val) 1))))
+
+;;; Procedure:
+;;;   hsv-hue
+;;; Parameters:
+;;;   hsv, an HSV color
+;;; Purpose:
+;;;   Extract the hue from an HSV color.
+;;; Produces:
+;;;   hue, an integer
+;;; Preconditions:
+;;;   (hsv? hsv)
+;;; Postconditions:
+;;;   0 <= hue <= 360
+(define hsv-hue car)
 
 ;;; Procedure
 ;;;   hsv->rgb
@@ -229,65 +234,175 @@
         ((equal? hi 4) (rgb-new (* 255 t) (* 255 p) (* 255 v)))
         ((equal? hi 5) (rgb-new (* 255 v) (* 255 p) (* 255 q)))))))
 
-;;; Procedure
-;;;   rgb-list?
-;;; Parameters
-;;;   val, a scheme value
-;;; Purpose
-;;;   Check if val is an rgb color
-;;; Produces
-;;;   is-rgb-list, a boolean value
-;;; Preconditions
-;;;   [none]
-;;; Postconditions
-;;;   Returns #t if val is an rgb color represented as a list of
-;;;     the three components.
-;;;   Returns #f otherwise.
-(define rgb-list?
-  (lambda (val)
-    (and (list? val) (equal? (length val) 3) (all-integer? val))))
 
 ;;; Procedure:
-;;;   rgb->rgb-list
+;;;   hsv-saturation
+;;; Parameters:
+;;;   hsv, an HSV color
+;;; Purpose:
+;;;   Extract the saturation from an HSV color.
+;;; Produces:
+;;;   saturation, a real
+;;; Preconditions:
+;;;   (hsv? hsv)
+;;; Postconditions:
+;;;   0 <= saturation <= 1
+(define hsv-saturation cadr)
+
+; [From mscm/hsv/hsv-value.scm]
+
+;;; Procedure:
+;;;   hsv-value
+;;; Parameters:
+;;;   hsv, an HSV color
+;;; Purpose:
+;;;   Extract the value from an HSV color.
+;;; Produces:
+;;;   value, a real number
+;;; Preconditions:
+;;;   (hsv? hsv)
+;;; Postconditions:
+;;;   0 <= value <= 1
+(define hsv-value caddr)
+
+
+
+; Sam's quick hacks to get RGB working.  This needs to be rewritten in C.
+
+
+(define rgb-new
+  (lambda (r g b)
+    (+ (* r 256 256) (* g 256) b)))
+
+
+;; Procedure:
+;;;   rgb-map
 ;;; Parameters:
 ;;;   rgb, an RGB color
+;;;   func, a function from components (integers in the range [0..255]) to
+;;;     components
 ;;; Purpose:
-;;;   Extract the components and shove 'em in a list.
-;;; Produces:
-;;;   rgb-list, an RGB list.
+;;;   Create a new RGB color by applying func to each component.
+;; Produces:
+;;;   new-rgb an RGB color
 ;;; Preconditions:
 ;;;   [No additional]
 ;;; Postconditions:
-;;;   The components of rgb-list are the same as those of rgb.
-(define _rgb->rgb-list
-  (lambda (rgb)
-    (list (rgb-red rgb) (rgb-green rgb) (rgb-blue rgb))))
+;;;   (rgb? new-rgb)
+;;;   (rgb-red new-rgb) = (func (rgb-red rgb))
+;;;   (rgb-green new-rgb) = (func (rgb-green rgb))
+;;;   (rgb-blue new-rgb) = (func (rgb-blue rgb))
+(define _rgb-map
+  (lambda (rgb func)
+    (rgb-new (func (rgb-red rgb))
+             (func (rgb-green rgb))
+             (func (rgb-blue rgb)))))
 
-(define rgb->rgb-list (guard-rgb-proc 'rgb->rgb-list _rgb->rgb-list))
+(define rgb-map _rgb-map)
+
+
+(define rgb-blue
+  (lambda (color)
+    (remainder color 256)))
 
 ;;; Procedure:
-;;;   rgb->string
+;;;   rgb-bluer
 ;;; Parameters:
-;;;   color, an rgb color [verified]
+;;;   rgb, an RGB color
 ;;; Purpose:
-;;;   Convert color to a string easy for a novice to read
+;;;   Produce a bluer version of rgb
 ;;; Produces:
-;;;   colorstring, a string of the form R/G/B
+;;;   bluer, an RGB color
 ;;; Preconditions:
-;;;   color is a valid rgb color.  That is, (rgb? color) holds.
+;;;   [No additional]
 ;;; Postconditions:
-;;;   R is (rgb.red color), G is (rgb.green color), B is (rgb.blue color)
-(define _rgb->string
+;;;   (rgb-blue bluer) >= (rgb-blue rgb)
+(define _rgb-bluer
   (lambda (color)
-    (string-append (number->string (rgb-red color)) 
-                   "/"
-		   (number->string (rgb-green color))
-		   "/"
-		   (number->string (rgb-blue color)))))
+    (rgb-new (rgb-red color)
+             (rgb-green color)
+             (min 255 (+ 32 (rgb-blue color))))))
 
-(define rgb->string (guard-rgb-proc 'rgb->string _rgb->string))
+(define rgb-bluer (guard-rgb-proc 'rgb-bluer _rgb-bluer))
 
-; [From mscm/rgb/rgb-to-hue.scm]
+;;; Procedure:
+;;;   rgb-complement
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   Compute the pseudo-complement of rgb
+;;; Produces:
+;;;   complement, an RGB color
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (+ (rgb-red rgb) (rgb-red complement)) = 255
+;;;   (+ (rgb-green rgb) (rgb-green complement)) = 255
+;;;   (+ (rgb-blue rgb) (rgb-blue complement)) = 255
+(define _rgb-complement
+  (r-s rgb-map (l-s - 255)))
+
+(define rgb-complement (guard-rgb-proc 'rgb-complement _rgb-complement))
+
+
+;;; Procedure:
+;;;   rgb-darker
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   Compute a darker version of rgb
+;;; Produces:
+;;;   darker, an RGB color.
+(define _rgb-darker
+  (r-s rgb-map (o (l-s max 0) (r-s - 16))))
+
+(define rgb-darker (guard-rgb-proc 'rgb-darker _rgb-darker))
+
+(define rgb-green
+  (lambda (color)
+    (remainder (quotient color 256) 256)))
+
+;;; Procedure:
+;;;   rgb-greener
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   Produce a greener version of rgb
+;;; Produces:
+;;;   greener, an RGB color
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (rgb-green greener) >= (rgb-green rgb)
+(define _rgb-greener
+  (lambda (color)
+    (rgb-new (rgb-red color)
+             (min 255 (+ 32 (rgb-green color)))
+             (rgb-blue color))))
+
+(define rgb-greener (guard-rgb-proc 'rgb-greener _rgb-greener))
+
+;;; Procedures:
+;;;   rgb-greyscale
+;;; Parameters:
+;;;   rgb, an rgb color
+;;; Purpose: 
+;;;   Convert rgb to an appropriate shade of grey
+;;; Produces:
+;;;   grey, an RGB color.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (rgb-red grey) = (rgb-green grey) = (rgb-blue grey)
+;;;   grey has a similar brightness to rgb
+(define _rgb-greyscale
+  (lambda (rgb)
+    (let ((ave (+ (* 0.30 (rgb-red rgb)) 
+                  (* 0.59 (rgb-green rgb)) 
+                  (* 0.11 (rgb-blue rgb)))))
+      (rgb-new ave ave ave))))
+
+(define rgb-greyscale (guard-rgb-proc 'rgb-greyscale _rgb-greyscale))
 
 ;;; Procedure
 ;;;  rgb->hue
@@ -319,7 +434,137 @@
 
 (define rgb->hue (guard-rgb-proc 'rgb->hue _rgb->hue))
 
-; [From mscm/rgb/rgb-to-saturation.scm]
+;;; Procedure:
+;;;   rgb-lighter
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   Compute a lighter version of rgb
+;;; Produces:
+;;;   lighter, an RGB color.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   lighter is likely to be interpreted as similar to, but lighter than
+;;;   rgb.
+(define _rgb-lighter
+  (r-s rgb-map (o (l-s min 255) (r-s + 16))))
+
+(define rgb-lighter (guard-rgb-proc 'rgb-lighter _rgb-lighter))
+
+;;; Procedure
+;;;   rgb-list?
+;;; Parameters
+;;;   val, a scheme value
+;;; Purpose
+;;;   Check if val is an rgb color
+;;; Produces
+;;;   is-rgb-list, a boolean value
+;;; Preconditions
+;;;   [none]
+;;; Postconditions
+;;;   Returns #t if val is an rgb color represented as a list of
+;;;     the three components.
+;;;   Returns #f otherwise.
+(define rgb-list?
+  (lambda (val)
+    (and (list? val) (equal? (length val) 3) (all-integer? val))))
+
+;;; Procedure:
+;;;   rgb-list->rgb
+;;; Parameters:
+;;;   color, an rgb-list
+;;; Purpose:
+;;;   Convert color to an rgb color.
+;;; Preconditions:
+;;;   color must be an rgb-list.  That is, it must be a list of three
+;;;     integers, all in the range [0..255].
+;;; Postconditions:
+;;;   rgb represents the same color as color.
+(define rgb-list->rgb
+  (lambda (color)
+    (rgb-new (car color) (cadr color) (caddr color))))
+
+
+;;; Procedure:
+;;;   rgb-phaseshift
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   "Phase shift" rgb by adding 128 to components less than or equal 
+;;;   to 128 and subtracting 128 from components greater than 128.
+;;; Produces:
+;;;   shifted, an RGB color
+(define _rgb-phaseshift
+  (r-s rgb-map (o (r-s modulo 256) (l-s + 128))))
+
+(define rgb-phaseshift (guard-rgb-proc 'rgb-phaseshift _rgb-phaseshift))
+
+
+(define rgb-red
+  (let ((scale (* 256 256)))
+    (lambda (color)
+      (quotient color scale))))
+
+;;; Procedure:
+;;;   rgb-redder
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   Produce a redder version of rgb
+;;; Produces:
+;;;   redder, an RGB color
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (rgb-red redder) >= (rgb-red rgb)
+(define _rgb-redder
+  (lambda (color)
+    (rgb-new (min 255 (+ 32 (rgb-red color)))
+             (rgb-green color)
+             (rgb-blue color))))
+
+(define rgb-redder (guard-rgb-proc 'rgb-redder _rgb-redder))
+
+;;; Procedure:
+;;;   rgb->hsv
+;;; Parmeters:
+;;;   rgb, an rgb color
+;;; Purpose:
+;;;   To convert an rgb color into an hsv color.
+;;; Produces:
+;;;   hsv, a three-element list containing hue, saturation and value.
+;;; Preconditions(d
+;;;   rgb must be a valid rgb color.
+;;; Postconditions
+;;;   hsvcolor contains three floats which (with rounding) roughly correspond 
+;;;     to the hsv values given for that color in GIMP.  Values are not 
+;;;     rounded to preserve color fidelity when converting from rgb to hsv 
+;;;     and then back to rgb again.
+;;;  (hsv->rgb hsv) should produce color.
+(define _rgb->hsv
+  (lambda (color)
+    (list (_rgb->hue color) (_rgb->saturation color) (_rgb->value color))))
+
+(define rgb->hsv (guard-rgb-proc 'rgb->hsv _rgb->hsv))
+
+;;; Procedure:
+;;;   rgb->rgb-list
+;;; Parameters:
+;;;   rgb, an RGB color
+;;; Purpose:
+;;;   Extract the components and shove 'em in a list.
+;;; Produces:
+;;;   rgb-list, an RGB list.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   The components of rgb-list are the same as those of rgb.
+(define _rgb->rgb-list
+  (lambda (rgb)
+    (list (rgb-red rgb) (rgb-green rgb) (rgb-blue rgb))))
+
+(define rgb->rgb-list (guard-rgb-proc 'rgb->rgb-list _rgb->rgb-list))
 
 ;;; Procedure
 ;;;  rgb->saturation
@@ -345,14 +590,12 @@
 
 (define rgb->saturation (guard-rgb-proc 'rgb->saturation _rgb->saturation))
 
-; [From mscm/rgb/rgb-to-value.scm]
-
 ;;; Procedure
 ;;;   rgb->value
 ;;; Parmeters:
 ;;;   col, an rgb color
 ;;; Purpose:
-;;;   To return the value (as in the V in HSV) of the color.
+;;;   To return the value (as in the V in (HSV) of the color.
 ;;; Produces:
 ;;;   value, a float between 0 and 1.
 ;;; Preconditions
@@ -365,49 +608,58 @@
     (let ((color (color->rgb-list col)))
       (/ (apply max color) 255))))
 
+(define rgb->value (guard-rgb-proc 'rgb->value _rgb->value))
 
 ;;; Procedure:
-;;;   hsv-hue
+;;;   rgb-rotate
 ;;; Parameters:
-;;;   hsv, an HSV color
+;;;   rgb, an RGB color
 ;;; Purpose:
-;;;   Extract the hue from an HSV color.
+;;;   Compute a 'rotated' version of rgb
 ;;; Produces:
-;;;   hue, an integer
-;;; Preconditions:
-;;;   (hsv? hsv)
-;;; Postconditions:
-;;;   0 <= hue <= 360
-(define hsv-hue car)
+;;;   rotated, an RGB color
+(define _rgb-rotate
+  (lambda (rgb)
+    (rgb-new (rgb-green rgb)
+             (rgb-blue rgb)
+             (rgb-red rgb))))
 
-; [From mscm/hsv/hsv-saturation.scm]
+(define rgb-rotate (guard-rgb-proc 'rgb-rotate _rgb-rotate))
 
 ;;; Procedure:
-;;;   hsv-saturation
+;;;   rgb->string
 ;;; Parameters:
-;;;   hsv, an HSV color
+;;;   color, an rgb color [verified]
 ;;; Purpose:
-;;;   Extract the saturation from an HSV color.
+;;;   Convert color to a string easy for a novice to read
 ;;; Produces:
-;;;   saturation, a real
+;;;   colorstring, a string of the form R/G/B
 ;;; Preconditions:
-;;;   (hsv? hsv)
+;;;   color is a valid rgb color.  That is, (rgb? color) holds.
 ;;; Postconditions:
-;;;   0 <= saturation <= 1
-(define hsv-saturation cadr)
+;;;   R is (rgb.red color), G is (rgb.green color), B is (rgb.blue color)
+(define _rgb->string
+  (lambda (color)
+    (string-append (number->string (rgb-red color)) 
+                   "/"
+		   (number->string (rgb-green color))
+		   "/"
+		   (number->string (rgb-blue color)))))
 
-; [From mscm/hsv/hsv-value.scm]
+(define rgb->string (guard-rgb-proc 'rgb->string _rgb->string))
 
 ;;; Procedure:
-;;;   hsv-value
+;;;   vector-contains?
 ;;; Parameters:
-;;;   hsv, an HSV color
+;;;   vec, a vector
+;;;   val, a Scheme value
 ;;; Purpose:
-;;;   Extract the value from an HSV color.
+;;;   Determines if vec contains val.
 ;;; Produces:
-;;;   value, a real number
-;;; Preconditions:
-;;;   (hsv? hsv)
-;;; Postconditions:
-;;;   0 <= value <= 1
-(define hsv-value caddr)
+;;;   contained?, a boolean
+(define vector-contains?
+  (lambda (vec val)
+    (let kernel ((pos (- (vector-length vec) 1)))
+      (and (>= pos 0)
+           (or (equal? (vector-ref vec pos) val)
+               (kernel (- pos 1)))))))

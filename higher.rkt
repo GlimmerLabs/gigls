@@ -1,4 +1,5 @@
 #lang racket
+
 (provide higher-and     ^and
          higher-false   ^false
          higher-if      ^if
@@ -7,7 +8,7 @@
          higher-true    ^true
          left-section   l-s
          right-section  r-s 
-         all)
+         all            o)
 
 
 ;;; Procedure:
@@ -140,6 +141,31 @@
       (lambda args
         (kernel funs args)))))
 (define ^or higher-or)
+
+;;; Procedure:
+;;;   o
+;;; Parameters:
+;;;   fun1 ... funn
+;;; Purpose:
+;;;   Compose fun1 ... funn
+;;; Produces:
+;;;   fun, a function
+;;; Preconditions:
+;;;   Each function can be applied to the results of the subsequent
+;;;   function.
+;;; Postconditions:
+;;;   (fun x) = (fun1 (fun2 (.... (funn x)...)))
+(define o
+  (lambda funs
+    (lambda (x)
+      (let kernel ((remaining (reverse funs))
+                   (val x))
+        (if (null? remaining)
+            val
+            (kernel (cdr remaining) ((car remaining) val)))))))
+
+
+
 
 ;;; Procedures:
 ;;;   higher-true 
