@@ -49,16 +49,26 @@
 	      (list 'image 'drawable 'pos2color)
 	      (list image-id? drawable? (constant #t))))
 
-(define _image-compute!
+(define _image-compute
   (lambda (pos2color width height)
     (let* ((image (image-new width height))
            (drawable (image-get-layer image)))
       (_drawable-recompute! image drawable pos2color))))
       
-(define image-compute!
-  (guard-proc 'image-compute!
-              _image-compute!
+(define image-compute
+  (guard-proc 'image-compute
+              _image-compute
 	      (list 'pos2color 'positive-integer 'positive-integer )
 	      (list (constant #t)
 	            (and integer? exact? positive?)
 		    (and integer? exact? positive?))))
+
+(define _image-transform!
+  (lambda (image transform)
+    (_drawable-transform! image (image-get-layer image) transform)))
+      
+(define image-transform!
+  (guard-proc 'image-transform
+              _image-transform!
+	      (list 'image 'colorfun)
+	      (list image-id? (constant #t))))
