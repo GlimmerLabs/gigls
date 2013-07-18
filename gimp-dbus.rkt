@@ -422,7 +422,6 @@
 (define gimp-drawable-set-image (loudbus-helper 'gimp_drawable_set_image))
 (define file-pcx-save (loudbus-helper 'file_pcx_save))
 (define gimp-display-get-window-handle (loudbus-helper 'gimp_display_get_window_handle))
-(define irgb-red (loudbus-helper 'irgb_red))
 (define gimp-text-layer-get-justification (loudbus-helper 'gimp_text_layer_get_justification))
 (define gimp-get-default-unit (loudbus-helper 'gimp_get_default_unit))
 (define gimp-context-set-feather-radius (loudbus-helper 'gimp_context_set_feather_radius))
