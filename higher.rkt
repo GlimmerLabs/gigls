@@ -6,10 +6,10 @@
          higher-not     ^not
          higher-or      ^or
          higher-true    ^true
+         constant
          left-section   l-s
          right-section  r-s 
          all            o)
-
 
 ;;; Procedure:
 ;;;   all
@@ -31,6 +31,10 @@
     (or (null? lst)
         (and (pred? (car lst))
              (all pred? (cdr lst))))))
+
+(define constant
+  (lambda (val)
+    (lambda stuff val)))
 
 ;;; Procedures:
 ;;;   higher-and
