@@ -50,6 +50,38 @@
              (check-list? (cdr preds) (cdr vals))))))
 
 ;;; Procedure:
+;;;   sequence-contains?
+;;; Parameters:
+;;;   sequence, a list or vector
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if vec contains val.
+;;; Produces:
+;;;   contained?, a boolean
+(define sequence-contains?
+  (lambda (sequence val)
+    (or (and (vector? sequence) (vector-contains? sequence val))
+        (member? sequence val))))
+
+;;; Procedure:
+;;;   sequence-ref
+;;; Parameters:
+;;;   sequence - a list or vector
+;;;   n - a non-negative integer
+;;; Purpose:
+;;;   Grab the nth element of the list or vector
+;;; Produces:
+;;;   val, a value
+;;; Preconditions:
+;;;   0 <= n < (length of squence-ref)
+(define sequence-ref
+  (lambda (sequence n)
+    (if (vector? sequence)
+        (vector-ref sequence n)
+        (list-ref sequence n))))
+
+
+;;; Procedure:
 ;;;   integer->ordinal
 ;;; Parameters:
 ;;;   n, an integer
@@ -92,7 +124,6 @@
 (define member?
   (lambda (val lst)
     (and (member val lst) #t)))
-
 
 ;;; mod is my favorite shorthand for modulo
 (define mod modulo)
@@ -301,3 +332,18 @@
              "...")
             result)))))
   
+;;; Procedure:
+;;;   vector-contains?
+;;; Parameters:
+;;;   vec, a vector
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if vec contains val.
+;;; Produces:
+;;;   contained?, a boolean
+(define vector-contains?
+  (lambda (vec val)
+    (let kernel ((pos (- (vector-length vec) 1)))
+      (and (>= pos 0)
+           (or (equal? (vector-ref vec pos) val)
+               (kernel (- pos 1)))))))

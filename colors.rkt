@@ -60,7 +60,7 @@
 (define color-name?
   (lambda (val)
     (and (string? val)
-         (vector-contains? (context-get-color-names) val))))
+         (sequence-contains? (context-get-color-names) val))))
 
 ;;; Procedure:
 ;;;   color-name->rgb
@@ -624,18 +624,3 @@
 
 (define rgb->string (guard-rgb-proc 'rgb->string _rgb->string))
 
-;;; Procedure:
-;;;   vector-contains?
-;;; Parameters:
-;;;   vec, a vector
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determines if vec contains val.
-;;; Produces:
-;;;   contained?, a boolean
-(define vector-contains?
-  (lambda (vec val)
-    (let kernel ((pos (- (vector-length vec) 1)))
-      (and (>= pos 0)
-           (or (equal? (vector-ref vec pos) val)
-               (kernel (- pos 1)))))))
