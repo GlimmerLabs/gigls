@@ -15,10 +15,12 @@
          LoudGimp/image
          LoudGimp/hacks
          LoudGimp/higher
+         LoudGimp/irgb
          LoudGimp/list
          LoudGimp/mgimp
          LoudGimp/misc
          LoudGimp/positions
+         LoudGimp/tile
          LoudGimp/utils
          LoudGimp/turtles)
 
@@ -36,12 +38,14 @@
          (all-from-out LoudGimp/drawings)
          (all-from-out LoudGimp/guard)
          (all-from-out LoudGimp/hacks)
+         (all-from-out LoudGimp/irgb)
          (all-from-out LoudGimp/higher)
          (all-from-out LoudGimp/image)
          (all-from-out LoudGimp/list) 
          (all-from-out LoudGimp/mgimp)
          (all-from-out LoudGimp/misc)
          (all-from-out LoudGimp/positions)
+         (all-from-out LoudGimp/tile)
          (all-from-out LoudGimp/utils)
          (all-from-out LoudGimp/turtles))
 
