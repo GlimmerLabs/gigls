@@ -3,8 +3,7 @@
 (require LoudGimp/gimp-dbus)
 
 ; Behind-the-scenes functions that don't need to be exported.
-(require
-         LoudGimp/makers)
+(require LoudGimp/makers)
 
 ; Primary functions that do need to be exported.
 (require LoudGimp/alt
