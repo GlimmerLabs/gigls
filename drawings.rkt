@@ -11,6 +11,7 @@
          LoudGimp/higher
          LoudGimp/list
          LoudGimp/positions
+         LoudGimp/rgb-core
          LoudGimp/utils)
 
 

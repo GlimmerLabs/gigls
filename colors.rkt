@@ -3,6 +3,7 @@
 (require LoudGimp/mgimp)
 (require louDBus/unsafe)
 (require LoudGimp/gimp-dbus)
+(require LoudGimp/rgb-core)
 (require LoudGimp/guard
          LoudGimp/higher
          LoudGimp/utils)
@@ -265,16 +266,6 @@
 ;;;   0 <= value <= 1
 (define hsv-value caddr)
 
-
-
-; Sam's quick hacks to get RGB working.  This needs to be rewritten in C.
-
-
-(define rgb-new
-  (lambda (r g b)
-    (+ (* r 256 256) (* g 256) b)))
-
-
 ;; Procedure:
 ;;;   rgb-map
 ;;; Parameters:
@@ -299,11 +290,6 @@
              (func (rgb-blue rgb)))))
 
 (define rgb-map _rgb-map)
-
-
-(define rgb-blue
-  (lambda (color)
-    (remainder color 256)))
 
 ;;; Procedure:
 ;;;   rgb-bluer
@@ -357,10 +343,6 @@
   (r-s rgb-map (o (l-s max 0) (r-s - 16))))
 
 (define rgb-darker (guard-rgb-proc 'rgb-darker _rgb-darker))
-
-(define rgb-green
-  (lambda (color)
-    (remainder (quotient color 256) 256)))
 
 ;;; Procedure:
 ;;;   rgb-greener
@@ -499,12 +481,6 @@
   (r-s rgb-map (o (r-s modulo 256) (l-s + 128))))
 
 (define rgb-phaseshift (guard-rgb-proc 'rgb-phaseshift _rgb-phaseshift))
-
-
-(define rgb-red
-  (let ((scale (* 256 256)))
-    (lambda (color)
-      (quotient color scale))))
 
 ;;; Procedure:
 ;;;   rgb-redder

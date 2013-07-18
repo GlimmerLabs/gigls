@@ -86,7 +86,6 @@
 
 (define repeat! repeat)
 
-
 ;;; Procedure:
 ;;;   square
 ;;; Parameters:

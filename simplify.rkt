@@ -19,6 +19,7 @@
          LoudGimp/mgimp
          LoudGimp/misc
          LoudGimp/positions
+         LoudGimp/rgb-core
          LoudGimp/tile
          LoudGimp/utils
          LoudGimp/turtles)
@@ -44,6 +45,7 @@
          (all-from-out LoudGimp/mgimp)
          (all-from-out LoudGimp/misc)
          (all-from-out LoudGimp/positions)
+         (all-from-out LoudGimp/rgb-core)
          (all-from-out LoudGimp/tile)
          (all-from-out LoudGimp/utils)
          (all-from-out LoudGimp/turtles))

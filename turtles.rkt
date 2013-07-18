@@ -2,7 +2,8 @@
 
 (require LoudGimp/gimp-dbus)
 (provide (all-defined-out))
-(require LoudGimp/colors
+(require LoudGimp/rgb-core
+         LoudGimp/colors
          LoudGimp/context
          LoudGimp/guard
          LoudGimp/image
