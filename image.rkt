@@ -16,7 +16,6 @@
 
 (provide (all-defined-out))
 
-
 ;;; Procedure:
 ;;;   image?
 ;;; Parameters:
@@ -189,7 +188,6 @@
                     real? real? real? real?
                     (and positive? real?) (and positive? real?))))
 
-
 ;;; Procedure:
 ;;;   image-draw-line!
 ;;; Parameters:
@@ -239,8 +237,6 @@
 
 (define image-fill!
   (guard-unary-proc 'image-fill! _image-fill! 'image image?))
-
-; [From gimp/image/image-fill-selection.scm]
 
 ;;; Procedure
 ;;;   image-fill-selection!
@@ -365,6 +361,7 @@
   (lambda (val)
     (and (integer? val)
          (not (= 0 (car (gimp-image-is-valid val)))))))
+
 ;;; Procedure:
 ;;;   image-load
 ;;; Parameters:
@@ -384,6 +381,7 @@
       (else
        (let* ((image (car (gimp-file-load 1 fname fname))))
          image)))))
+
 ;;; Procedure:
 ;;;   image-name
 ;;; Parameters:
@@ -438,7 +436,6 @@
                 (vector-ref images pos))
                (else (kernel (+ pos 1)))))))))
 
-
 ;;; Procedure:
 ;;;   image-selection-drop!
 ;;; Parameters:
@@ -457,7 +454,6 @@
     (gimp-image-remove-channel image selection)
     (void)))
 
-
 ;;; Procedure:
 ;;;   image-selection-load!
 ;;; Parameters:
@@ -474,7 +470,6 @@
   (lambda (image selection)
     (gimp-selection-load selection)
     (void)))
-
 
 ;;; Procedure:
 ;;;   image-selection-save
@@ -616,7 +611,6 @@
     (context-update-displays!)
     image))
 
-
 ;;; Procedure:
 ;;;   image-select-polygon!
 ;;; Parameters:
@@ -737,7 +731,6 @@
               (list (^and integer? positive?)
                     (^and integer? positive?))))
 
-
 ;;; Procedure:
 ;;;   image-validate-selection!
 ;;; Purpose:
@@ -775,7 +768,6 @@
              (>= 0 (+ left width))
              (>= 0 (+ top height)))
          (crash "selection is outside of the bounds of the image"))))))
-
 
 ;;; Procedure:
 ;;;   image-width
