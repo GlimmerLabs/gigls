@@ -13,7 +13,7 @@ CFLAGS = -g -Wall
 
 # The extensions to racket implemented in C.
 C_EXTENSIONS = \
-	$(COMPILED_DIR)/irgb.so \
+	$(COMPILED_DIR)/irgb-core.so \
 	$(COMPILED_DIR)/tile-core.so
 
 
@@ -62,13 +62,13 @@ rebuild-funs:
 	rm -f funs
 	make funs
 
-irgb.o: irgb.c
+irgb-core.o: irgb-core.c
 	raco ctool --cc $(RACO_GC) $(RACO_CFLAGS) $<
 
-irgb.so: irgb.o
+irgb-core.so: irgb-core.o
 	raco ctool --vv $(RACO_RC) ++ldf -L/usr/lib/x86_64-linux-gnu $(RACO_LDLIBS) --ld $@ $^
 
-$(COMPILED_DIR)/irgb.so: irgb.so
+$(COMPILED_DIR)/irgb-core.so: irgb-core.so
 	install -D $< $@
 
 tile-core.o: tile-core.c
