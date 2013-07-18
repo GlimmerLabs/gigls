@@ -32,6 +32,17 @@
         (and (pred? (car lst))
              (all pred? (cdr lst))))))
 
+;;; Procedure:
+;;;   constant
+;;; Parameters:
+;;;   val, a value
+;;; Purpose:
+;;;   Build a constant function for val. The function always returns
+;;;   val, no matter what parameters it is applied to.
+;;; Produces:
+;;;   constant func, a function
+;;; Postconditions:
+;;;   (constant func x) = val for all x.
 (define constant
   (lambda (val)
     (lambda stuff val)))
