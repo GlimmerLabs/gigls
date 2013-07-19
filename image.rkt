@@ -10,6 +10,7 @@
 (require LoudGimp/colors
          LoudGimp/context
          LoudGimp/hacks
+         LoudGimp/irgb
          LoudGimp/list
          LoudGimp/positions
          LoudGimp/utils)
@@ -295,8 +296,10 @@
 ;;;   color, a color
 (define image-get-pixel
   (lambda (image col row)
-    (let ((drawable (car (gimp-image-get-active-layer image))))
-      (cadr (gimp-drawable-get-pixel drawable col row)))))
+    (let* ((drawable (car (gimp-image-get-active-layer image)))
+           (color (cadr (gimp-drawable-get-pixel drawable col row))))
+      (irgb-new (bytes-ref color 0) (bytes-ref color 1) (bytes-ref color 2)))))
+
 
 ;;; Procedure:
 ;;;   image-has-selection?
@@ -432,8 +435,8 @@
            (let kernel ((pos 0))
              (cond
                ((= pos len) #f)
-               ((equal? name (image-name (vector-ref images pos)))
-                (vector-ref images pos))
+               ((equal? name (image-name (sequence-ref images pos)))
+                (sequence-ref images pos))
                (else (kernel (+ pos 1)))))))))
 
 ;;; Procedure:
@@ -502,7 +505,10 @@
 (define image-set-pixel!
   (lambda (image col row color)
     (let ((drawable (car (gimp-image-get-active-layer image))))
-        (gimp-drawable-set-pixel drawable col row 0 color))))
+        (gimp-drawable-set-pixel drawable col row 3 
+                                 (bytes (irgb-red color)
+                                        (irgb-green color)
+                                        (irgb-blue color))))))
 
 ;;; Procedure:
 ;;;   image-select-all!
