@@ -708,6 +708,30 @@
        (gimp-edit-stroke (image-get-layer image))))))
 
 ;;; Procedure:
+;;;   image-transform-pixel!
+;;; Parameters:
+;;;   image, an image identifier
+;;;   col, an integer
+;;;   row, an integer
+;;;   ctrans, a function from rgb colors to rgb colors
+;;; Purpose:
+;;;   Transform one pixel in the image
+;;; Produces:
+;;;   [Nothing; Called for the side effect]
+;;; Preconditions:
+;;;   image names a valid image.
+;;;   0 <= col < (image-width image)
+;;;   0 <= row < (image-height image)
+;;;   For any rgb color, c, (rgb? (ctrans c))
+;;; Postconditions:
+;;;   Let c be (image.get-pixel image col row) prior to this call.
+;;;   After this call, (image.get-pixel image col row) is now (ctrans c).
+(define image-transform-pixel!
+  (lambda (image col row ctrans)
+    (image-set-pixel! image col row
+                      (ctrans (image-get-pixel image col row)))))
+
+;;; Procedure:
 ;;;   image-new
 ;;; Parameters:
 ;;;   width, a positive integer
