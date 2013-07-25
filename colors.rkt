@@ -156,7 +156,7 @@
   (lambda (color)
     (rgb->string (color->rgb color))))
 
-;;; Included in colors (not context) to avoid interdependencies
+
 ;;; Procedure:
 ;;;   context-get-color-names
 ;;; Parameters:
@@ -168,6 +168,7 @@
 ;;; Partners:
 ;;;   (context-find-color-names "NAME")
 ;;;      Provides a way to find a list of names that include "NAME".
+;;; Included in colors (not context) to avoid interdependencies
 (define context-get-color-names mgimp-get-color-names)
 
 
@@ -266,7 +267,7 @@
 ;;;   0 <= value <= 1
 (define hsv-value caddr)
 
-;; Procedure:
+;;; Procedure:
 ;;;   rgb-map
 ;;; Parameters:
 ;;;   rgb, an RGB color
@@ -274,7 +275,7 @@
 ;;;     components
 ;;; Purpose:
 ;;;   Create a new RGB color by applying func to each component.
-;; Produces:
+;;; Produces:
 ;;;   new-rgb an RGB color
 ;;; Preconditions:
 ;;;   [No additional]

@@ -1,7 +1,7 @@
 #lang racket
 
-;;; tile.rkt
-;;;   A wrapper for the tile functions
+; tile.rkt
+;   A wrapper for the tile functions
 
 (require "tile-core")		; Functions we're wrapping
 

@@ -197,7 +197,7 @@
 ;;;   proc-name, a symbol
 ;;;   param-types, a list of symbols
 ;;;   param-preds, a list of predicates
-;;    params, a list of values
+;;;    params, a list of values
 ;;; Purpose:
 ;;;   Makes sure that all of the params meet the corresponding predicate
 ;;; Produces:

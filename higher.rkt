@@ -208,7 +208,7 @@
 ;;;   left, a value
 ;;; Purpose:
 ;;;   Creates a one-parameter procedure by filling in the first parameter
-;;    of binproc. 
+;;;    of binproc. 
 ;;; Produces:
 ;;;   unproc, a one-parameter procedure 
 ;;; Preconditions:  
@@ -228,7 +228,7 @@
 ;;;   right, a value
 ;;; Purpose:
 ;;;   Creates a one-parameter procedure by filling in the second parameter
-;;    of binproc. 
+;;;    of binproc. 
 ;;; Produces:
 ;;;   unproc, a one-parameter procedure 
 ;;; Preconditions:  

@@ -16,7 +16,7 @@
 ;;; Purpose:
 ;;;   Create a new turtle that "lives" on image.
 ;;; Produces:
-;;    newturtle, a turtle.
+;;;   newturtle, a turtle.
 ;;; Preconditions:
 ;;;   image is a valid image id.
 ;;; Postconditions:
@@ -24,6 +24,7 @@
 ;;;   until the image disappears).
 ;;; Phoo:
 ;;;   The body of the object should probably be generated automatically.
+
 (define _turtle-new
   (lambda (image)
     (let ((world image)

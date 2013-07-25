@@ -125,7 +125,7 @@
   (lambda (val lst)
     (and (member val lst) #t)))
 
-;;; mod is my favorite shorthand for modulo
+; mod is my favorite shorthand for modulo
 (define mod modulo)
 
 ;;; Procedure:

@@ -672,7 +672,7 @@
 ;;;   Displays the image (which may have been modified behind the scenes).
 ;;; Produces:
 ;;;   image, the original image.gimp
-;; Preconditions:
+;;; Preconditions:
 ;;;   image must be a valid image (created by create-image or image-load).
 (define _image-show 
   (lambda (image)
@@ -692,7 +692,7 @@
 ;;; Purpose:
 ;;;   Trace the edge of the selected region of the current image
 ;;;   (in the active layer) using the current brush and foreground
-;;    color.
+;;;    color.
 ;;; Produces:
 ;;;   image, the updated image
 ;;; Preconditions:

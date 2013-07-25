@@ -38,7 +38,7 @@
 ;;; Parameters:
 ;;;   val, a Scheme value
 ;;; Purpose:
-;;    Determine whether val can be appropriately interpreted as a
+;;;   Determine whether val can be appropriately interpreted as a
 ;;;   drawing
 ;;; Produces:
 ;;;   is-drawing?, a Boolean
@@ -49,7 +49,8 @@
         (drawing-line? val)
         (drawing-rule? val)
         (drawing-shape? val))))
-
+;;; Procedure:
+;;;   drawing-blank?
 ;;; Parameters:
 ;;;   val, a Scheme value
 ;;; Purpose:
@@ -259,7 +260,7 @@
 (define drawing-color
   (guard-drawing-proc 'drawing-color _drawing-color))
 
-
+;;; Procedure:
 ;;;   drawing-ellipse
 ;;; Purpose:
 ;;;   Create a new drawing that represents an ellipse
@@ -588,7 +589,7 @@
 ;;;   drawing-line-hscale
 ;;; Parameters:
 ;;;   line, a drawing line
-;;:   factor, a real number
+;;;   factor, a real number
 ;;; Purpose:
 ;;;   Create a new version of line, scaled horizontally by factor
 ;;; Produces:
@@ -738,7 +739,7 @@
 ;;;   drawing-line-hshift
 ;;; Parameters:
 ;;;   line, a drawing line
-;;:   amt, a real number
+;;;   amt, a real number
 ;;; Purpose:
 ;;;   Create a new version of line, shifted horizontally by amt
 ;;; Produces:
@@ -934,7 +935,7 @@
 ;;;   drawing-line-scale
 ;;; Parameters:
 ;;;   line, a drawing line
-;;:   factor, a real number
+;;;   factor, a real number
 ;;; Purpose:
 ;;;   Create a new version of line, scaled by factor
 ;;; Produces:
@@ -977,7 +978,7 @@
 ;;;   drawing-line-vscale
 ;;; Parameters:
 ;;;   line, a drawing line
-;;:   factor, a real number
+;;;   factor, a real number
 ;;; Purpose:
 ;;;   Create a new version of line, scaled vertically by factor
 ;;; Produces:
@@ -1002,7 +1003,7 @@
 ;;;   drawing-line-vshift
 ;;; Parameters:
 ;;;   line, a drawing line
-;;:   amt, a real number
+;;;   amt, a real number
 ;;; Purpose:
 ;;;   Create a new version of line, shifted vertically by amt
 ;;; Produces:
@@ -1749,17 +1750,17 @@
   (guard-drawing-proc 'drawing-type _drawing-type))
 
 
-;;; Value:
-;;;   drawing-unit-circle
-;;; Description:
-;;;   A circle with diameter 1, centered at 0,0
+; Value:
+;   drawing-unit-circle
+; Description:
+;   A circle with diameter 1, centered at 0,0
 (define drawing-unit-circle (drawing-ellipse -0.5 -0.5 1 1))
 
 
-;;; Value:
-;;;   drawing-unit-square
-;;; Description:
-;;;   A circle with edge length 1, centered at 0,0
+; Value:
+;   drawing-unit-square
+; Description:
+;   A circle with edge length 1, centered at 0,0
 (define drawing-unit-square (drawing-rectangle -0.5 -0.5 1 1))
 
 ;;; Procedure:

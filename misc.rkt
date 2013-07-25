@@ -1,7 +1,7 @@
 #lang racket
-;;; A miscellaneous racket library for wrapper functions that 
-;;; a: don't belong in another library or b: would cause 
-;;; libraries to be interdependent.
+; A miscellaneous racket library for wrapper functions that 
+; a: don't belong in another library or b: would cause 
+; libraries to be interdependent.
 
 (require LoudGimp/guard
          LoudGimp/higher)
