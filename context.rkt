@@ -335,7 +335,7 @@
 ;;;   [None]
 ;;; Purpose:
 ;;;   Flush recent gimp image operations to the graphical user interface
-;;;   (give gimp-displays-flush a "nicer" name for students).
+;;;   (give gimp-displays-flush a 'nicer' name for students).
 ;;; Produces
 ;;;   [Nothing; called for the side effect]
 ;;; Preconditions

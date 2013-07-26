@@ -1,4 +1,4 @@
-#lang racket
+dr#lang racket
 
 
 (require LoudGimp/gimp-dbus) ;For gimp-pencil
@@ -661,7 +661,7 @@
 ;;;   hstretch, a real
 ;;;   vstretch, a real
 ;;; Purpose:
-;;;   Create a 'line" from (c1,r1) to (c2,r2)
+;;;   Create a 'line' from (c1,r1) to (c2,r2)
 ;;; Produces:
 ;;;   line, a drawing
 ;;; Preconditions:
@@ -690,7 +690,7 @@
 ;;; Parameters:
 ;;;   line, a drawing line
 ;;; Purpose:
-;;;   Get the horizontal "stretch" of the line
+;;;   Get the horizontal 'stretch' of the line
 ;;; Produces:
 ;;;   stretch, a real
 (define _drawing-line-hstretch 
@@ -706,7 +706,7 @@
 ;;; Parameters:
 ;;;   line, a drawing line
 ;;; Purpose:
-;;;   Get the horizontal "stretch" of the line
+;;;   Get the horizontal 'stretch' of the line
 ;;; Produces:
 ;;;   stretch, a real
 (define _drawing-line-vstretch 

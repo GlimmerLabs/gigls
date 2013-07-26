@@ -97,7 +97,7 @@
 ;;;   yes, a function
 ;;;   no, a a function
 ;;; Purpose:
-;;;   "Higher Order If": Builds a function that uses test? to choose
+;;;   'Higher Order If: Builds a function that uses test? to choose
 ;;;   between yes and no.
 ;;; Produces:
 ;;;   fun, a function 
@@ -120,7 +120,7 @@
 ;;; Parameters:
 ;;;   pred?, a predicate
 ;;; Purpose:
-;;;   "Higher Order Not": Builds a function that returns the opposite
+;;;   'Higher Order Not': Builds a function that returns the opposite
 ;;;   value of pred?.
 ;;; Produces:
 ;;;   not-pred?, a predicate

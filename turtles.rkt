@@ -14,7 +14,7 @@
 ;;; Parameters:
 ;;;   image, the id of an image
 ;;; Purpose:
-;;;   Create a new turtle that "lives" on image.
+;;;   Create a new turtle that 'lives' on image.
 ;;; Produces:
 ;;;   newturtle, a turtle.
 ;;; Preconditions:
@@ -269,11 +269,11 @@
               (list turtle? color?)))
 
 
-;;; Produces:
-;;;   turtle, the original turtle
-;;; Ponderings:
-;;;   Probably not very useful, but included just in case I find
-;;;   a reason for it.
+; Produces:
+;   turtle, the original turtle
+; Ponderings:
+;   Probably not very useful, but included just in case I find
+;   a reason for it.
 (define _turtle-set-image!
   (lambda (turtle image)
     (turtle ':set-world! image)

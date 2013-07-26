@@ -474,7 +474,7 @@
 ;;; Parameters:
 ;;;   rgb, an RGB color
 ;;; Purpose:
-;;;   "Phase shift" rgb by adding 128 to components less than or equal 
+;;;   'Phase shift' rgb by adding 128 to components less than or equal 
 ;;;   to 128 and subtracting 128 from components greater than 128.
 ;;; Produces:
 ;;;   shifted, an RGB color

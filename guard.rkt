@@ -10,7 +10,7 @@
 ;;;   arity, an integer
 ;;;   params, a list of values
 ;;; Purpose:
-;;;   Report an arity error ("expects M parameters; called with N")
+;;;   Report an arity error ('expects M parameters; called with N')
 ;;; Produces:
 ;;;   [Nothing, called for the side effect]
 ;;; Preconditions:
@@ -84,7 +84,7 @@
 ;;;   flag-name, a symbol
 ;;;   flag-proc, a procedure created by make-flag
 ;;; Purpose:
-;;;   Create a "guarded" version of flag-proc, one that checks the
+;;;   Create a 'guarded' version of flag-proc, one that checks the
 ;;;   preconditions:
 ;;; Produces:
 ;;;   proc, a version of flag-proc that checks preconditions.
