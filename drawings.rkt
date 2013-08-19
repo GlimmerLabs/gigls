@@ -1,4 +1,4 @@
-dr#lang racket
+#lang racket
 
 
 (require LoudGimp/gimp-dbus) ;For gimp-pencil
