@@ -37,7 +37,8 @@ COMPILED_DIR = $(shell racket utils/compiled-goes-here.rkt)
 
 default: gimp-dbus.rkt $(C_EXTENSIONS)
 
-clean: rm gimp-dbus.rkt
+clean: 
+	rm gimp-dbus.rkt
 
 
 # +-----------------+-------------------------------------------------
