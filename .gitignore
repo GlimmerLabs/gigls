@@ -12,3 +12,8 @@ mkwrapper
 
 # Project-specific files and directories
 compiled
+
+# Generated files
+pdb-funs
+pdb-dbus.rkt
+
