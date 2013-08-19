@@ -6,7 +6,7 @@
 (require "tile-core")		; Functions we're wrapping
 
 (require louDBus/unsafe 	; For loudbus_call
-         LoudGimp/gimp-dbus 	; Get access to the PDB
+         LoudGimp/pdb-dbus 	; Get access to the PDB
          LoudGimp/guard 	; For guarding stuff
          LoudGimp/higher 	; For constant
          LoudGimp/image 	; For image?

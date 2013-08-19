@@ -1,6 +1,6 @@
 #lang racket
 ; We need the bridge between Racket and the raw PDB functions
-(require LoudGimp/gimp-dbus)
+(require LoudGimp/pdb-dbus)
 
 ; Behind-the-scenes functions that don't need to be exported.
 (require LoudGimp/makers)
@@ -31,7 +31,7 @@
 ;;;   for beginning programmers.
 
 (provide (all-defined-out)
-         (all-from-out LoudGimp/gimp-dbus)
+         (all-from-out LoudGimp/pdb-dbus)
          (all-from-out LoudGimp/alt)
          (all-from-out LoudGimp/colors)
          (all-from-out LoudGimp/context)

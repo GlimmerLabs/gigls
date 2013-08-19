@@ -1,7 +1,6 @@
 #lang racket
 
-
-(require LoudGimp/gimp-dbus) ;For gimp-pencil
+(require LoudGimp/pdb-dbus) ;For gimp-pencil
 (provide (all-defined-out))
 (require LoudGimp/colors
          LoudGimp/context

@@ -35,10 +35,10 @@ COMPILED_DIR = $(shell racket utils/compiled-goes-here.rkt)
 # | Standard Targets |
 # +------------------+
 
-default: gimp-dbus.rkt $(C_EXTENSIONS)
+default: pdb-dbus.rkt $(C_EXTENSIONS)
 
 clean: 
-	rm gimp-dbus.rkt
+	rm -f pdb-funs pdb-dbus.rkt
 
 
 # +-----------------+-------------------------------------------------
@@ -53,15 +53,15 @@ expose:
 # | Special Targets |
 # +-----------------+
 
-gimp-dbus.rkt: funs mkwrapper
-	./mkwrapper funs > gimp-dbus.rkt
+pdb-dbus.rkt: pdb-funs mkwrapper
+	./mkwrapper $< > $@
 
-funs:
-	racket utils/list-pdb-funs.rkt > funs
+pdb-funs:
+	racket utils/list-pdb-funs.rkt > pdb-funs
 
 rebuild-funs: 
-	rm -f funs
-	make funs
+	rm -f pdb-funs
+	make pdb-funs
 
 irgb-core.o: irgb-core.c
 	raco ctool --cc $(RACO_GC) $(RACO_CFLAGS) $<

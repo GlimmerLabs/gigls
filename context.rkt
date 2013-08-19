@@ -1,6 +1,6 @@
 #lang racket
 (provide (all-defined-out))
-(require LoudGimp/gimp-dbus)
+(require LoudGimp/pdb-dbus)
 (require louDBus/unsafe)
 (require LoudGimp/colors
          LoudGimp/guard

@@ -2,7 +2,7 @@
 
 (require LoudGimp/mgimp)
 (require louDBus/unsafe)
-(require LoudGimp/gimp-dbus)
+(require LoudGimp/pdb-dbus)
 (require LoudGimp/rgb-core)
 (require LoudGimp/guard
          LoudGimp/higher

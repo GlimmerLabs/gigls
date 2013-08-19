@@ -1,6 +1,6 @@
 #lang racket
 
-(require LoudGimp/gimp-dbus)
+(require LoudGimp/pdb-dbus)
 (provide (all-defined-out))
 (require LoudGimp/rgb-core
          LoudGimp/colors
