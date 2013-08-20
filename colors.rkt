@@ -27,8 +27,8 @@
   (lambda (val)
     (or (rgb? val) 
         (rgb-list? val) 
-        (hsv? val))))
-
+        (hsv? val)
+        (color-name? val))))
 
 ;;; Procedure:
 ;;;   color->hsv
@@ -47,7 +47,6 @@
        color)
       (else
        (rgb->hsv (color->rgb color))))))
-
 
 ;;; Procedure:
 ;;;   color-name?
@@ -89,15 +88,11 @@
 (define color-representation
   (lambda (color)
     (cond
-      ((rgb? color) 'RGB)
+      ((rgb? color) 'IRGB)
       ((rgb-list? color) 'RGB-LIST)
       ((hsv? color) 'HSV)
+      ((color-name? color) 'NAME)
       (else #f))))
-
-; [From mscm/color/color-to-hsv.scm]
-
-
-; [From mscm/color/color-to-rgb.scm]
 
 ;;; Procedure:
 ;;;   color->rgb
@@ -117,10 +112,9 @@
       ((rgb? color) color)
       ((hsv? color) (hsv->rgb color))
       ((rgb-list? color) (rgb-list->rgb color))
+      ((color-name? color) (color-name->rgb color))
       (else
        (error "Unknown type of color" color)))))
-
-; [From mscm/color/color-to-rgb-list.scm]
 
 ;;; Procedure:
 ;;;   color->rgb-list
@@ -138,8 +132,6 @@
         color
         (rgb->rgb-list (color->rgb color)))))
 
-; [From mscm/color/color-to-string.scm]
-
 ;;; Procedure:
 ;;;   color->string
 ;;; Parameters:
@@ -156,21 +148,21 @@
   (lambda (color)
     (rgb->string (color->rgb color))))
 
-
 ;;; Procedure:
 ;;;   context-get-color-names
 ;;; Parameters:
 ;;;   [None]
 ;;; Purpose:
-;;;   Get a vector of all the available color names.
+;;;   Get a list of all the available color names.
 ;;; Produces:
-;;;   names, a vector of strings
+;;;   names, a list of strings
 ;;; Partners:
 ;;;   (context-find-color-names "NAME")
 ;;;      Provides a way to find a list of names that include "NAME".
 ;;; Included in colors (not context) to avoid interdependencies
-(define context-get-color-names mgimp-get-color-names)
-
+(define context-get-color-names 
+  (lambda ()
+    (cadr (ggimp-rgb-list))))
 
 ;;; Procedure:
 ;;;   hsv?
@@ -235,7 +227,6 @@
         ((equal? hi 3) (rgb-new (* 255 p) (* 255 q) (* 255 v)))
         ((equal? hi 4) (rgb-new (* 255 t) (* 255 p) (* 255 v)))
         ((equal? hi 5) (rgb-new (* 255 v) (* 255 p) (* 255 q)))))))
-
 
 ;;; Procedure:
 ;;;   hsv-saturation
