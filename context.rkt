@@ -39,8 +39,6 @@
   (lambda ()
     (color->rgb (car (gimp-context-get-background)))))
 
-; [From gimp/context/context-get-fgcolor.scm]
-
 ;;; Procedure:
 ;;;   context-get-fgcolor
 ;;; Parameters:
@@ -52,8 +50,6 @@
 (define context-get-fgcolor
   (lambda ()
     (color->rgb (car (gimp-context-get-foreground)))))
-
-; [From gimp/context/context-get-brush.scm]
 
 ;;; Procedure:
 ;;;   context-get-brush
@@ -74,8 +70,6 @@
 ; | Setting Basic GIMP Contextual Information |
 ; +-------------------------------------------+
 
-; [From gimp/context/context-set-bgcolor.scm]
-
 ;;; Procedure:
 ;;;   context-set-bgcolor!
 ;;; Parameters:
@@ -90,15 +84,13 @@
 ;;;   The background color is now the specified color.
 (define _context-set-bgcolor!
   (lambda (color)
-    (gimp-context-set-background  color)))
+    (gimp-context-set-background  (color->rgb color))))
 
 (define context-set-bgcolor!
   (guard-unary-proc 'context-set-bgcolor!
                     _context-set-bgcolor!
                     'color
                     color?))
-
-; [From gimp/context/context-set-fgcolor.scm]
 
 ;;; Procedure:
 ;;;   context-set-fgcolor!
@@ -115,15 +107,13 @@
 (define _context-set-fgcolor!
   (lambda (color)
     (process-gimp-result
-     (gimp-context-set-foreground color))))
+     (gimp-context-set-foreground (color->rgb color)))))
 
 (define context-set-fgcolor!
   (guard-unary-proc 'context-set-fgcolor!
                     _context-set-fgcolor!
                     'color
                     color?))
-
-; [From gimp/context/context-set-brush.scm]
 
 ;;; Procedure
 ;;;   context-set-brush!
@@ -152,9 +142,6 @@
        (error "context-set-brush!: invalid brush:" brush))
       (else 
        (_context-set-brush! brush)))))
-
-
-; [From gimp/context/context-list-brushes.scm]
 
 ;;; Procedure:
 ;;;  context-list-brushes
@@ -210,8 +197,6 @@
   (lambda ()
     (cadr (loudbus-call gimp 'ggimp_rgb_list))))
 
-; [From gimp/context/context-list-fonts.scm]
-
 ;;; Procedure:
 ;;;   context-list-fonts
 ;;; Parameters:
@@ -246,8 +231,6 @@
 ; | Miscellaneous Context-Related Procedures |
 ; +------------------------------------------+
 
-; [From gimp/context/context-immediate-updates.scm]
-
 ;;; Procedure:
 ;;;   context-immediate-updates
 ;;; Parameters:
@@ -270,8 +253,6 @@
 (define context-immediate-updates
   (guard-flag 'context-immediate-updates _context-immediate-updates))
 
-; [From gimp/context/context-immediate-updates-p.scm]
-
 ;;; Procedure:
 ;;;   context-immediate-updates?
 ;;; Parameters:
@@ -291,8 +272,6 @@
               null
               null))
 
-; [From gimp/context/context-immediate-updates-on.scm]
-
 ;;; Procedure:
 ;;;   context-immediate-updates-on!
 ;;; Parameters:
@@ -309,8 +288,6 @@
 
 (define context-immediate-updates-on! _context-immediate-updates-on!)
 
-; [From gimp/context/context-immediate-updates-off.scm]
-
 ;;; Procedure:
 ;;;   context-immediate-updates-off!
 ;;; Parameters:
@@ -326,8 +303,6 @@
     (context-immediate-updates #f)))
 
 (define context-immediate-updates-off! _context-immediate-updates-off!)
-
-; [From gimp/context/context-update-displays.scm]
 
 ;;; Procedure:
 ;;;   context-update-displays!
@@ -348,8 +323,6 @@
 ; +------------------------------------------+----------------------------------
 ; | Miscellaneous Context-Related Procedures |
 ; +------------------------------------------+
-
-; [From gimp/context/context-preserve.scm]
 
 ;;; Procedure:
 ;;;   context-preserve
@@ -373,8 +346,6 @@
 (define context-preserve
   (guard-flag 'context-preserve _context-preserve))
 
-; [From gimp/context/context-preserve-p.scm]
-
 ;;; Procedure:
 ;;;   context-preserve?
 ;;; Parameters:
@@ -394,8 +365,6 @@
               null
               null))
 
-; [From gimp/context/context-preserve-on.scm]
-
 ;;; Procedure:
 ;;;   context-preserve-on!
 ;;; Parameters:
@@ -409,8 +378,6 @@
     (context-preserve #t)))
 
 (define context-preserve-on! _context-preserve-on!)
-
-; [From gimp/context/context-preserve-off.scm]
 
 ;;; Procedure:
 ;;;   context-preserve-off!
@@ -426,8 +393,6 @@
     (context-preserve #f)))
 
 (define context-preserve-off! _context-preserve-off!)
-
-; [From gimp/context/context-select-random-brush.scm]
 
 ;;; Procedure
 ;;;   context-select-random-brush!
