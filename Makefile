@@ -38,7 +38,7 @@ COMPILED_DIR = $(shell racket utils/compiled-goes-here.rkt)
 default: pdb-dbus.rkt $(C_EXTENSIONS)
 
 clean: 
-	rm -f pdb-funs pdb-dbus.rkt
+	rm -f pdb-funs pdb-dbus.rkt *.o *.so
 
 
 # +-----------------+-------------------------------------------------

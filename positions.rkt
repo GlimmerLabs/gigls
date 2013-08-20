@@ -1,9 +1,9 @@
 #lang racket
 
 (provide (all-defined-out))
-(require LoudGimp/guard
-         LoudGimp/higher
-         LoudGimp/utils)
+(require gigls/guard
+         gigls/higher
+         gigls/utils)
 
 ;;; Procedure:
 ;;;   position?

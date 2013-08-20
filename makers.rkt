@@ -1,5 +1,5 @@
 #lang racket
-(require LoudGimp/guard)
+(require gigls/guard)
 (provide (all-defined-out))
 
 ; [From iascm/hop/make-bi-cycle.scm]

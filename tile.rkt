@@ -6,12 +6,12 @@
 (require "tile-core")		; Functions we're wrapping
 
 (require louDBus/unsafe 	; For loudbus_call
-         LoudGimp/pdb-dbus 	; Get access to the PDB
-         LoudGimp/guard 	; For guarding stuff
-         LoudGimp/higher 	; For constant
-         LoudGimp/image 	; For image?
-         LoudGimp/drawable 	; For drawable?
-         LoudGimp/irgb 		; For irgb-new
+         gigls/pdb-dbus 	; Get access to the PDB
+         gigls/guard 	        ; For guarding stuff
+         gigls/higher 	        ; For constant
+         gigls/image 	        ; For image?
+         gigls/drawable 	; For drawable?
+         gigls/irgb 		; For irgb-new
  )
 
 (provide (all-defined-out)

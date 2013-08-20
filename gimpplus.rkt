@@ -1,6 +1,6 @@
 #lang racket
 
-; LoudGimp/gimpplus.rkt
+; gigls/gimpplus.rkt
 ;   A simple module to provide access to the additionalGimp functions.
 
 (require louDBus/unsafe)

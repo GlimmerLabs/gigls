@@ -1,19 +1,19 @@
 #lang racket
 
-(require LoudGimp/pdb-dbus)
+(require gigls/pdb-dbus)
 
-(require LoudGimp/guard
-         LoudGimp/higher
-         LoudGimp/makers
-         LoudGimp/mgimp)
+(require gigls/guard
+         gigls/higher
+         gigls/makers
+         gigls/mgimp)
 
-(require LoudGimp/colors
-         LoudGimp/context
-         LoudGimp/hacks
-         LoudGimp/irgb
-         LoudGimp/list
-         LoudGimp/positions
-         LoudGimp/utils)
+(require gigls/colors
+         gigls/context
+         gigls/hacks
+         gigls/irgb
+         gigls/list
+         gigls/positions
+         gigls/utils)
 
 (provide (all-defined-out))
 

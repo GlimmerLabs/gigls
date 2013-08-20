@@ -1,7 +1,7 @@
 #lang racket
 
-(require LoudGimp/hacks
-         LoudGimp/higher)
+(require gigls/hacks
+         gigls/higher)
          
 (provide (all-defined-out))
 

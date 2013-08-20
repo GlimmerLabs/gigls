@@ -1,52 +1,52 @@
 #lang racket
 ; We need the bridge between Racket and the raw PDB functions
-(require LoudGimp/pdb-dbus)
+(require gigls/pdb-dbus)
 
 ; Behind-the-scenes functions that don't need to be exported.
-(require LoudGimp/makers)
+(require gigls/makers)
 
 ; Primary functions that do need to be exported.
-(require LoudGimp/alt
-         LoudGimp/colors
-         LoudGimp/context
-         LoudGimp/drawings
-         LoudGimp/guard
-         LoudGimp/image
-         LoudGimp/hacks
-         LoudGimp/higher
-         LoudGimp/irgb
-         LoudGimp/list
-         LoudGimp/mgimp
-         LoudGimp/misc
-         LoudGimp/positions
-         LoudGimp/rgb-core
-         LoudGimp/tile
-         LoudGimp/utils
-         LoudGimp/turtles)
+(require gigls/alt
+         gigls/colors
+         gigls/context
+         gigls/drawings
+         gigls/guard
+         gigls/image
+         gigls/hacks
+         gigls/higher
+         gigls/irgb
+         gigls/list
+         gigls/mgimp
+         gigls/misc
+         gigls/positions
+         gigls/rgb-core
+         gigls/tile
+         gigls/utils
+         gigls/turtles)
 
 ;;; File:
-;;;   LoudGimp/simplify
+;;;   gigls/simplify
 ;;; Summary:
 ;;;   Simplified versions of the PDB procedures, intended
 ;;;   for beginning programmers.
 
 (provide (all-defined-out)
-         (all-from-out LoudGimp/pdb-dbus)
-         (all-from-out LoudGimp/alt)
-         (all-from-out LoudGimp/colors)
-         (all-from-out LoudGimp/context)
-         (all-from-out LoudGimp/drawings)
-         (all-from-out LoudGimp/guard)
-         (all-from-out LoudGimp/hacks)
-         (all-from-out LoudGimp/irgb)
-         (all-from-out LoudGimp/higher)
-         (all-from-out LoudGimp/image)
-         (all-from-out LoudGimp/list) 
-         (all-from-out LoudGimp/mgimp)
-         (all-from-out LoudGimp/misc)
-         (all-from-out LoudGimp/positions)
-         (all-from-out LoudGimp/rgb-core)
-         (all-from-out LoudGimp/tile)
-         (all-from-out LoudGimp/utils)
-         (all-from-out LoudGimp/turtles))
+         (all-from-out gigls/pdb-dbus)
+         (all-from-out gigls/alt)
+         (all-from-out gigls/colors)
+         (all-from-out gigls/context)
+         (all-from-out gigls/drawings)
+         (all-from-out gigls/guard)
+         (all-from-out gigls/hacks)
+         (all-from-out gigls/irgb)
+         (all-from-out gigls/higher)
+         (all-from-out gigls/image)
+         (all-from-out gigls/list) 
+         (all-from-out gigls/mgimp)
+         (all-from-out gigls/misc)
+         (all-from-out gigls/positions)
+         (all-from-out gigls/rgb-core)
+         (all-from-out gigls/tile)
+         (all-from-out gigls/utils)
+         (all-from-out gigls/turtles))
 

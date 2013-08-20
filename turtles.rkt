@@ -1,13 +1,13 @@
 #lang racket
 
-(require LoudGimp/pdb-dbus)
+(require gigls/pdb-dbus)
 (provide (all-defined-out))
-(require LoudGimp/rgb-core
-         LoudGimp/colors
-         LoudGimp/context
-         LoudGimp/guard
-         LoudGimp/image
-         LoudGimp/utils)
+(require gigls/rgb-core
+         gigls/colors
+         gigls/context
+         gigls/guard
+         gigls/image
+         gigls/utils)
 
 ;;; Procedure:
 ;;;   turtle-new

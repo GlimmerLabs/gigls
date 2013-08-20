@@ -1,12 +1,12 @@
   #lang racket
 
-(require LoudGimp/mgimp)
+(require gigls/mgimp)
 (require louDBus/unsafe)
-(require LoudGimp/pdb-dbus)
-(require LoudGimp/rgb-core)
-(require LoudGimp/guard
-         LoudGimp/higher
-         LoudGimp/utils)
+(require gigls/pdb-dbus)
+(require gigls/rgb-core)
+(require gigls/guard
+         gigls/higher
+         gigls/utils)
 
 (provide (all-defined-out))
 

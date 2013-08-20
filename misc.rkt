@@ -3,11 +3,9 @@
 ; a: don't belong in another library or b: would cause 
 ; libraries to be interdependent.
 
-(require LoudGimp/guard
-         LoudGimp/higher)
+(require gigls/guard
+         gigls/higher)
 (provide (all-defined-out))
-
-
 
 ;;; Procedure:
 ;;;   increment

@@ -2,9 +2,9 @@
 
 (provide (all-defined-out))
 
-(require LoudGimp/guard
-         LoudGimp/higher
-         LoudGimp/rgb-core)
+(require gigls/guard
+         gigls/higher
+         gigls/rgb-core)
 
 ; Sam's quick hacks to get RGB working.  This needs to be rewritten in C.
 

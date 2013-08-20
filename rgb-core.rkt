@@ -1,5 +1,5 @@
 #lang racket
-(require LoudGimp/irgb)
+(require gigls/irgb)
 
 (provide (all-defined-out))
 

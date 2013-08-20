@@ -1,6 +1,6 @@
 #lang racket
 
-(require LoudGimp/pdb-dbus)
+(require gigls/pdb-dbus)
 
 (provide (all-defined-out))
 

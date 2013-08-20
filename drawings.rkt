@@ -1,17 +1,17 @@
 #lang racket
 
-(require LoudGimp/pdb-dbus) ;For gimp-pencil
+(require gigls/pdb-dbus) ;For gimp-pencil
 (provide (all-defined-out))
-(require LoudGimp/colors
-         LoudGimp/context
-         LoudGimp/guard
-         LoudGimp/hacks
-         LoudGimp/image
-         LoudGimp/higher
-         LoudGimp/list
-         LoudGimp/positions
-         LoudGimp/rgb-core
-         LoudGimp/utils)
+(require gigls/colors
+         gigls/context
+         gigls/guard
+         gigls/hacks
+         gigls/image
+         gigls/higher
+         gigls/list
+         gigls/positions
+         gigls/rgb-core
+         gigls/utils)
 
 
 ;;; Procedure:

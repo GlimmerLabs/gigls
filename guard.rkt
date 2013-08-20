@@ -1,6 +1,6 @@
 #lang racket
 
-(require LoudGimp/utils)
+(require gigls/utils)
 (provide (all-defined-out))
 
 ;;; Procedure:

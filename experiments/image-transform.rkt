@@ -4,7 +4,7 @@
 ;   An experiment in how image-transform! works.  Assumes that
 ;   (1)tThe Gimp DBus server is running ; (2) image 1 is open.
 
-(require LoudGimp/simplify)
+(require gigls/simplify)
 
 (define rotate-colors
   (lambda (color) (irgb-new (irgb-blue color)

@@ -1,9 +1,9 @@
 #lang racket
 
-;;; LoudGimp/experiments/drawable
+;;; gigls/experiments/drawable
 ;;;   A quick experiment with drawables.
 
-(require LoudGimp/drawable)
+(require gigls/drawable)
 
 (define expt
   (lambda (val)

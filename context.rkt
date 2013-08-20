@@ -1,14 +1,14 @@
 #lang racket
 (provide (all-defined-out))
-(require LoudGimp/pdb-dbus)
+(require gigls/pdb-dbus)
 (require louDBus/unsafe)
-(require LoudGimp/colors
-         LoudGimp/guard
-         LoudGimp/hacks
-         LoudGimp/list
-         LoudGimp/makers
-         LoudGimp/mgimp
-         LoudGimp/utils)
+(require gigls/colors
+         gigls/guard
+         gigls/hacks
+         gigls/list
+         gigls/makers
+         gigls/mgimp
+         gigls/utils)
 
 ;;; Procedure:
 ;;;   brush?
