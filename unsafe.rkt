@@ -1,4 +1,13 @@
 #lang racket
+
+;;; File:
+;;;   gigls/unsafe
+;;; Summary:
+;;;   The primary gigls interface.  A library of functions that make it
+;;;   easier for beginning programmers to script the Gimp.
+
+(define gigls-version "gigls 0.1.0b1 of 20 August 2013")
+
 ; We need the bridge between Racket and the raw PDB functions
 (require gigls/pdb-dbus)
 
@@ -21,14 +30,9 @@
          gigls/positions
          gigls/rgb-core
          gigls/tile
+         gigls/turtles
          gigls/utils
-         gigls/turtles)
-
-;;; File:
-;;;   gigls/simplify
-;;; Summary:
-;;;   Simplified versions of the PDB procedures, intended
-;;;   for beginning programmers.
+         )
 
 (provide (all-defined-out)
          (all-from-out gigls/pdb-dbus)
@@ -47,6 +51,8 @@
          (all-from-out gigls/positions)
          (all-from-out gigls/rgb-core)
          (all-from-out gigls/tile)
+         (all-from-out gigls/turtles)
          (all-from-out gigls/utils)
-         (all-from-out gigls/turtles))
+         gigls-version
+         )
 
