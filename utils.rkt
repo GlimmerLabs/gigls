@@ -61,7 +61,7 @@
 (define sequence-contains?
   (lambda (sequence val)
     (or (and (vector? sequence) (vector-contains? sequence val))
-        (member? sequence val))))
+        (member? val sequence))))
 
 ;;; Procedure:
 ;;;   sequence-ref
