@@ -6,6 +6,7 @@
 
 CFLAGS = -g -Wall
 
+INSTALL_DIR = /glimmer/lib/gigls
 
 # +---------------+---------------------------------------------------
 # | Sets of Files |
@@ -39,6 +40,10 @@ default: pdb-dbus.rkt $(C_EXTENSIONS)
 
 clean: 
 	rm -f pdb-funs pdb-dbus.rkt *.o *.so
+
+install:
+	install -d compiled $(INSTALL_DIR)
+	install -D *.rkt $(INSTALL_DIR)
 
 
 # +-----------------+-------------------------------------------------
