@@ -42,9 +42,9 @@ clean:
 	rm -f pdb-funs pdb-dbus.rkt *.o *.so
 
 install:
-	install -d compiled $(INSTALL_DIR)
-	install -D *.rkt $(INSTALL_DIR)
-
+	mkdir -p $(INSTALL_DIR)
+	cp -r compiled $(INSTALL_DIR)
+	cp *.rkt $(INSTALL_DIR)
 
 # +-----------------+-------------------------------------------------
 # | Special Actions |
