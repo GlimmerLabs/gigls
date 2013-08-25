@@ -41,7 +41,7 @@ default: pdb-dbus.rkt $(C_EXTENSIONS)
 clean: 
 	rm -f pdb-funs pdb-dbus.rkt *.o *.so
 
-install:
+install: default 
 	mkdir -p $(INSTALL_DIR)
 	cp -r compiled $(INSTALL_DIR)
 	cp *.rkt $(INSTALL_DIR)
@@ -49,6 +49,11 @@ install:
 # +-----------------+-------------------------------------------------
 # | Special Actions |
 # +-----------------+
+
+# Compile all the .rkt files (usually before installation)
+.PHONY: compile
+compile:
+	raco make *.rkt
 
 # Expose exposes this directory to DrRacket
 expose:
