@@ -10,7 +10,6 @@
 
 (provide (all-defined-out))
 
-
 ;;; Procedure:
 ;;;   color?
 ;;; Parameters:
