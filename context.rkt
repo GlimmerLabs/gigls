@@ -179,8 +179,9 @@
 
 
 
-;;; Procedure:
+;;; Procedures:
 ;;;   context-list-color-names
+;;;   context-list-colors
 ;;; Parmeters:
 ;;;  none
 ;;; Purpose:
@@ -196,6 +197,8 @@
 (define context-list-color-names
   (lambda ()
     (cadr (loudbus-call gimp 'ggimp_rgb_list))))
+
+(define context-list-colors context-list-color-names)
 
 ;;; Procedure:
 ;;;   context-list-fonts
