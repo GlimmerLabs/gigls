@@ -48,6 +48,7 @@
         (drawing-line? val)
         (drawing-rule? val)
         (drawing-shape? val))))
+
 ;;; Procedure:
 ;;;   drawing-blank?
 ;;; Parameters:
@@ -65,6 +66,21 @@
 (define drawing-blank? _drawing-blank?)
 
 ;;; Procedure:
+;;;   drawing-ellipse?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;    Determine whether val can be appropriately interpreted as a
+;;;   rectagular drawing (e.g., built by scaling, shifting, and/or
+;;;   recoloring the unit circle).
+;;; Produces:
+;;;   is-drawing?, a Boolean
+(define _drawing-ellipse?
+  (^and drawing-shape? (o (l-s eq? 'ellipse) drawing-type)))
+
+(define drawing-ellipse? _drawing-ellipse?)
+
+;;; Procedure:
 ;;;   drawing-group?
 ;;; Parameters:
 ;;;   val, a Scheme value
@@ -80,7 +96,6 @@
                  val)))
 
 (define drawing-group? _drawing-group?)
-
 
 ;;; Procedure:
 ;;;   drawing-line?
@@ -106,6 +121,21 @@
                    val))))
 
 (define drawing-line? _drawing-line?)
+
+;;; Procedure:
+;;;   drawing-rectangle?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;    Determine whether val can be appropriately interpreted as a
+;;;   rectagular drawing (e.g., built by scaling, shifting, and/or
+;;;   recoloring the unit square).
+;;; Produces:
+;;;   is-drawing?, a Boolean
+(define _drawing-rectangle?
+  (^and drawing-shape? (o (l-s eq? 'rectangle) drawing-type)))
+
+(define drawing-rectangle? _drawing-rectangle?)
 
 ;;; Procedure:
 ;;;   drawing-rule?
