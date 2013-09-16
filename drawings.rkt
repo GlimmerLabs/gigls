@@ -33,6 +33,30 @@
     (guard-unary-proc name proc 'drawing drawing?)))
 
 ;;; Procedure:
+;;;   drawing-shape?
+;;; Parameters:
+;;;   val, a value
+;;; Purpose:
+;;;   Determine if val is one of the drawing shapes
+;;; Produces:
+;;;   is-shape?, a Boolean
+(define _drawing-shape?
+  (let* ((nnr? (^and real? (^not negative?))))
+    (lambda (val)
+      (check-list? (list (l-s eq? 'drawing) 
+                         (r-s member '(ellipse rectangle))
+                         color?         ; color
+                         string?        ; brush
+                         real?          ; left
+                         real?          ; right
+                         nnr?           ; width
+                         nnr?           ; height
+                         )
+                    val))))
+
+(define drawing-shape? _drawing-shape?)
+
+;;; Procedure:
 ;;;   drawing?
 ;;; Parameters:
 ;;;   val, a Scheme value
@@ -64,21 +88,6 @@
                  val)))
 
 (define drawing-blank? _drawing-blank?)
-
-;;; Procedure:
-;;;   drawing-ellipse?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;    Determine whether val can be appropriately interpreted as a
-;;;   rectagular drawing (e.g., built by scaling, shifting, and/or
-;;;   recoloring the unit circle).
-;;; Produces:
-;;;   is-drawing?, a Boolean
-(define _drawing-ellipse?
-  (^and drawing-shape? (o (l-s eq? 'ellipse) drawing-type)))
-
-(define drawing-ellipse? _drawing-ellipse?)
 
 ;;; Procedure:
 ;;;   drawing-group?
@@ -123,21 +132,6 @@
 (define drawing-line? _drawing-line?)
 
 ;;; Procedure:
-;;;   drawing-rectangle?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;    Determine whether val can be appropriately interpreted as a
-;;;   rectagular drawing (e.g., built by scaling, shifting, and/or
-;;;   recoloring the unit square).
-;;; Produces:
-;;;   is-drawing?, a Boolean
-(define _drawing-rectangle?
-  (^and drawing-shape? (o (l-s eq? 'rectangle) drawing-type)))
-
-(define drawing-rectangle? _drawing-rectangle?)
-
-;;; Procedure:
 ;;;   drawing-rule?
 ;;; Parameters:
 ;;;   val, a value
@@ -156,30 +150,6 @@
                    val))))
 
 (define drawing-rule? _drawing-rule?)
-
-;;; Procedure:
-;;;   drawing-shape?
-;;; Parameters:
-;;;   val, a value
-;;; Purpose:
-;;;   Determine if val is one of the drawing shapes
-;;; Produces:
-;;;   is-shape?, a Boolean
-(define _drawing-shape?
-  (let* ((nnr? (^and real? (^not negative?))))
-    (lambda (val)
-      (check-list? (list (l-s eq? 'drawing) 
-                         (r-s member '(ellipse rectangle))
-                         color?         ; color
-                         string?        ; brush
-                         real?          ; left
-                         real?          ; right
-                         nnr?           ; width
-                         nnr?           ; height
-                         )
-                    val))))
-
-(define drawing-shape? _drawing-shape?)
 
 ;;; Procedure:
 ;;;   drawing-bottom
@@ -1918,4 +1888,34 @@
 
 (define drawing-width
   (guard-drawing-proc 'drawing-width _drawing-width))
+
+;;; Procedure:
+;;;   drawing-ellipse?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;    Determine whether val can be appropriately interpreted as a
+;;;   rectagular drawing (e.g., built by scaling, shifting, and/or
+;;;   recoloring the unit circle).
+;;; Produces:
+;;;   is-drawing?, a Boolean
+(define _drawing-ellipse?
+  (^and drawing-shape? (o (l-s eq? 'ellipse) drawing-type)))
+
+(define drawing-ellipse? _drawing-ellipse?)
+
+;;; Procedure:
+;;;   drawing-rectangle?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;    Determine whether val can be appropriately interpreted as a
+;;;   rectagular drawing (e.g., built by scaling, shifting, and/or
+;;;   recoloring the unit square).
+;;; Produces:
+;;;   is-drawing?, a Boolean
+(define _drawing-rectangle?
+  (^and drawing-shape? (o (l-s eq? 'rectangle) drawing-type)))
+
+(define drawing-rectangle? _drawing-rectangle?)
 
