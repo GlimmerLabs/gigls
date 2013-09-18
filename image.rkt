@@ -762,6 +762,33 @@
                     (^and integer? positive?))))
 
 ;;; Procedure:
+;;;   image-refresh-display
+;;; Parameters:
+;;;   img, an image
+;;; Purpose:
+;;;   Refresh the display.  (Useful when we're setting pixels.)
+;;; Produces:
+;;;   img, the same image
+;;; Preconditions:
+;;;   [No additional.]
+;;; Postconditions:
+;;;   The display has been refreshed (hopefully, showing all the updates)
+(define _image-refresh-display!
+  (lambda (img)
+    ; Hack!  Rotating it twice seems to get context-update-displays
+    ; to work.
+    (gimp-image-rotate img 1)
+    (gimp-image-rotate img 1)
+    (context-update-displays!)))
+  
+(define image-refresh-display!
+  (guard-unary-proc
+   'image-refresh-display!
+   _image-refresh-display!
+   'image
+   image?))
+
+;;; Procedure:
 ;;;   image-validate-selection!
 ;;; Purpose:
 ;;;   Validate the typical parameters to a selection routine, such
