@@ -502,13 +502,30 @@
 ;;;   Sets the pixel at (col,row) to color.
 ;;; Produces:
 ;;;   [Nothing; called for the side effect]
-(define image-set-pixel!
+(define _image-set-pixel!
   (lambda (image col row color)
-    (let ((drawable (car (gimp-image-get-active-layer image))))
+    (when (>= col (image-width image))
+       (error "image-set-pixel!: column too large" col))
+    (when (>= row (image-height image))
+       (error "image-set-pixel!: row too large" row))
+    (let ((drawable (car (gimp-image-get-active-layer image)))
+          (irgb (color->rgb color)))
         (gimp-drawable-set-pixel drawable col row 3 
-                                 (bytes (irgb-red color)
-                                        (irgb-green color)
-                                        (irgb-blue color))))))
+                                 (bytes (irgb-red irgb)
+                                        (irgb-green irgb)
+                                        (irgb-blue irgb))))))
+
+(define image-set-pixel!
+  (guard-proc 'image-set-pixel!
+              _image-set-pixel!
+              (list 'image 
+                    'non-negative-integer 
+                    'non-negative-integer 
+                    'color)
+              (list image?
+                    (^and integer? (^not negative?))
+                    (^and integer? (^not negative?))
+                    color?)))
 
 ;;; Procedure:
 ;;;   image-select-all!
