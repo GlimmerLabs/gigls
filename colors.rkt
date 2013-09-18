@@ -1,4 +1,4 @@
-  #lang racket
+#lang racket
 
 (require gigls/mgimp)
 (require louDBus/unsafe)
@@ -75,6 +75,34 @@
 (define color-name->rgb
   (lambda (color-name)
     (car (loudbus-call gimp 'ggimp_rgb_parse color-name))))
+
+;;; Procedure:
+;;;   color->color-name
+;;; Parameters:
+;;;   color, one of the many permitted forms of colors.
+;;; Purpose:
+;;;   Convert color to the name of the nearest color
+;;; Produces:
+;;;   color-name, a string
+(define color->color-name
+  (lambda (color)
+    (cond
+      ; Note: We violate the normal "check preconditions first" order
+      ; for efficiency.  This causes a bit of code duplication.
+      ((color-name? color)
+       color)
+      ((not (color? color))
+       (error "color->color-name: invalid color" color))
+      (else
+       (_color->color-name color)))))
+
+(define _color->color-name
+  (lambda (color)
+    (cond
+      ((color-name? color)
+       color)
+      (else
+       (rgb->color-name (color->rgb color))))))
 
 ;;; Procedure:
 ;;;   color-representation
@@ -376,6 +404,75 @@
       (rgb-new ave ave ave))))
 
 (define rgb-greyscale (guard-rgb-proc 'rgb-greyscale _rgb-greyscale))
+
+;;; Procedure:
+;;;   rgb-distance-squared
+;;; Parameters:
+;;;   rgb1, an RGB color
+;;;   rgb2, an RGB color
+;;; Purpose:
+;;;   Compute the distance squared between rgb1 and rgb2.
+;;; Produces:
+;;;   dsquared, an integer
+;;; Preconditions:
+;;;   None.
+;;; Postconditions:
+;;;   dsquared is the square of the Cartesian difference in a 3D colorspace.
+;;; Philosophy:
+;;;   It's easy to compute the squared distance.  It takes additional
+;;;   (and unnecessary) power to compute the normal distance, so we
+;;;   usually just use the squared distance.
+(define _rgb-distance-squared
+  (let ((square (lambda (x) (* x x))))
+    (lambda (rgb1 rgb2)
+      (+ (square (- (rgb-red rgb1) (rgb-red rgb2)))
+         (square (- (rgb-green rgb1) (rgb-green rgb2)))
+         (square (- (rgb-blue rgb1) (rgb-blue rgb2)))))))
+
+(define rgb-distance-squared
+  (guard-proc 'rgb-distance-squared
+              _rgb-distance-squared
+              (list 'rgb 'rgb)
+              (list rgb? rgb?)))
+
+;;; Procedure:
+;;;   rgb->color-name
+;;; Parameters:
+;;;   color, an rgb color
+;;; Purpose:
+;;;   Find the name of a color that is similar to the given color.
+;;; Produces:
+;;;   name, a string
+;;; Preconditions:
+;;;   We can connect to GIMP to get the list of colors.
+;;; Postconditions:
+;;;   There is no color name k for which
+;;;     (rgb-distance-squared color (name->color k)
+;;;        < (rgb-distance-squared color (name->color name)
+(define _rgb->color-name
+  (let* ((color-names (cadr (loudbus-call gimp 'ggimp_rgb_list)))
+         (color-values (map color-name->rgb color-names))
+         (distance _rgb-distance-squared))
+    (lambda (rgb)
+      (let kernel ((guess-name (car color-names))
+                   (guess-distance (distance rgb (car color-values)))
+                   (remaining-names (cdr color-names))
+                   (remaining-values (cdr color-values)))
+               (if (null? remaining-names)
+                   guess-name
+                   (let ((next-distance
+                         (distance rgb (car remaining-values))))
+                     (if (< next-distance guess-distance)
+                         (kernel (car remaining-names)
+                                 next-distance
+                                 (cdr remaining-names)
+                                 (cdr remaining-values))
+                         (kernel guess-name
+                                 guess-distance
+                                 (cdr remaining-names)
+                                 (cdr remaining-values)))))))))
+
+(define rgb->color-name (guard-rgb-proc 'rgb->color-name _rgb->color-name))
 
 ;;; Procedure
 ;;;  rgb->hue
