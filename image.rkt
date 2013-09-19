@@ -513,7 +513,8 @@
         (gimp-drawable-set-pixel drawable col row 3 
                                  (bytes (irgb-red irgb)
                                         (irgb-green irgb)
-                                        (irgb-blue irgb))))))
+                                        (irgb-blue irgb))))
+    (void)))
 
 (define image-set-pixel!
   (guard-proc 'image-set-pixel!
