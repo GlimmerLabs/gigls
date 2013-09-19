@@ -49,6 +49,23 @@
 	      (list 'image 'drawable 'pos2color)
 	      (list image-id? drawable? (constant #t))))
 
+;;; Procedure:
+;;;   image-compuate
+;;; Parameters:
+;;;   pos2color, a function from two integers to a color
+;;;   width, a positive integer
+;;;   height, a positive integer
+;;; Purpose:
+;;;   Create a new image
+;;; Produces:
+;;;   image, an image
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (image-width image) = width
+;;;   (image-height image) = height
+;;;   For all 0 <= i < width, 0 <= j < height
+;;;     (image-get-pixel image i j) = (pos2color i j)
 (define _image-compute
   (lambda (pos2color width height)
     (let* ((image (image-new width height))
@@ -63,6 +80,19 @@
 	            (and integer? exact? positive?)
 		    (and integer? exact? positive?))))
 
+;;; Procedure:
+;;;   image-transform!
+;;; Parameters:
+;;;   image, an image
+;;;   transform, a function from RGB colors to RGB colors.
+;;; Purpose:
+;;;   Transform all the pixels in image.
+;;; Produces:
+;;;   image, the same image, now transformed.
+;;; Preconditions:
+;;;   IMAGE contains the original pixel values of image.
+;;;   For all 0 <= i < (image-width image), 0 <= j < (image-height image)
+;;;     (image-get-pixel image i j) = (transform (image-get-pixel IMAGE i j))
 (define _image-transform!
   (lambda (image transform)
     (_drawable-transform! image (image-get-layer image) transform)))
@@ -71,4 +101,33 @@
   (guard-proc 'image-transform
               _image-transform!
 	      (list 'image 'colorfun)
-	      (list image-id? (constant #t))))
+	      (list image-id? procedure?)))
+
+;;; Procedure:
+;;;   image-variant
+;;; Parameters:
+;;;   image, an image
+;;;   transform, a function from RGB to RGB
+;;; Purpose:
+;;;   To create a variant of image using transform.
+;;; Produces:
+;;;   variant, an image
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (image-width variant) = (image-width image)
+;;;   (image-height variant) = (image-height image)
+;;;   For all 0 <= i < (image-width image), 0 <= j < (image-height image)
+;;;     (image-get-pixel variant i j) = (transform (image-get-pixel image i j))
+(define _image-variant
+  (lambda (image transform)
+    (let ((result (car (gimp-image-duplicate image))))
+      (image-transform! result transform)
+      result)))
+
+(define image-variant
+  (guard-proc 'image-variant
+              _image-variant
+	      (list 'image 'colorfun)
+	      (list image-id? procedure?)))
+
