@@ -36,6 +36,11 @@
 #include "irgb-funs.c"
 
 
+// +---------+---------------------------------------------------------
+// | Helpers |
+// +---------+
+
+
 // +------------+------------------------------------------------------
 // | Extensions |
 // +------------+
@@ -67,23 +72,45 @@ irgb_green_scheme (int argc, Scheme_Object **argv)
 Scheme_Object *
 irgb_new_scheme (int argc, Scheme_Object **argv)
 {
-  if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-red", "integer", 0, 3, argv);
-  if (! SCHEME_INTP (argv[1]))
-    scheme_wrong_type ("irgb-red", "integer", 1, 3, argv);
-  if (! SCHEME_INTP (argv[2]))
-    scheme_wrong_type ("irgb-red", "integer", 2, 3, argv);
+  int red = 0;
+  int green = 0;
+  int blue = 0;
 
-  return scheme_make_integer (irgb_new (SCHEME_INT_VAL (argv[0]),
-                                        SCHEME_INT_VAL (argv[1]),
-                                        SCHEME_INT_VAL (argv[2])));
+  if (SCHEME_INTP (argv[0])) 
+    red = SCHEME_INT_VAL (argv[0]);
+  else if (SCHEME_DBLP (argv[0]))
+    red = (int) SCHEME_DBL_VAL (argv[0]);
+  else if (SCHEME_RATIONALP (argv[0]))
+    red = (int) scheme_rational_to_double (argv[0]);
+  else
+    scheme_wrong_type ("irgb-new", "integer", 0, 3, argv);
+  
+  if (SCHEME_INTP (argv[1]))
+    green = SCHEME_INT_VAL (argv[1]);
+  else if (SCHEME_DBLP (argv[1])) 
+    green = (int) SCHEME_DBL_VAL (argv[1]);
+  else if (SCHEME_RATIONALP (argv[1]))
+    green = (int) scheme_rational_to_double (argv[1]);
+  else
+    scheme_wrong_type ("irgb-new", "integer", 1, 3, argv);
+
+  if (SCHEME_INTP (argv[2]))
+    blue = SCHEME_INT_VAL (argv[2]);
+  else if (SCHEME_DBLP (argv[2])) 
+    blue = (int) SCHEME_DBL_VAL (argv[2]);
+  else if (SCHEME_RATIONALP (argv[2]))
+    blue = (int) scheme_rational_to_double (argv[2]);
+  else
+    scheme_wrong_type ("irgb-new", "integer", 2, 3, argv);
+
+  return scheme_make_integer (irgb_new (red, green, blue));
 } // irgb_new_scheme
 
 Scheme_Object *
 irgb_red_scheme (int argc, Scheme_Object **argv)
 {
   if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-red", "integer", 1, 1, argv);
+    scheme_wrong_type ("irgb-red", "integer", 0, 1, argv);
   return scheme_make_integer (irgb_red (SCHEME_INT_VAL (argv[0])));
 } // irgb_red_scheme
 
@@ -91,13 +118,13 @@ Scheme_Object *
 irgba_new_scheme (int argc, Scheme_Object **argv)
 {
   if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-red", "integer", 0, 4, argv);
+    scheme_wrong_type ("irgba-new", "integer", 0, 4, argv);
   if (! SCHEME_INTP (argv[1]))
-    scheme_wrong_type ("irgb-red", "integer", 1, 4, argv);
+    scheme_wrong_type ("irgba-new", "integer", 1, 4, argv);
   if (! SCHEME_INTP (argv[2]))
-    scheme_wrong_type ("irgb-red", "integer", 2, 4, argv);
+    scheme_wrong_type ("irgba-new", "integer", 2, 4, argv);
   if (! SCHEME_INTP (argv[2]))
-    scheme_wrong_type ("irgb-red", "integer", 3, 4, argv);
+    scheme_wrong_type ("irgba-new", "integer", 3, 4, argv);
 
   return scheme_make_integer (irgba_new (SCHEME_INT_VAL (argv[0]),
                                          SCHEME_INT_VAL (argv[1]),
