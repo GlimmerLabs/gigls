@@ -1,15 +1,5 @@
 #lang racket
-
-(provide higher-and     ^and
-         higher-false   ^false
-         higher-if      ^if
-         higher-not     ^not
-         higher-or      ^or
-         higher-true    ^true
-         constant
-         left-section   l-s
-         right-section  r-s 
-         all            o)
+(provide (all-defined-out))
 
 ;;; Procedure:
 ;;;   all
@@ -31,6 +21,56 @@
     (or (null? lst)
         (and (pred? (car lst))
              (all pred? (cdr lst))))))
+
+;;; Procedure:
+;;;   any
+;;; Parameters:
+;;;   pred?, a unary predicate
+;;;   lst, a list
+;;; Purpose:
+;;;   Determines if pred? holds for any of the values in lst
+;;; Produces:
+;;;   ok?, a Boolean
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If there is an i s.t. (pred? (list-ref lst i)) holds, then
+;;;     ok? is true.
+;;;   If for all i, (pred? (list-ref list i)) does not hold, then
+;;;     ok? is false.
+(define any
+  (lambda (pred? lst)
+    (and (not (null? lst))
+         (or (pred? (car lst))
+	     (any pred? (cdr lst))))))
+
+;;; Procedure:
+;;;   range-checker
+;;; Parameters:
+;;;   lb, a real number
+;;;   ub, a real number
+;;; Purpose:
+;;;   Create a procedure that determines if its parameter is between
+;;;   lb and ub.
+;;; Produces:
+;;;   checker, a boolean
+;;; Preconditions:
+;;;   No additional
+;;; Postconditions:
+;;;   (checker val) holds iff (<= lb val ub)
+(define _range-checker
+  (lambda (lb ub)
+    (lambda (val)
+      (<= lb val ub))))
+
+(define range-checker
+  (lambda (lb ub)
+    (cond
+      [(not (real? lb))
+       (error "range-checker expected real for param 1, received" lb)]
+      [(not (real? ub))
+       (error "range-checker expected real for param 2, received" ub)]
+      [else (_range-checker lb ub)])))
 
 ;;; Procedure:
 ;;;   constant
@@ -179,9 +219,6 @@
             val
             (kernel (cdr remaining) ((car remaining) val)))))))
 
-
-
-
 ;;; Procedures:
 ;;;   higher-true 
 ;;;   ^true
@@ -198,7 +235,6 @@
 (define higher-true
   (lambda args #t))
 (define ^true higher-true)
-
 
 ;;; Procedures:
 ;;;   left-section 
