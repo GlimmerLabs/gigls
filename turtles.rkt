@@ -3,8 +3,10 @@
 (require gigls/pdb-dbus)
 (provide (all-defined-out))
 (require gigls/rgb-core
+         gigls/brushes
          gigls/colors
          gigls/context
+         gigls/current-brush
          gigls/guard
          gigls/image
          gigls/utils)

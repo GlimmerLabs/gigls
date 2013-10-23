@@ -4,6 +4,7 @@
 (provide (all-defined-out))
 (require gigls/colors
          gigls/context
+         gigls/current-brush
          gigls/guard
          gigls/hacks
          gigls/image
