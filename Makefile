@@ -36,10 +36,10 @@ COMPILED_DIR = $(shell racket utils/compiled-goes-here.rkt)
 # | Standard Targets |
 # +------------------+
 
-default: pdb-dbus.rkt $(C_EXTENSIONS)
+default: $(C_EXTENSIONS)
 
 clean: 
-	rm -f pdb-funs pdb-dbus.rkt *.o *.so
+	rm -f pdb-funs *.o *.so
 
 install: default 
 	mkdir -p $(INSTALL_DIR)
