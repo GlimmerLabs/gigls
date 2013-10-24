@@ -65,28 +65,35 @@
   (^or brush-name? brush-info?))
 
 ;;; Procedure:
-;;;   brush-cloneable?
+;;;   brush-generated?
 ;;; Parameters:
-;;;   brush, a string
+;;;   brush, as tring
 ;;; Purpose:
-;;;   Determines if the brush can be cloned
-;;; Produces:
-;;;   is-cloneable?, a boolean
-(define brush-cloneable?
+;;;   Determine if it's a generated brush (which means that we get 
+;;;   various attributes
+;;;   values).
+(define brush-generated?
   (lambda (brush)
     (and (string? brush)
          (brush-name? brush)
          (= 1 (car (gimp-brush-is-generated brush))))))
 
 ;;; Procedure:
-;;;   brush-generated?
+;;;   brush-mutable?
 ;;; Parameters:
-;;;   brush, as tring
+;;;   brush, a string
 ;;; Purpose:
-;;;   Determine if it's a generated brush (which means that we get more
-;;;   values).
-(define brush-generated?
-   brush-cloneable?)
+;;;   Determines if the brush (or at least a copy of the brush) can be 
+;;;   mutated.  That is, can you set one of the key attributes?
+;;; Produces:
+;;;   mutable? boolean
+;;; Preconditions:
+;;;   (brush-name? brush)
+;;; Postconditions:
+;;;   If mutable?, then it is safe to call brush-set-ATTRIBUTE, where
+;;;   ATTRIBUTE is one of the key attributes (shape, size, radius, etc.)
+(define brush-mutable?
+  brush-generated?)
 
 ;;; Procedure:
 ;;;   brush-valid-angle?

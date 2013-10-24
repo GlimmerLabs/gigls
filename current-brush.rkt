@@ -191,7 +191,7 @@
     (let ([radius (if (null? rest)
                       (brush-get-radius (brush-original brush))
                       (* 0.5 (car rest)))])
-      (if (and (brush-cloneable? brush)
+      (if (and (brush-mutable? brush)
                (not (equal? (brush-get-radius brush) radius)))
           (let ([editable (brush-make-editable brush)])
             (gimp-brush-set-radius editable radius)
@@ -222,13 +222,25 @@
        (apply _context-set-brush! (cons brush rest))])))
 
 ;;; Procedure:
+;;;   context-set-brush-aspect-ratio!
+;;; Parameters:
+;;;   aspect-ratio, a real number
+;;; Purpose:
+;;;   Set the aspect ratio of the current brush (or an editable version
+;;;   thereof)
+;;; Produces:
+;;;   brush, a string representing the current brush
+
+;;; Procedure:
 ;;;   context-set-brush-angle!
 ;;; Parameters:
-;;;   anglea real number
+;;;   angle, a real number
 ;;; Purpose:
 ;;;   Set the angle of the current brush (or an editable version thereof).
 ;;; Produces:
-;;;   brush, the current brush.
+;;;   brush, a string representing the current brush.
+;;; Preconditions:
+;;;   The current brush is 
 (define _context-set-brush-angle!
   (lambda (angle)
     (context-verify-current-brush-mutable! 'context-set-brush-angle!)
@@ -327,7 +339,7 @@
 (define context-verify-current-brush-mutable!
   (lambda (procname)
     (let ((name (car (gimp-context-get-brush))))
-      (when (not (brush-cloneable? name))
+      (when (not (brush-mutable? name))
         (error (string-append (symbol->string procname)
                               ": brush \""
                               name
