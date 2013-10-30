@@ -35,7 +35,8 @@
           (angle 0)
           (pen? #t)
           (color (rgb-new 0 0 0))
-          (brush "1. Pixel"))
+          (brush "2. Hardness 100")
+          (brush-size 3))
       (lambda (message . params)
         (cond
           ((eq? message ':type) 
@@ -56,6 +57,8 @@
            color)
           ((eq? message ':brush)
            brush)
+          ((eq? message ':brush-size)
+           brush-size)
           ((eq? message ':set-world)
            (set! world (car params)))
           ((eq? message ':set-col!)
@@ -68,6 +71,8 @@
            (set! color (car params)))
           ((eq? message ':set-brush!)
            (set! brush (car params)))
+          ((eq? message ':set-brush-size!)
+           (set! brush-size (car params)))
           ((eq? message ':up!)
            (set! pen? #f))
           ((eq? message ':down!)
@@ -98,12 +103,12 @@
 ;;; Produces:
 ;;;   turtle-like?, a Boolean
 ;;; Ponderings:
-;;;   Since we represent turtles as procedures, it is difficult to tell if a
-;;;   particular procedure is really a turtle.  Hence, we use a bit of a hack:
-;;;   We rely on PLT Scheme's rendering of anonymous procedures as strings.  
-;;;   Two anonymous procedures created by the same procedure will have the same
-;;;   string.  Two anonymous procedures created by different procedures will have
-;;;   different strings.
+;;;   Since we represent turtles as procedures, it is difficult to tell
+;;;   if a particular procedure is really a turtle.  Hence, we use a bit
+;;;   of a hack: We rely on PLT Scheme's rendering of anonymous procedures
+;;;   as strings.  Two anonymous procedures created by the same procedure
+;;;   will have the same string.  Two anonymous procedures created by
+;;;   different procedures will have different strings.
 (define _turtle?
   (let ((sample (value->string (_turtle-new 0))))
     (lambda (val)
@@ -111,7 +116,6 @@
            (string=? (value->string val) sample)))))
 
 (define turtle? _turtle?)
-
 
 ;;; Procedure:
 ;;;   turtle-clone
@@ -134,6 +138,7 @@
       (clone ':set-angle! (turtle ':angle))
       (clone ':set-color! (turtle ':color))
       (clone ':set-brush! (turtle ':brush))
+      (clone ':set-brush-size! (turtle ':brush-size))
       clone)))
 
 (define turtle-clone
@@ -141,6 +146,21 @@
                     _turtle-clone
                     'turtle
                     turtle?))
+
+;;; Procedure:
+;;;   turtle-direction
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the direction in which the turtle is facint
+;;; Produces:
+;;;   direction, a real
+(define _turtle-direction
+  (lambda (turtle)
+    (turtle ':angle)))
+
+(define turtle-direction
+  (guard-unary-proc 'turtle-direction _turtle-direction 'turtle turtle?))
 
 ;;; Procedure:
 ;;;   turtle-down!
@@ -205,16 +225,18 @@
             (let ((saved-brush (context-get-brush))
                   (saved-color (context-get-fgcolor))
                   (turtle-brush (turtle ':brush))
+                  (turtle-brush-size (turtle ':brush-size))
                   (turtle-color (turtle ':color)))
-              (when (not (equal? turtle-brush saved-brush))
-                (context-set-brush! turtle-brush))
+              (if (brush-generated? turtle-brush)
+                  (context-set-brush! turtle-brush turtle-brush-size)
+                  (when (not (equal? saved-brush turtle-brush))
+                    (context-set-brush! turtle-brush)))
               (when (not (equal? turtle-color saved-color))
                 (context-set-fgcolor! turtle-color))
               (image-draw-line! (turtle ':world)
                                 col row
                                 newcol newrow)
-              (when (and (context-preserve?) 
-                         (not (equal? turtle-brush saved-brush)))
+              (when (context-preserve?) 
                 (context-set-brush! saved-brush))
               (when (and (context-preserve?) 
                          (not (equal? turtle-color saved-color)))
@@ -240,15 +262,27 @@
 ;;; Produces:
 ;;;   turtle, the same turtle
 (define _turtle-set-brush! 
-  (lambda (turtle brush)
+  (lambda (turtle brush . rest)
     (turtle ':set-brush! brush)
-    turtle))
+    (when (not (null? rest))
+      (turtle ':set-brush-size! (car rest)))))
 
 (define turtle-set-brush!
-  (guard-proc 'turtle-set-brush!
-              _turtle-set-brush!
-              (list 'turtle 'brush)
-              (list turtle? brush?)))
+  (lambda (turtle brush . rest)
+    (let ([params (cons turtle (cons brush rest))])
+      (cond 
+        [(not (turtle? turtle))
+         (error/parameter-type 'turtle-set-brush! 1 'turtle params)]
+        [(not (brush-name? brush))
+         (error/parameter-type 'turtle-set-brush! 2 'brush params)]
+        [(and (not (brush-generated? brush)) (not (null? rest)))
+         (error "turtle-set-brush! cannot set size for a non-mutable brush")]
+        [(and (not (null? rest))
+              (or (not (real? (car rest)))
+                  (not (integer? (car rest)))))
+         (error/parameter-type 'turtle-set-brush! 3 'positive-real params)]
+        [else
+         (apply _turtle-set-brush! params)]))))
 
 ;;; Procedure:
 ;;;   turtle-set-color!
@@ -308,8 +342,7 @@
                 (turtle-color (turtle ':color)))
             (when (not (equal? turtle-color saved-color))
               (context-set-fgcolor! turtle-color))
-            (when (not (equal? saved-brush "Circle (01)"))
-              (context-set-brush! "Circle (01)"))
+            (context-set-brush! "2. Hardness 100" 1)
             (image-draw-arrow! (turtle ':world)
                                'pointy
                                back-col back-row
@@ -318,8 +351,7 @@
             (when (context-preserve?)
               (when (not (equal? turtle-color saved-color))
                 (context-set-fgcolor! saved-color))
-              (when (not (equal? saved-brush "Circle (01)"))
-                (context-set-brush! saved-brush))))))
+              (context-set-brush! saved-brush)))))
       turtle)))
 
 (define turtle-show
@@ -411,3 +443,33 @@
                     _turtle-world
                     'turtle
                     turtle?))
+
+;;; Procedure:
+;;;   turtle-x
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Get the x coordinate of the turtle
+;;; Produces:
+;;;   x, a real number
+(define _turtle-x
+  (lambda (turtle)
+    (turtle ':col)))
+
+(define turtle-x
+  (guard-unary-proc 'turtle-x _turtle-x 'turtle turtle?))
+   
+;;; Procedure:
+;;;   turtle-y
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Get the y coordinate of the turtle
+;;; Produces:
+;;;   y, a real number
+(define _turtle-y
+  (lambda (turtle)
+    (turtle ':row)))
+
+(define turtle-y
+  (guard-unary-proc 'turtle-y _turtle-y 'turtle turtle?))
