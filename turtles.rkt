@@ -33,7 +33,7 @@
           (angle 0)
           (pen? #t)
           (color (rgb-new 0 0 0))
-          (brush "Circle (01)"))
+          (brush "1. Pixel"))
       (lambda (message . params)
         (cond
           ((eq? message ':type) 
