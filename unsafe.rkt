@@ -16,8 +16,10 @@
 
 ; Primary functions that do need to be exported.
 (require gigls/alt
+         gigls/brushes
          gigls/colors
          gigls/context
+         gigls/current-brush
          gigls/drawings
          gigls/guard
          gigls/image
@@ -37,8 +39,10 @@
 (provide (all-defined-out)
          (all-from-out gigls/pdb-dbus)
          (all-from-out gigls/alt)
+         (all-from-out gigls/brushes)
          (all-from-out gigls/colors)
          (all-from-out gigls/context)
+         (all-from-out gigls/current-brush)
          (all-from-out gigls/drawings)
          (all-from-out gigls/guard)
          (all-from-out gigls/hacks)
