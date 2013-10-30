@@ -358,3 +358,18 @@
 (define context-select-random-brush!
   (lambda ()
     (context-set-brush! (list-random-element (brushes-list)))))
+
+;;; Procedure:
+;;;   context-cleanup-brushes!
+;;; Parameters:
+;;;   [none, called for the side effects]
+;;; Purpose:
+;;;   Remove all of the editable copies of brushes.
+;;; Produces:
+;;;   [Nothing; Called for the side effect]
+;;; Postconditions:
+;;;   No more brushes with the name "(editable)" exist.
+(define context-cleanup-brushes!
+  (lambda () 
+    (for-each (lambda (brush) (gimp-brush-delete brush))
+              (brushes-list "(editable)"))))
