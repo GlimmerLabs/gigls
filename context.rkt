@@ -2,30 +2,20 @@
 (provide (all-defined-out))
 (require gigls/pdb-dbus)
 (require louDBus/unsafe)
-(require gigls/colors
+(require gigls/brushes
+         gigls/colors
          gigls/guard
          gigls/hacks
+         gigls/higher
          gigls/list
          gigls/makers
          gigls/mgimp
          gigls/utils)
 
-;;; Procedure:
-;;;   brush?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determine if val is a brush.
-;;; Produces:
-;;;   is-brush?, a Boolean.
-;;; Points:
-;;;   The #t at the end may seem a bit odd, since it's pointless.  However,
-;;;   it ensures that brush? returns a Boolean.
-(define brush?
-  (lambda (val)
-    (and (string? val)
-         (member val (context-list-brushes val))
-         #t)))
+
+; +-----------+-------------------------------------------------------
+; | Observers |
+; +-----------+
 
 ;;; Procedure:
 ;;;   context-get-bgcolor
@@ -51,21 +41,7 @@
   (lambda ()
     (color->rgb (car (gimp-context-get-foreground)))))
 
-;;; Procedure:
-;;;   context-get-brush
-;;; Parameters:
-;;;   [None]
-;;; Purpose:
-;;;   Gets the current brush.
-;;; Produces:
-;;;   brush, a string
-;;; Postconditions:
-;;;   (brush? brush)
-(define context-get-brush
-  (lambda ()
-    (car (gimp-context-get-brush))))
 
-
 ; +-------------------------------------------+---------------------------------
 ; | Setting Basic GIMP Contextual Information |
 ; +-------------------------------------------+
@@ -114,34 +90,6 @@
                     _context-set-fgcolor!
                     'color
                     color?))
-
-;;; Procedure
-;;;   context-set-brush!
-;;; Parameters
-;;;   brush, a string
-;;; Purpose
-;;;   Change the gimp's currently selected brush
-;;; Produces
-;;;   brush, the provided brush
-;;; Preconditions
-;;;   (brush? brush)
-;;; Postconditions
-;;;   GIMP's current brush is now set to the given brush
-(define _context-set-brush!
-  (lambda (brush)
-    (gimp-context-set-brush brush)
-    brush))
-
-(define context-set-brush!
-  (lambda (brush)
-    (cond
-      ((not (string? brush))
-       (error "context-set-brush!: expects a string as a parameter, received"
-              brush))
-      ((not (brush? brush))
-       (error "context-set-brush!: invalid brush:" brush))
-      (else 
-       (_context-set-brush! brush)))))
 
 ;;; Procedure:
 ;;;  context-list-brushes
@@ -240,7 +188,7 @@
 ;;;   immediate?, an optional boolean
 ;;; Purpose:
 ;;;   Set or get a flag that specifies whether or not some operations
-;;;   are requested to immediate-updates the context.
+;;;   are requested to immediately update the context.
 ;;; Produces:
 ;;;   immediate-updates?, a Boolean
 ;;; Preconditions:
@@ -397,16 +345,6 @@
 
 (define context-preserve-off! _context-preserve-off!)
 
-;;; Procedure
-;;;   context-select-random-brush!
-;;; Parameters:
-;;;   [None]
-;;; Purpose:
-;;;   Select one of the brushes.
-;;; Produces:
-;;;   [Nothing; called for the side effect]
-;;; Postconditions:
-;;;   It is difficult to predict the brush.
-(define context-select-random-brush!
-  (lambda ()
-    (context-set-brush! (list-random-element (context-list-brushes)))))
+; By default, we don't preserve context.  The ugly code is so that we
+; don't get output.
+(let ([x (context-preserve-off!)]) (void))

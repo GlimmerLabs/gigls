@@ -49,7 +49,7 @@ static Scheme_Object *
 irgb_alpha_scheme (int argc, Scheme_Object **argv)
 {
   if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-alpha", "integer", 0, 1, argv);
+    scheme_wrong_type ("irgb-alpha", "integer-encoded rgb color", 0, 1, argv);
   return scheme_make_integer (irgb_alpha (SCHEME_INT_VAL (argv[0])));
 } // irgb_alpha_scheme
 
@@ -57,7 +57,7 @@ Scheme_Object *
 irgb_blue_scheme (int argc, Scheme_Object **argv)
 {
   if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-blue", "integer", 0, 1, argv);
+    scheme_wrong_type ("irgb-blue", "integer-encoded rgb color", 0, 1, argv);
   return scheme_make_integer (irgb_blue (SCHEME_INT_VAL (argv[0])));
 } // irgb_blue_scheme
 
@@ -65,7 +65,7 @@ Scheme_Object *
 irgb_green_scheme (int argc, Scheme_Object **argv)
 {
   if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-green", "integer", 0, 1, argv);
+    scheme_wrong_type ("irgb-green", "integer-encoded rgb color", 0, 1, argv);
   return scheme_make_integer (irgb_green (SCHEME_INT_VAL (argv[0])));
 } // irgb_green_scheme
 
@@ -110,7 +110,7 @@ Scheme_Object *
 irgb_red_scheme (int argc, Scheme_Object **argv)
 {
   if (! SCHEME_INTP (argv[0]))
-    scheme_wrong_type ("irgb-red", "integer", 0, 1, argv);
+    scheme_wrong_type ("irgb-red", "integer-encoded rgb color", 0, 1, argv);
   return scheme_make_integer (irgb_red (SCHEME_INT_VAL (argv[0])));
 } // irgb_red_scheme
 
