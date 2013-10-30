@@ -345,3 +345,6 @@
 
 (define context-preserve-off! _context-preserve-off!)
 
+; By default, we don't preserve context.  The ugly code is so that we
+; don't get output.
+(let ([x (context-preserve-off!)]) (void))
