@@ -61,6 +61,26 @@ static Scheme_Object *gimpplus = NULL;
 // +-----------------+
 
 /**
+ * Convert a Scheme object to an iRGB.  Does appropriate rounding
+ * (I hope).  Returns a negative number for an invalid Scheme
+ * object.
+ */
+static int
+scheme_object_to_irgb (Scheme_Object *obj)
+{
+  if (SCHEME_INTP (obj)) 
+    return (int) SCHEME_INT_VAL (obj);
+  else if (SCHEME_DBLP (obj)) 
+    return (int) SCHEME_DBL_VAL (obj);
+  else if (SCHEME_FLTP (obj))
+    return (int) SCHEME_FLT_VAL (obj);
+  else if (SCHEME_RATIONALP (obj))
+    return (int)  scheme_rational_to_double (obj);
+  else
+    return -1;
+} // scheme_object_to_irgb
+
+/**
  * Add a procedure
  */
 static void
@@ -169,7 +189,7 @@ tile_update (Scheme_Object *stream, int size, unsigned char *data)
   params[1] = scheme_make_symbol ("tile_update");
   params[2] = stream;
   params[3] = scheme_make_integer (size);
-  params[4] = scheme_make_sized_byte_string (data, size, 1);
+  params[4] = scheme_make_sized_byte_string ((char *) data, size, 1);
   params[5] = NULL;
   return SCHEME_INT_VAL (SCHEME_CAR (scheme_apply (loudbus_call, 5, params)));
 } // tile_update
@@ -241,7 +261,7 @@ drawable_fill_core (int argc, Scheme_Object **argv)
   MZ_GC_REG ();
 
   // Get the color
-  color  = SCHEME_INT_VAL (argv[2]);
+  color = SCHEME_INT_VAL (argv[2]);
   r = (unsigned char) irgb_red (color);
   g = (unsigned char) irgb_green (color);
   b = (unsigned char) irgb_blue (color);
@@ -314,6 +334,7 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
   Scheme_Object *fun  = NULL;   // The color function
   Scheme_Object *pos[2] = { NULL, NULL };
                                 // The current position
+  Scheme_Object *color_object;  // The color as a Scheme value
   int color;                    // The color as an iRGB
   unsigned char r, g, b;        // The color components
 
@@ -365,7 +386,15 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
         for (col = 0; col < tw; col++)
           {
             pos[0] = scheme_make_integer (col + tx);
-            color = SCHEME_INT_VAL (scheme_apply (fun, 2, pos));
+            color_object = scheme_apply (fun, 2, pos);
+            color = scheme_object_to_irgb (color_object);
+            if (color < 0) 
+              {
+                scheme_signal_error ("At position (%d,%d), a color function "
+                                     "returned %V, instead of an "
+                                     "integer-encoded RGB color.",
+                                     col+tx, row+ty, color_object);
+              } // invalid color
 /*
             t[0] = (unsigned char) irgb_red (color);
             t[1] = (unsigned char) irgb_green (color);
@@ -414,6 +443,7 @@ drawable_transform_core (int argc, Scheme_Object **argv)
   Scheme_Object *fun  = NULL;   // The color function
   Scheme_Object *params[1] = { NULL };
                                 // Parameters for the inner fun
+  Scheme_Object *color_object;  // The color as a Scheme value
   int color;                    // The color as an iRGB
   unsigned char r, g, b;        // The color components
 
@@ -463,7 +493,15 @@ drawable_transform_core (int argc, Scheme_Object **argv)
           {
             color = irgb_new (t[0], t[1], t[2]);
             params[0] = scheme_make_integer (color); 
-            color = SCHEME_INT_VAL (scheme_apply (fun, 1, params));
+            color_object = scheme_apply (fun, 1, params);
+            color = scheme_object_to_irgb (color_object);
+            if (color < 0) 
+              {
+                scheme_signal_error ("At position (%d,%d), a color function "
+                                     "returned %S, instead of an "
+                                     "integer-encoded RGB color.",
+                                     col+tx, row+ty, color_object);
+              } // invalid color
 /*
             t[0] = (unsigned char) irgb_red (color);
             t[1] = (unsigned char) irgb_green (color);
