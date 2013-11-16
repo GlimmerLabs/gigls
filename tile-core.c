@@ -229,7 +229,7 @@ drawable_fill_core (int argc, Scheme_Object **argv)
       scheme_wrong_type ("drawable-fill!", "drawable", 0, argc, argv);
       return scheme_void;
     }
-  if (! SCHEME_INTP (argv[0]))
+  if (! SCHEME_INTP (argv[2]))
     {
       scheme_wrong_type ("drawable-fill!", "iRGB", 0, argc, argv);
       return scheme_void;
