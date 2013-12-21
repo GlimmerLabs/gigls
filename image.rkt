@@ -571,7 +571,7 @@
 (define image-select-ellipse!
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
-                               "image-select-ellipse!")
+                               'image-select-ellipse!)
     (gimp-ellipse-select image
                          left top
                          width height
@@ -626,13 +626,13 @@
 (define image-select-rectangle!
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
-                               "image-select-rectangle!")
+                               'image-select-rectangle!)
     (gimp-rect-select image
                       left top
                       width height
                       (selection-op operation)
                       0 0)
-    (context-update-displays!)
+    ; (context-update-displays!)
     image))
 
 ;;; Procedure:
@@ -826,7 +826,11 @@
 ;;;   Otherwise, it should be safe to do the selection.
 (define image-validate-selection!
   (lambda (image operation left top width height proc)
-    (let ((crash (lambda (message) (error (string-append proc ": " message)))))
+    (let ((crash (lambda (message) 
+                   (error (string-append 
+                           (symbol->string proc) ": " message "\n  in "
+                           (value->string (list proc image operation
+                                                left top width height)))))))
       (cond
         ((not (image? image))
          (crash "invalid image"))
