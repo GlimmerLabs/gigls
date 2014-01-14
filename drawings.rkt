@@ -10,7 +10,7 @@
          gigls/image
          gigls/higher
          gigls/list
-         gigls/positions
+         gigls/point
          gigls/rgb-core
          gigls/utils)
 
@@ -890,10 +890,10 @@
         (else
          (let* ((hh (/ h 2))
                 (vv (/ v 2))
-                (points (list (position-new (- c1 hh) (+ r1 vv))
-                              (position-new (+ c1 hh) (- r1 vv))
-                              (position-new (+ c2 hh) (- r2 vv))
-                              (position-new (- c2 hh) (+ r2 vv)))))
+                (points (list (point - c1 hh) (+ r1 vv))
+                              (point (+ c1 hh) (- r1 vv))
+                              (point (+ c2 hh) (- r2 vv))
+                              (point (- c2 hh) (+ r2 vv)))))
            (image-select-polygon! image REPLACE points)
            (image-fill-selection! image)
            (image-select-nothing! image))))

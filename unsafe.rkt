@@ -29,6 +29,7 @@
          gigls/list
          gigls/mgimp
          gigls/misc
+         gigls/point
          gigls/positions
          gigls/rgb-core
          gigls/tile
