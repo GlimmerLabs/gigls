@@ -99,7 +99,7 @@
 ;;;   image, the same image (now updated with an arrow)
 ;;; Preconditions:
 ;;;   (from-col,from-row) != (to-col,to-row)
-;;;   type must be one of 'line, 'filled, 'hollow, 'pointy, and
+;;;   type must be one of 'lines, 'filled, 'hollow, 'pointy, and
 ;;;     'hollow-pointy
 (define _image-draw-arrow!
   (lambda (image type from-col from-row to-col to-row head-width head-length)
@@ -277,11 +277,14 @@
     (let ((id (and image (image-id image))))
       (and id
            (let ((active (car (gimp-image-get-active-layer id)))
-                 (layers (gimp-image-get-layers id)))
+                 (layers-info (gimp-image-get-layers id)))
              (if (= active -1)
-                 (if (= (car layers) 0)
+                 (if (= (car layers-info) 0)
                      #f
-                     (vector-ref (cadr layers) 0))
+                     (let ((layers (cadr layers-info)))
+                       (if (vector? layers)
+                           (vector-ref layers 0)
+                           (car layers))))
                 active))))))
 
 ;;; Procedure:
