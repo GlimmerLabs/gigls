@@ -128,6 +128,19 @@
 (define turtle? _turtle?)
 
 ;;; Procedure:
+;;;   guard-turtle-proc
+;;; Parameters:
+;;;   procname, a symbol
+;;;   proc, a one-parameter procedure that expects a turtle
+;;; Purpose:
+;;;   Build a version of proc that checks its parameter type.
+;;; Produces:
+;;;   guarded-proc, a procedure
+(define guard-turtle-proc
+  (lambda (procname proc)
+   (guard-unary-proc procname proc 'turtle turtle?)))
+
+;;; Procedure:
 ;;;   turtle-clone
 ;;; Parameters:
 ;;;   turtle, a turtle
@@ -154,11 +167,8 @@
           (clone ':hide!))
       clone)))
 
-(define turtle-clone
-  (guard-unary-proc 'turtle-clone
-                    _turtle-clone
-                    'turtle
-                    turtle?))
+(define turtle-clone 
+  (guard-turtle-proc 'turtle-clone _turtle-clone))
 
 ;;; Procedure:
 ;;;   turtle-angle
@@ -173,7 +183,7 @@
     (turtle ':angle)))
 
 (define turtle-angle
-  (guard-unary-proc 'turtle-angle _turtle-angle 'turtle turtle?))
+  (guard-turtle-proc 'turtle-angle _turtle-angle))
 
 ;;; Procedure:
 ;;;   turtle-col
@@ -188,7 +198,7 @@
     (turtle ':col)))
 
 (define turtle-col
-  (guard-unary-proc 'turtle-col _turtle-col 'turtle turtle?))
+  (guard-turtle-proc 'turtle-col _turtle-col))
 
 ;;; Procedure:
 ;;;   turtle-display
@@ -249,7 +259,7 @@
     (turtle ':angle)))
 
 (define turtle-direction
-  (guard-unary-proc 'turtle-direction _turtle-direction 'turtle turtle?))
+  (guard-turtle-proc 'turtle-direction _turtle-direction))
 
 ;;; Procedure:
 ;;;   turtle-down!
@@ -265,10 +275,7 @@
     turtle))
 
 (define turtle-down!
-  (guard-unary-proc 'turtle-down!
-                    _turtle-down!
-                    'turtle
-                    turtle?))
+  (guard-turtle-proc 'turtle-down!  _turtle-down!))
 
 ;;; Procedure:
 ;;;   turtle-face!
@@ -362,7 +369,7 @@
     turtle))
 
 (define turtle-hide!
-  (guard-unary-proc 'turtle-hide!  _turtle-hide!  'turtle turtle?))
+  (guard-turtle-proc 'turtle-hide!  _turtle-hide!))
 
 ;;; Procedure:
 ;;;   turtle-point
@@ -377,7 +384,7 @@
     (point (turtle ':col) (turtle ':row))))
 
 (define turtle-point
-  (guard-unary-proc 'turtle_point _turtle-point 'turtle turtle?))
+  (guard-turtle-proc 'turtle_point _turtle-point))
 
 ;;; Procedure:
 ;;;   turtle-row
@@ -392,7 +399,7 @@
     (turtle ':row)))
 
 (define turtle-row
-  (guard-unary-proc 'turtle-row _turtle-row 'turtle turtle?))
+  (guard-turtle-proc 'turtle-row _turtle-row))
 
 ;;; Procedure:
 ;;;   turtle-set-brush!
@@ -483,7 +490,7 @@
     turtle))
 
 (define turtle-show!
-  (guard-unary-proc 'turtle-show!  _turtle-show!  'turtle turtle?))
+  (guard-turtle-proc 'turtle-show! _turtle-show!))
 
 ;;; Procedure:
 ;;;   turtle-teleport!
@@ -552,10 +559,7 @@
     turtle))
 
 (define turtle-up!
-  (guard-unary-proc 'turtle-up!
-                    _turtle-up!
-                    'turtle
-                    turtle?))
+  (guard-turtle-proc 'turtle-up!  _turtle-up!))
 
 ;;; Procedure:
 ;;;   turtle-world
@@ -570,10 +574,7 @@
     (turtle ':world)))
 
 (define turtle-world
-  (guard-unary-proc 'turtle-world
-                    _turtle-world
-                    'turtle
-                    turtle?))
+  (guard-turtle-proc 'turtle-world _turtle-world))
 
 ;;; Procedure:
 ;;;   turtle-x
@@ -588,7 +589,7 @@
     (turtle ':col)))
 
 (define turtle-x
-  (guard-unary-proc 'turtle-x _turtle-x 'turtle turtle?))
+  (guard-turtle-proc 'turtle-x _turtle-x))
    
 ;;; Procedure:
 ;;;   turtle-y
@@ -603,4 +604,4 @@
     (turtle ':row)))
 
 (define turtle-y
-  (guard-unary-proc 'turtle-y _turtle-y 'turtle turtle?))
+  (guard-turtle-proc 'turtle-y _turtle-y))
