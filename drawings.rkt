@@ -1928,7 +1928,7 @@
   (guard-proc 'scale-drawing
               _scale-drawing
               (list 'real 'drawing)
-              (list 'real? 'drawing?)))
+              (list real? drawing?)))
 
 (define _hscale-drawing (swap-params _drawing-hscale))
 (define hscale-drawing
