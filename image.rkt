@@ -81,6 +81,31 @@
                     'image
                     image?))
 
+;;; Name:
+;;;   arrow-types
+;;; Type:
+;;;   list-of-symbols
+;;; Value:
+;;;   A list of all the valid arrow types
+(define arrow-types
+  (list 'lines 'hollow 'filled 'pointy 'hollow-pointy))
+
+;;; Procedure:
+;;;   arrow-type?
+;;; Parameters:
+;;;   type, a symbol
+;;; Purpose:
+;;;   Determine if type is one of the valid arrow types
+;;; Produces:
+;;;   valid?, a Boolean
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If type is a valid type, valid? is #t.
+;;;   Otherwise, valid? is #f.
+(define arrow-type?
+  (r-s member? arrow-types))
+
 ;;; Procedure:
 ;;;   image-draw-arrow!
 ;;; Parameters:
@@ -184,10 +209,9 @@
                     'real 'real 'real 'real 
                     'positive-real 'positive-real)
               (list image?
-                    (r-s member? 
-                         (list 'lines 'hollow 'filled 'pointy 'hollow-pointy))
+                    ^true
                     real? real? real? real?
-                    (and positive? real?) (and positive? real?))))
+                    (^and positive? real?) (^and positive? real?))))
 
 ;;; Procedure:
 ;;;   image-draw-line!
