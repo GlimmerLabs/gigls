@@ -406,6 +406,7 @@
 ;;; Parameters:
 ;;;   turtle, a turtle
 ;;;   brush, a string that names a brush
+;;;   size, a positive real number
 ;;; Purpose:
 ;;;   Set the brush with which the turtle draws.
 ;;; Produces:
@@ -428,7 +429,7 @@
          (error "turtle-set-brush! cannot set size for a non-mutable brush")]
         [(and (not (null? rest))
               (or (not (real? (car rest)))
-                  (not (integer? (car rest)))))
+                  (not (positive? (car rest)))))
          (error/parameter-type 'turtle-set-brush! 3 'positive-real params)]
         [else
          (apply _turtle-set-brush! params)]))))
