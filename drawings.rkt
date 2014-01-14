@@ -890,7 +890,7 @@
         (else
          (let* ((hh (/ h 2))
                 (vv (/ v 2))
-                (points (list (point - c1 hh) (+ r1 vv))
+                (points (list (point (- c1 hh) (+ r1 vv))
                               (point (+ c1 hh) (- r1 vv))
                               (point (+ c2 hh) (- r2 vv))
                               (point (- c2 hh) (+ r2 vv)))))
