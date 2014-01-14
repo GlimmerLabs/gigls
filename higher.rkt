@@ -276,3 +276,20 @@
     (lambda (left) (binproc left right))))
 (define r-s right-section)
 
+;;; Procedure:
+;;;   swap-params
+;;; Parameters:
+;;;   binproc, a two-parameter procedure
+;;; Purpose:
+;;;   Creates a two-parameter procedure that works like binproc, but
+;;;   with the parameters in the opposite order.
+;;; Produces:
+;;;   newproca two-parameter procedure
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (newproc x y) = (binproc y x)
+(define swap-params
+  (lambda (binproc)
+    (lambda (x y)
+      (binproc y x))))
