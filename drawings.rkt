@@ -14,7 +14,6 @@
          gigls/rgb-core
          gigls/utils)
 
-
 ;;; Procedure:
 ;;;   guard-drawing-proc
 ;;; Parameters:
@@ -1920,3 +1919,48 @@
 
 (define drawing-rectangle? _drawing-rectangle?)
 
+; +------------------------------------------+------------------------
+; | Alternate versions of drawing procedures |
+; +------------------------------------------+
+
+(define _scale-drawing (swap-params _drawing-scale))
+(define scale-drawing
+  (guard-proc 'scale-drawing
+              _scale-drawing
+              (list 'real 'drawing)
+              (list 'real? 'drawing?)))
+
+(define _hscale-drawing (swap-params _drawing-hscale))
+(define hscale-drawing
+  (guard-proc 'hscale-drawing
+              _hscale-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _vscale-drawing (swap-params _drawing-vscale))
+(define vscale-drawing
+  (guard-proc 'vscale-drawing
+              _vscale-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _hshift-drawing (swap-params _drawing-hshift))
+(define hshift-drawing
+  (guard-proc 'hshift-drawing
+              _hshift-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _vshift-drawing (swap-params _drawing-vshift))
+(define vshift-drawing
+  (guard-proc 'vshift-drawing
+              _vshift-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _recolor-drawing (swap-params _drawing-recolor))
+(define recolor-drawing
+  (guard-proc 'recolor-drawing
+              _recolor-drawing
+              (list 'color 'drawing)
+              (list color? drawing?)))
