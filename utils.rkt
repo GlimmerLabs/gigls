@@ -191,14 +191,15 @@
 ;;; Preconditions:
 ;;;   [No additional]
 ;;; Postconditions:
-;;;   If there is an i s.t. (substring str i (+ i (string-length pattern))) = pattern
+;;;   If there is an i s.t. 
+;;;     (substring str i (+ i (string-length pattern))) = pattern
 ;;;     then contains? is true (#t)
 ;;;   Otherwise, contains is false (#f)
 ;;; Ponderings:
-;;;   This currently has a very straightforward implementation.  A KMP matcher
-;;;   would likely be more efficient.  We could even make it slightly more efficient 
-;;;   by restricting our seach to the positions in which the first character of
-;;;   patterns occurs.
+;;;   This currently has a very straightforward implementation.  A KMP 
+;;;   matcher would likely be more efficient.  We could even make it slightly 
+;;;   more efficient by restricting our seach to the positions in which the 
+;;;   first character of patterns occurs.
 (define _string-contains?
   (lambda (str pattern)
     (or (string=? pattern "")
