@@ -9,6 +9,7 @@
          gigls/current-brush
          gigls/guard
          gigls/image
+         gigls/point
          gigls/utils)
 
 ;;; Procedure:
@@ -362,6 +363,21 @@
 
 (define turtle-hide!
   (guard-unary-proc 'turtle-hide!  _turtle-hide!  'turtle turtle?))
+
+;;; Procedure:
+;;;   turtle-point
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Get the point at which the turtle resides.
+;;; Produces:
+;;;   pt, a point
+(define _turtle-point
+  (lambda (turtle)
+    (point (turtle ':col) (turtle ':row))))
+
+(define turtle-point
+  (guard-unary-proc 'turtle_point _turtle-point 'turtle turtle?))
 
 ;;; Procedure:
 ;;;   turtle-row
