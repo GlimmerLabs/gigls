@@ -6,6 +6,7 @@
 (provide (all-defined-out))
 (require gigls/guard
          gigls/higher
+         gigls/list
          gigls/misc
          gigls/utils)
 
@@ -229,3 +230,37 @@
       (else
        (_points->floats points)))))
 
+;;; Procedure:
+;;;   random-points
+;;; Parameters:
+;;;   n, an integer
+;;;   cols, an integer
+;;;   rows, an integer
+;;; Purpose:
+;;;   Generate a list of n points, each between (0,0) [inclusive]
+;;;     and (cols,rows) [exclusive]
+;;; Produces:
+;;;   points, a list of points.
+;;; Preconditions:
+;;;   n >= 0
+;;;   cols >= 1
+;;;   rows >= 1
+;;; Postconditions:
+;;;   (length points) = n
+;;;   For each i, 0 < i < n
+;;;     (position? (list-ref points i)) 
+;;;     (integer? (position-col (list-ref points i)))
+;;;     (integer? (position-row (list-ref points i)))
+;;;     0 <= (position-col (list-ref points i)) < cols
+;;;     0 <= (position-row (list-ref points i)) < rows
+(define _random-points
+  (lambda (n cols rows)
+    (_list-random n (lambda () (point (random cols) (random rows))))))
+
+(define random-points
+  (guard-proc 'random-points
+              _random-points
+              (list 'non-negative-integer 'positive-integer 'positive-integer)
+              (list (^and integer? (r-s >= 0))
+                    (^and integer? (r-s > 0))
+                    (^and integer? (r-s > 0)))))
