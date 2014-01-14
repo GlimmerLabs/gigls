@@ -325,16 +325,18 @@
 ;;;   turtle-show
 ;;; Parameters:
 ;;;   turtle, a turtle (created by turtle-new or turtle-clone)
+;;;   type, a type of arrow (optional; pointy by default)
 ;;; Purpose:
 ;;;   Shows the turtle on the screen
 ;;; Produces:
 ;;;   turtle, the same turtle
 (define _turtle-show
   (let ((d2r (/ pi 180)))
-    (lambda (turtle)
+    (lambda (turtle . rest)
       (let ((col (turtle ':col))
             (row (turtle ':row))
-            (angle (turtle ':angle)))
+            (angle (turtle ':angle))
+            (type (if (null? rest) 'pointy (car rest))))
         (let ((back-col (- col (cos (* d2r angle))))
               (back-row (- row (sin (* d2r angle)))))
           (let ((saved-color (context-get-fgcolor))
@@ -344,7 +346,7 @@
               (context-set-fgcolor! turtle-color))
             (context-set-brush! "2. Hardness 100" 1)
             (image-draw-arrow! (turtle ':world)
-                               'pointy
+                               type
                                back-col back-row
                                col row
                                15 10)
@@ -355,8 +357,15 @@
       turtle)))
 
 (define turtle-show
-  (guard-unary-proc 'turtle-show _turtle-show 'turtle turtle?))
-
+  (lambda (turtle . rest)
+    (cond
+      ((not (turtle? turtle))
+       (error/parameter-type 'turtle-show 1 'turtle (cons turtle rest)))
+      ((and (not (null? rest)) (not (null? (cdr rest))))
+       (error/arity 'turtle-show "one or two" (cons turtle rest)))
+      ((and (not (null? rest)) (not (arrow-type? (car rest))))
+       (error/parameter-type 'turtle-show 2 'arrow-type (cons turtle rest)))
+      (else (apply _turtle-show (cons turtle rest))))))
 
 ;;; Procedure:
 ;;;   turtle-teleport!
