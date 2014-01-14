@@ -56,6 +56,19 @@
                           "\n  in "
                           (value->string (cons proc-name params) 60)))))
 
+
+;(define-syntax-rule 
+;  (error/parameter-type proc-name param-num param-type params)
+;  (error (string-append (symbol->string proc-name)
+;                        ": expects type <" 
+;                        (symbol->string param-type)
+;                        "> for "
+;                        (integer->ordinal param-num)
+;                        " parameter, given "
+;                        (value->string (list-ref params (- param-num 1)) 40)
+;                        "\n  in "
+;                        (value->string (cons proc-name params) 60))))
+
 ;;; Procedure:
 ;;;   error/misc
 ;;; Parameters:
