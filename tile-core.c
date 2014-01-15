@@ -102,11 +102,21 @@ unpack_tile (Scheme_Object *tile,
 	     int *x, int *y, int *w, int *h)
 {
   Scheme_Object *tmp = tile;
+  char *oldbytes;
+  char *newbytes;
 
   // Step through the list, extracting values
   *size = SCHEME_INT_VAL (SCHEME_CAR (tmp));
   tmp = SCHEME_CDR (tmp);
-  *bytes = (unsigned char *) SCHEME_BYTE_STR_VAL (SCHEME_CAR (tmp));
+
+  // We're going to copy the bytes to save them from the evil Scheme
+  // garbage collector.  (Or maybe just because I'm not competent enough
+  // to tell the garbage collector that they are not garbage.)
+  oldbytes = (unsigned char *) SCHEME_BYTE_STR_VAL (SCHEME_CAR (tmp));
+  newbytes = malloc(*size);
+  bcopy(oldbytes, newbytes, *size);
+  *bytes = newbytes;
+
   tmp = SCHEME_CDR (tmp);
   *bpp = SCHEME_INT_VAL (SCHEME_CAR (tmp));
   tmp = SCHEME_CDR (tmp);
@@ -279,13 +289,13 @@ drawable_fill_core (int argc, Scheme_Object **argv)
     unpack_tile (tile, &tsize, &tdata, &tbpp, &trowstride, &tx, &ty, &tw, &th);
 
     // Process the tile
-    unsigned char *tmp = tdata;
+    unsigned char *rowdata = tdata;
     // Do each row
     int row;
     for (row = 0; row < th; row++)
       {
         // Grab a pointers to the start of the data
-        unsigned char *t = tmp;
+        unsigned char *t = rowdata;
 
         // Do each column in the row
         int col;
@@ -300,11 +310,13 @@ drawable_fill_core (int argc, Scheme_Object **argv)
           } // for each column
 
         // Advance to the next row
-        tmp += trowstride;
+        rowdata += trowstride;
       } // for each row
 
     // Push the modified tile back to the server
     tile_update (stream, tsize, tdata);
+    // We've allocated the data, so free it!
+    free (tdata);
   } while (tile_stream_advance (stream));
 
   // Close the stream
@@ -348,11 +360,12 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
   int th;
 
   // Set up for garbage collection
-  MZ_GC_DECL_REG (4);
+  MZ_GC_DECL_REG (5);
   MZ_GC_VAR_IN_REG (0, stream);
   MZ_GC_VAR_IN_REG (1, fun);
   MZ_GC_VAR_IN_REG (2, pos[0]);
   MZ_GC_VAR_IN_REG (3, pos[1]);
+  MZ_GC_VAR_IN_REG (4, tile);
   MZ_GC_REG ();
 
   // Get the function
@@ -360,6 +373,7 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
 
   // Get a stream
   stream = tile_stream_new (argv[0], argv[1]);
+  int streamid = SCHEME_INT_VAL(stream);
 
   // Check the validity of the stream
   // STUB
@@ -371,13 +385,14 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
     unpack_tile (tile, &tsize, &tdata, &tbpp, &trowstride, &tx, &ty, &tw, &th);
 
     // Process the tile
-    unsigned char *tmp = tdata;
+    unsigned char *rowdata = tdata;
     // Do each row
     int row;
+
     for (row = 0; row < th; row++)
       {
         // Grab a pointer to the start of the data
-        unsigned char *t = tmp;
+        unsigned char *t = rowdata;
         // Set up half of the position
         pos[1] = scheme_make_integer (row + ty);
 
@@ -409,11 +424,12 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
           } // for each column
 
         // Advance to the next row
-        tmp += trowstride;
+        rowdata += trowstride;
       } // for each row
 
     // Push the modified tile back to the server
     tile_update (stream, tsize, tdata);
+    free (tdata);
   } while (tile_stream_advance (stream));
 
   // Close the stream
@@ -479,13 +495,13 @@ drawable_transform_core (int argc, Scheme_Object **argv)
     unpack_tile (tile, &tsize, &tdata, &tbpp, &trowstride, &tx, &ty, &tw, &th);
 
     // Process the tile
-    unsigned char *tmp = tdata;
+    unsigned char *rowdata = tdata;
     // Do each row
     int row;
     for (row = 0; row < th; row++)
       {
         // Grab a pointer to the start of the data
-        unsigned char *t = tmp;
+        unsigned char *t = rowdata;
 
         // Do each column in the row
         int col;
@@ -516,11 +532,12 @@ drawable_transform_core (int argc, Scheme_Object **argv)
           } // for each column
 
         // Advance to the next row
-        tmp += trowstride;
+        rowdata += trowstride;
       } // for each row
 
     // Push the modified tile back to the server
     tile_update (stream, tsize, tdata);
+    free (tdata);
   } while (tile_stream_advance (stream));
 
   // Close the stream
