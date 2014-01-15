@@ -17,6 +17,7 @@
 ; Primary functions that do need to be exported.
 (require gigls/alt
          gigls/brushes
+         gigls/color-name
          gigls/colors
          gigls/context
          gigls/current-brush
@@ -25,6 +26,7 @@
          gigls/image
          gigls/hacks
          gigls/higher
+         gigls/hsv
          gigls/irgb
          gigls/list
          gigls/mgimp
@@ -32,6 +34,7 @@
          gigls/point
          gigls/positions
          gigls/rgb-core
+         gigls/rgb-list
          gigls/tile
          gigls/turtles
          gigls/utils
