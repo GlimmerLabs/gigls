@@ -9,6 +9,15 @@
 
 (provide (all-defined-out))
 
+;;; Name:
+;;;   all-color-names
+;;; Type:
+;;;   list of strings
+;;; Value:
+;;;   All of the valid color names
+(define all-color-names
+  (sequence->list (cadr (ggimp-rgb-list))))
+
 ;;; Procedure:
 ;;;   color-name?
 ;;; Parameters:
@@ -20,7 +29,7 @@
 (define color-name?
   (lambda (val)
     (and (string? val)
-         (sequence-contains? (context-get-color-names) val))))
+         (sequence-contains? all-color-names val))))
 
 ;;; Procedure:
 ;;;   guard-color-name-proc
@@ -42,20 +51,4 @@
 (define guard-color-name-proc
   (lambda (procname proc)
     (guard-unary-proc procname proc 'color-name color-name?)))
-
-;;; Procedure:
-;;;   context-get-color-names
-;;; Parameters:
-;;;   [None]
-;;; Purpose:
-;;;   Get a list of all the available color names.
-;;; Produces:
-;;;   names, a list of strings
-;;; Partners:
-;;;   (context-find-color-names "NAME")
-;;;      Provides a way to find a list of names that include "NAME".
-;;; Included in colors (not context) to avoid interdependencies
-(define context-get-color-names 
-  (lambda ()
-    (cadr (ggimp-rgb-list))))
 
