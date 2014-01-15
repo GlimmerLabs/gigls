@@ -4,6 +4,7 @@
 (require louDBus/unsafe)
 (require gigls/brushes
          gigls/colors
+         gigls/color-name
          gigls/guard
          gigls/hacks
          gigls/higher
@@ -125,15 +126,15 @@
         (else
          (apply _context-list-brushes restriction))))))
 
-
-
 ;;; Procedures:
+;;;   context-get-color-names
 ;;;   context-list-color-names
 ;;;   context-list-colors
-;;; Parmeters:
-;;;  none
+;;; Parameters:
+;;;   pattern [optional]
 ;;; Purpose:
-;;;   List all the colors contained in the GIMP
+;;;   List all the colors contained in the GIMP (or just those
+;;;   the contain pattern)
 ;;; Produces:
 ;;;   colors, a list of strings
 ;;; Preconditions:
@@ -142,10 +143,27 @@
 ;;;   All of the colors recognized by the GIMP
 ;;; NOTE:
 ;;;   Calls a function implimented as a GIMP plugin
-(define context-list-color-names
-  (lambda ()
-    (cadr (loudbus-call gimp 'ggimp_rgb_list))))
+(define _context-list-color-names
+  (lambda args
+    (if (null? args)
+        all-color-names
+        (let ([pattern (car args)])
+          (list-select all-color-names 
+                       (lambda (color) (string-contains? color pattern)))))))
 
+(define context-list-color-names
+  (lambda args
+    (cond
+      [(null? args)
+       (_context-list-color-names)]
+      [(not (null? (cdr args)))
+       (error/arity 'context-list-color-names "zero or one" args)]
+      [(not (string? (car args)))
+       (error/parameter-type 'context-list-color-names 1 'string args)]
+      [else
+       (_context-list-color-names (car args))])))
+
+(define context-get-color-names context-list-color-names)
 (define context-list-colors context-list-color-names)
 
 ;;; Procedure:
