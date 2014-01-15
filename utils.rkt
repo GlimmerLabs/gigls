@@ -80,6 +80,27 @@
         (vector-ref sequence n)
         (list-ref sequence n))))
 
+;;; Procedure:
+;;;   sequence->list
+;;; Parameters:
+;;;   seqa list or vector
+;;; Purpose:
+;;;   Convert the sequence to a list
+;;; Produces: 
+;;;   lst, a list
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   For all reasonable i, (sequence-ref seq i) = (list-ref lst i)
+(define sequence->list
+  (lambda (seq)
+    (cond
+     [(vector? seq)
+      (vector->list seq)]
+     [(list? seq)
+      seq]
+     [else
+      (error 'sequnce->list "expects a value of type <sequence>, given" seq)])))
 
 ;;; Procedure:
 ;;;   integer->ordinal
@@ -250,7 +271,6 @@
                    (cons (car lst) (charlist-escape (cdr lst))))))))
       (lambda (str)
         (list->string (charlist-escape (string->list str)))))))
-
 
 ;;; Procedure:
 ;;;   value->string
