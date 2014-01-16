@@ -166,7 +166,7 @@
 ;;;   name, a symbol
 ;;;   proc, a procedure of the form (lambda (val) ___)
 ;;;   param-type, a symbol
-;;;   param-pred, a unary predicate
+;;;   param-pred,? a unary predicate
 ;;; Purpose:
 ;;;   Build a new version of proc that checks preconditions.
 ;;; Produces:
@@ -177,10 +177,42 @@
 ;;;   If (param-pred? val), (guarded-proc val) = (proc val)
 ;;;   Otherwise, (guarded-proc val) throws an appropriate error
 (define guard-unary-proc
-  (lambda (name proc param-type param-pred)
-    (guard-proc name proc (list param-type) (list param-pred))))
+  (lambda (name proc param-type param-pred?)
+    (guard-proc name proc (list param-type) (list param-pred?))))
 
 (define rgb? integer?)
+;;; Procedure:
+;;;   guard-01-proc
+;;; Parameters:
+;;;   name, a symbol
+;;;   proc, a procedure that expects zero or one parameters
+;;;   param-type, a symbol
+;;;   param-pred?, a unary predicate
+;;; Purpose:
+;;;   Build a new version of proc that checks preconditions.
+;;; Produces:
+;;;   guarded-proc, a procedure of the form (lambda params _____)
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If (null? params)
+;;;     (guarded-proc) = (proc)
+;;;   Otherwise, if (and (param-pred? (car params)) (= (length params) 1))
+;;;     (guarded-proc (car params)) = (proc (car params))
+;;;   Otherwise,
+;;;     Reports an error
+(define guard-01-proc
+  (lambda (name proc param-type param-pred?)
+    (lambda params
+      (cond
+        [(null? params)
+         (proc)]
+        [(not (null? (cdr params)))
+         (error/arity 'procname 1 params)]
+        [(not (param-pred? (car params)))
+         (error/parameter-type 'procname 1 param-type params)]
+        [else
+         (proc (car params))]))))
 
 ;;; Procedure:
 ;;;   validate-param!
