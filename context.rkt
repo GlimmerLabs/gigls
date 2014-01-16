@@ -167,7 +167,7 @@
 (define context-list-colors context-list-color-names)
 
 ;;; Procedure:
-;;;   context-list-fonts
+;;;   context-list-fonts [DEPRECATED]
 ;;; Parameters:
 ;;;   pattern, a string [optional]
 ;;; Purpose:
@@ -179,9 +179,9 @@
   (lambda restriction
     (cond
       ((null? restriction)
-       (vector->list (cadr (gimp-fonts-get-list ""))))
+       (sequence->list (cadr (gimp-fonts-get-list ""))))
       (else
-       (vector->list (cadr (gimp-fonts-get-list (car restriction))))))))
+       (sequence->list (cadr (gimp-fonts-get-list (car restriction))))))))
 
 (define context-list-fonts
   (lambda restriction
