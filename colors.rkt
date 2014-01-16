@@ -323,8 +323,8 @@
         ((equal? cmax g) (+ (* 60 (/ (- b r) (- cmax cmin))) 120))
         ((equal? cmax b) (+ (* 60 (/ (- r g) (- cmax cmin))) 240))))))
 
-(define irgb->hue (guard-rgb-proc 'irgb->hue _irgb->hue))
-(define rgb->hue (guard-rgb-proc 'rgb->hue _irgb->hue))
+(define irgb->hue (guard-irgb-proc 'irgb->hue _irgb->hue))
+(define rgb->hue (guard-irgb-proc 'rgb->hue _irgb->hue))
 
 ;;; Procedures:
 ;;;   irgb->hsv
