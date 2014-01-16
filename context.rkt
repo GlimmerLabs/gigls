@@ -286,7 +286,12 @@
 ;;;   [None]
 ;;; Postconditions
 ;;;   All completed image operations should be visible.
-(define context-update-displays! gimp-displays-flush)
+(define _context-update-displays! 
+  (lambda ()
+    gimp-displays-flush
+    (void)))
+
+(define context-update-displays! _context-update-displays!)
 
 
 ; +------------------------------------------+----------------------------------
