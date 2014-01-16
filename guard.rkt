@@ -140,27 +140,6 @@
       (apply proc params))))
 
 ;;; Procedure:
-;;;   guard-rgb-proc
-;;; Parameters:
-;;;   name, a symbol
-;;;   proc, a procedure of the form (lambda (rgb) ___)
-;;; Purpose:
-;;;   Build a new version of proc that checks preconditions.
-;;; Produces:
-;;;   guarded-proc, a procedure of the form (lambda (rgb) _____)
-;;; Preconditions:
-;;;   [No additional]
-;;; Postconditions:
-;;;   If (rgb? val), (guarded-proc val) = (proc val)
-;;;   Otherwise, (guarded-proc val) throws an appropriate error
-(define guard-rgb-proc
-  (lambda (name proc)
-    (lambda params
-      (validate-unary! name params)
-      (validate-param! name 'rgb rgb? params)
-      (proc (car params)))))
-
-;;; Procedure:
 ;;;   guard-unary-proc
 ;;; Parameters:
 ;;;   name, a symbol
@@ -180,7 +159,6 @@
   (lambda (name proc param-type param-pred?)
     (guard-proc name proc (list param-type) (list param-pred?))))
 
-(define rgb? integer?)
 ;;; Procedure:
 ;;;   guard-01-proc
 ;;; Parameters:
