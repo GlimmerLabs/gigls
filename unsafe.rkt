@@ -35,6 +35,7 @@
          gigls/positions
          gigls/rgb-core
          gigls/rgb-list
+         gigls/text
          gigls/tile
          gigls/turtles
          gigls/utils
