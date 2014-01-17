@@ -467,6 +467,29 @@
                (else (kernel (+ pos 1)))))))))
 
 ;;; Procedure:
+;;;   image-save
+;;; Parameters:
+;;;   image, an image
+;;;   fname, a file name
+;;; Purpose:
+;;;   Save image in the given file.
+;;; Produces:
+;;;   fname, the name of the file
+;;; Preconditions:
+;;;   The user can legally write to fname.
+;;;   fname ends in one of the standard image file suffixes (.gif,
+;;;     .jpg, .png, xcf, ...)
+;;; Postconditions:
+;;;   The given file now contains a copy of the image.
+(define image-save
+  (lambda (image fname)
+    (gimp-file-save 1 ; non-interactive
+                    image
+                    (image-get-layer image)
+                    fname
+                    fname)))
+
+;;; Procedure:
 ;;;   image-selection-drop!
 ;;; Parameters:
 ;;;   image, an image
