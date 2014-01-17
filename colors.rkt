@@ -437,6 +437,7 @@
 ; +----------------------------------+
 
 ;;; Procedure:
+;;;   rgb-list->irgb
 ;;;   rgb-list->rgb
 ;;; Parameters:
 ;;;   color, an rgb-list
@@ -447,12 +448,14 @@
 ;;;     integers, all in the range [0..255].
 ;;; Postconditions:
 ;;;   rgb represents the same color as color.
-(define _rgb-list->rgb
+(define _rgb-list->irgb
   (lambda (color)
-    (irgb-new (car color) (cadr color) (caddr color))))
+    (irgb (car color) (cadr color) (caddr color))))
 
+(define rgb-list->irgb
+  (guard-rgb-list-proc 'rgb-list->irgb _rgb-list->irgb))
 (define rgb-list->rgb
-  (guard-rgb-list-proc 'rgb-list->rgb _rgb-list->rgb))
+  (guard-rgb-list-proc 'rgb-list->rgb _rgb-list->irgb))
 
 ; +------------------------+------------------------------------------
 ; | Misc. Color Procedures |
@@ -472,6 +475,6 @@
       ((irgb? color) 'IRGB)
       ((rgb-list? color) 'RGB-LIST)
       ((hsv? color) 'HSV)
-      ((color-name? color) 'NAME)
+      ((color-name? color) 'COLOR-NAME)
       (else #f))))
 
