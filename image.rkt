@@ -81,6 +81,37 @@
                     'image
                     image?))
 
+;;; Procedure:
+;;;   image-copy-paste-block!
+;;; Parameters:
+;;;   source, an image id
+;;;   source-col, an integer
+;;;   source-row, an integer
+;;;   target, an image id
+;;;   target-col, an integer
+;;;   target-row, an integer
+;;;   width, an integer
+;;;   height, an integer
+;;; Purpose:
+;;;   Copies a width-x-height block from source to target, with the top-left of
+;;;   each block as specified.
+;;; Produces:
+;;;   [Nothing; called for the side effect.]
+;;; Problems:
+;;;   Need to deal with out-of-bounds issues.  
+;;;     (See paste-buffer! in newgrid.scm for an approach.)
+(define image-copy-paste-block!
+  (lambda (source source-col source-row 
+           target target-col target-row 
+           width height)
+    (image-select-rectangle! source REPLACE source-col source-row width height)
+    (gimp-edit-copy (image-get-layer source))
+    (image-select-rectangle! target REPLACE target-col target-row width height)
+    (gimp-floating-sel-anchor 
+     (car (gimp-edit-paste (image-get-layer target) 0)))
+    (image-select-nothing! source)
+    (image-select-nothing! target)))
+
 ;;; Name:
 ;;;   arrow-types
 ;;; Type:
@@ -754,6 +785,7 @@
                     image?))
 
 ;;; Procedure:
+;;;   image-stroke!
 ;;;   image-stroke-selection!
 ;;; Parameters:
 ;;;   image, a gimp image
@@ -767,13 +799,20 @@
 ;;;   image is a valid image
 ;;; Postconditions:
 ;;;   The image has been stroked, as in the stroke menu item.
-(define image-stroke-selection!
+(define _image-stroke-selection!
   (lambda (image)
     (cond 
       ((not (image? image))
        (error "image-stroke-selection!: invalid image" image))
       (else
        (gimp-edit-stroke (image-get-layer image))))))
+
+(define image-stroke-selection!
+  (guard-unary-proc 'image-stroke-selection! _image-stroke-selection!
+                    'image image?))
+(define image-stroke!
+  (guard-unary-proc 'image-stroke! _image-stroke-selection!
+                    'image image?))
 
 ;;; Procedure:
 ;;;   image-transform-pixel!
