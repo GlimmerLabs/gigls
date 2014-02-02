@@ -527,11 +527,12 @@
 ;;;   img, when shown, contains the given drawing.
 (define drawing->image
   (lambda (drawing width height)
-    (let ((img (image-new width height)))
-      (drawing-render! drawing img)
-      img)))
-
-
+    (let ([bgcolor (context-get-bgcolor)])
+      (context-set-bgcolor! "white")
+      (let ((img (image-new width height)))
+        (drawing-render! drawing img)
+        (context-set-bgcolor! bgcolor)
+        img))))
 
 ;;; Procedure:
 ;;;   drawing-left
