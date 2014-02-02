@@ -505,7 +505,7 @@
 ;;; Purpose:
 ;;;   Save image in the given file.
 ;;; Produces:
-;;;   fname, the name of the file
+;;;   image, the saved image
 ;;; Preconditions:
 ;;;   The user can legally write to fname.
 ;;;   fname ends in one of the standard image file suffixes (.gif,
@@ -518,7 +518,8 @@
                     image
                     (image-get-layer image)
                     fname
-                    fname)))
+                    fname)
+    image))
 
 ;;; Procedure:
 ;;;   image-selection-drop!
