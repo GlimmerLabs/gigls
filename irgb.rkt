@@ -150,8 +150,11 @@
           (func (irgb-green color))
           (func (irgb-blue color)))))
 
-(define irgb-map (guard-irgb-proc 'irgb-map _irgb-map))
-(define rgb-map (guard-irgb-proc 'rgb-map _irgb-map))
+(define irgb-map 
+  (guard-proc 'irgb-map
+              _irgb-map
+              (list 'irgb-color 'procedure)
+              (list irgb? procedure?)))
 
 ; +-----------------+-------------------------------------------------
 ; | Transformations |
@@ -227,7 +230,7 @@
 ;;;   Otherwise
 ;;;     (irgb-blue darker) = 0
 (define _irgb-darker
-  (r-s irgb-map (o (l-s max 0) (r-s - 16))))
+  (r-s _irgb-map (o (l-s max 0) (r-s - 16))))
 
 (define irgb-darker (guard-irgb-proc 'irgb-darker _irgb-darker))
 (define rgb-darker (guard-irgb-proc 'rgb-darker _irgb-darker))
@@ -306,7 +309,7 @@
 ;;;   Otherwise
 ;;;     (irgb-blue lighter) = 255
 (define _irgb-lighter
-  (r-s irgb-map (o (l-s min 255) (r-s + 16))))
+  (r-s _irgb-map (o (l-s min 255) (r-s + 16))))
 
 (define irgb-lighter (guard-irgb-proc 'irgb-lighter _irgb-lighter))
 (define rgb-lighter (guard-irgb-proc 'rgb-lighter _irgb-lighter))
@@ -322,7 +325,7 @@
 ;;; Produces:
 ;;;   shifted, an integer-encoded RGB color
 (define _irgb-phaseshift
-  (r-s irgb-map (o (r-s modulo 256) (l-s + 128))))
+  (r-s _irgb-map (o (r-s modulo 256) (l-s + 128))))
 
 (define irgb-phaseshift (guard-irgb-proc 'irgb-phaseshift _irgb-phaseshift))
 (define rgb-phaseshift (guard-irgb-proc 'rgb-phaseshift _irgb-phaseshift))
