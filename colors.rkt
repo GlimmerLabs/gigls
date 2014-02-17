@@ -469,7 +469,7 @@
 ;;;   Determine what representation is used for color
 ;;; Produces:
 ;;;   representation, a symbol (or #f)
-(define color-representation
+(define _color-representation
   (lambda (color)
     (cond
       ((irgb? color) 'IRGB)
@@ -478,3 +478,4 @@
       ((color-name? color) 'COLOR-NAME)
       (else #f))))
 
+(define color-representation _color-representation)
