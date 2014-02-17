@@ -90,7 +90,9 @@
 ;;;   Subsequent calls to (context-get-font-name) return font-name
 (define _context-set-font-name!
   (lambda (font-name)
-    (gimp-context-set-font font-name)))
+    (gimp-context-set-font font-name)
+    (void)))
+
 (define context-set-font-name!
   (guard-unary-proc 'context-set-font-name! 
                     _context-set-font-name!
