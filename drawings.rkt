@@ -151,6 +151,15 @@
 
 (define drawing-rule? _drawing-rule?)
 
+;;; Value: 
+;;;   drawing-blank
+;;; Type:
+;;;   drawing
+;;; Description:
+;;;   A blank drawing.  Included for the sake of completeness and,
+;;;   more importantly, to provide a base case for recursion.
+(define drawing-blank (list 'drawing 'blank))
+
 ;;; Procedure:
 ;;;   drawing-bottom
 ;;; Parameters:
@@ -527,11 +536,12 @@
 ;;;   img, when shown, contains the given drawing.
 (define drawing->image
   (lambda (drawing width height)
-    (let ((img (image-new width height)))
-      (drawing-render! drawing img)
-      img)))
-
-
+    (let ([bgcolor (context-get-bgcolor)])
+      (context-set-bgcolor! "white")
+      (let ((img (image-new width height)))
+        (drawing-render! drawing img)
+        (context-set-bgcolor! bgcolor)
+        img))))
 
 ;;; Procedure:
 ;;;   drawing-left
