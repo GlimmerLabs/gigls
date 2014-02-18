@@ -514,7 +514,7 @@ drawable_transform_core (int argc, Scheme_Object **argv)
             if (color < 0) 
               {
                 scheme_signal_error ("At position (%d,%d), a color function "
-                                     "returned %S, instead of an "
+                                     "returned %V, instead of an "
                                      "integer-encoded RGB color.",
                                      col+tx, row+ty, color_object);
               } // invalid color
