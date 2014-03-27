@@ -288,7 +288,7 @@
 ;;;   All completed image operations should be visible.
 (define _context-update-displays! 
   (lambda ()
-    gimp-displays-flush
+    (gimp-displays-flush)
     (void)))
 
 (define context-update-displays! _context-update-displays!)
