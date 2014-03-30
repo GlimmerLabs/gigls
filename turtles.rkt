@@ -186,6 +186,36 @@
   (guard-turtle-proc 'turtle-angle _turtle-angle))
 
 ;;; Procedure:
+;;;   turtle-brush
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the brush that the turtle uses to draw
+;;; Produces:
+;;;   brush, a string that names a Gimp brush.
+(define _turtle-brush
+  (lambda (turtle)
+    (turtle ':brush)))
+
+(define turtle-brush
+  (guard-turtle-proc 'turtle-brush _turtle-brush))
+ 
+;;; Procedure:
+;;;   turtle-brush-size
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the size of the brush that the turtle uses to draw
+;;; Produces:
+;;;   size, an integer
+(define _turtle-brush-size
+  (lambda (turtle)
+    (turtle ':brush-size)))
+
+(define turtle-brush-size
+  (guard-turtle-proc 'turtle-brush-size _turtle-brush-size))
+ 
+;;; Procedure:
 ;;;   turtle-col
 ;;; Parameters:
 ;;;   turtle, a turtle
@@ -199,6 +229,21 @@
 
 (define turtle-col
   (guard-turtle-proc 'turtle-col _turtle-col))
+
+;;; Procedure:
+;;;   turtle-color
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the color the turtle uses to draw
+;;; Produces:
+;;;   color, an integer-encoded RGB color
+(define _turtle-color
+  (lambda (turtle)
+    (turtle ':color)))
+
+(define turtle-color
+  (guard-turtle-proc 'turtle-color _turtle-color))
 
 ;;; Procedure:
 ;;;   turtle-display
