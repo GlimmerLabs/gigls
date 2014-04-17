@@ -429,11 +429,6 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
 
 	    else // it's a valid color
 	      {
-/*
-                t[0] = (unsigned char) irgb_red (color);
-                t[1] = (unsigned char) irgb_green (color);
-                t[2] = (unsigned char) irgb_blue (color);
- */
                 t[0] = IRGB_RED (color);
                 t[1] = IRGB_GREEN (color);
                 t[2] = IRGB_BLUE (color);
@@ -461,6 +456,127 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
   // And we're done
   return argv[0];
 } // drawable_recompute_core
+
+/**
+ * Redo the pixels in a drawable.  (Inner code for image-redo! and
+ * other functions.)
+ * 
+ * Parameters:
+ *   0: image-id
+ *   1: drawable-id
+ *   2: lambda (x,y,color) -> newcolor
+ */
+Scheme_Object *
+drawable_redo_core (int argc, Scheme_Object **argv)
+{
+  Scheme_Object *stream = NULL;	// The tile stream
+  Scheme_Object *tile = NULL;	// Info on the current tile
+  Scheme_Object *fun  = NULL;   // The color function
+  Scheme_Object *params[3] = { NULL, NULL, NULL };
+                                // Parameters for the inner fun
+  Scheme_Object *color_object;  // The color as a Scheme value
+  int color;                    // The color as an iRGB
+  unsigned char r, g, b;        // The color components
+
+  int tsize;
+  unsigned char *tdata;
+  int tbpp;
+  int trowstride;
+  int tx;
+  int ty;
+  int tw;
+  int th;
+
+  // Set up for garbage collection
+  MZ_GC_DECL_REG (5);
+  MZ_GC_VAR_IN_REG (0, stream);
+  MZ_GC_VAR_IN_REG (1, fun);
+  MZ_GC_VAR_IN_REG (2, params[0]);
+  MZ_GC_VAR_IN_REG (3, params[1]);
+  MZ_GC_VAR_IN_REG (4, params[2]);
+  MZ_GC_REG ();
+
+  // Get the function
+  fun = argv[2];
+
+  // Get a stream
+  stream = tile_stream_new (argv[0], argv[1]);
+
+  // Check the validity of the stream
+  // STUB
+
+  // Get all the tiles 
+  do {
+    // Get the data from the current tile 
+    tile = tile_stream_get (stream);
+    unpack_tile (tile, &tsize, &tdata, &tbpp, &trowstride, &tx, &ty, &tw, &th);
+
+    // Process the tile
+    unsigned char *rowdata = tdata;
+    // Do each row
+    int row;
+    for (row = 0; row < th; row++)
+      {
+        // Grab a pointer to the start of the data
+        unsigned char *t = rowdata;
+
+        // Set up half of the position
+        params[1] = scheme_make_integer (row + ty);
+
+        // Do each column in the row
+        int col;
+        for (col = 0; col < tw; col++)
+          {
+            // Set up the other half of the position
+            params[0] = scheme_make_integer (col + tx);
+            // Add the color
+            color = irgb_new (t[0], t[1], t[2]);
+            params[2] = scheme_make_integer (color); 
+            color_object = scheme_apply (fun, 3, params);
+            color = scheme_object_to_irgb (color_object);
+
+	    if (color == TRANSPARENT)
+	      {
+	        // Do nothing, keep the color as is
+	      } // if (color == TRANSPARENT) 
+
+            else if (color < 0) 
+              {
+                scheme_signal_error ("At position (%d,%d), a color function "
+                                     "returned %V, instead of an "
+                                     "integer-encoded RGB color.",
+                                     col+tx, row+ty, color_object);
+              } // invalid color
+
+            else // it's a valid color.
+              {
+                t[0] = IRGB_RED (color);
+                t[1] = IRGB_GREEN (color);
+                t[2] = IRGB_BLUE (color);
+              } // it's a valid color
+
+            // Advance to the next pixel
+            t += tbpp;
+          } // for each column
+
+        // Advance to the next row
+        rowdata += trowstride;
+      } // for each row
+
+    // Push the modified tile back to the server
+    tile_update (stream, tsize, tdata);
+    free (tdata);
+  } while (tile_stream_advance (stream));
+
+  // Close the stream
+  tile_stream_close (stream);
+
+  // Clean up
+  MZ_GC_UNREG ();
+
+  // And we're done
+  return argv[0];
+} // drawable_redo_core
 
 /**
  * Transform the pixels in a drawable.  (Inner code for image-transform! and
@@ -547,11 +663,6 @@ drawable_transform_core (int argc, Scheme_Object **argv)
 
             else // it's a valid color.
               {
-/*
-                t[0] = (unsigned char) irgb_red (color);
-                t[1] = (unsigned char) irgb_green (color);
-                t[2] = (unsigned char) irgb_blue (color);
- */
                 t[0] = IRGB_RED (color);
                 t[1] = IRGB_GREEN (color);
                 t[2] = IRGB_BLUE (color);
@@ -661,6 +772,7 @@ scheme_reload (Scheme_Env *env)
   // Add the procedures
   register_scheme_function (drawable_fill_extended, "drawable-fill-extended", 5, 5, menv);
   register_scheme_function (drawable_fill_core, "_drawable-fill!", 3, 3, menv);
+  register_scheme_function (drawable_redo_core, "_drawable-redo!", 3, 3, menv);
   register_scheme_function (drawable_recompute_core, "_drawable-recompute!", 3, 3, menv);
   register_scheme_function (drawable_transform_core, "_drawable-transform!", 3, 3, menv);
   register_scheme_function (tile_core_init, "tile-core-init", 2, 2, menv);

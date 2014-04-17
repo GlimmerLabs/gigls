@@ -107,6 +107,32 @@
 	      (list image?  procedure?)))
 
 ;;; Procedure:
+;;;   image-redo!
+;;; Parameters:
+;;;   image, an image
+;;;   fun, a function from two integers and a color to a color
+;;; Purpose:
+;;;   Redo selected portions or all of the image
+;;; Produces:
+;;;   image, the same image, now modified.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   For all 0 <= i < width, 0 <= j < height
+;;;     If i,j is in the selected region (or nothing is selected)
+;;;       (image-get-pixel image i j) = (fun i j (image-get-pixel original i j))
+(define _image-redo!
+  (lambda (image fun)
+    (let* ([drawable (image-get-layer image)])
+      (_drawable-redo! image drawable fun))))
+      
+(define image-redo!
+  (guard-proc 'image-redo!
+              _image-redo!
+	      (list 'image 'x-y-color-to-color)
+	      (list image?  procedure?)))
+
+;;; Procedure:
 ;;;   image-transform!
 ;;; Parameters:
 ;;;   image, an image
