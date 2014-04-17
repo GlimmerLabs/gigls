@@ -3,7 +3,7 @@
  *   A Racket extension that provides the core of the various functions
  *   that operation on image tiles.
  *
- * Copyright (c) 2012-13 Samuel A. Rebelsky.  All rights reserved.
+ * Copyright (c) 2012-14 Samuel A. Rebelsky.  All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the Lesser GNU General Public License as published 
@@ -41,6 +41,16 @@
 #include <scheme.h>
 
 
+// +-----------+-------------------------------------------------------
+// | Constants |
+// +-----------+
+
+/**
+ * The special value for "transparent", used in image-recompute!
+ */
+#define TRANSPARENT -1
+
+
 // +---------+---------------------------------------------------------
 // | Globals |
 // +---------+
@@ -75,9 +85,9 @@ scheme_object_to_irgb (Scheme_Object *obj)
   else if (SCHEME_FLTP (obj))
     return (int) SCHEME_FLT_VAL (obj);
   else if (SCHEME_RATIONALP (obj))
-    return (int)  scheme_rational_to_double (obj);
+    return (int) scheme_rational_to_double (obj);
   else
-    return -1;
+    return -2;
 } // scheme_object_to_irgb
 
 /**
@@ -403,21 +413,31 @@ drawable_recompute_core (int argc, Scheme_Object **argv)
             pos[0] = scheme_make_integer (col + tx);
             color_object = scheme_apply (fun, 2, pos);
             color = scheme_object_to_irgb (color_object);
-            if (color < 0) 
+
+	    if (color == TRANSPARENT)
+	      {
+	        // Do nothing, keep the color as is
+	      } // if (color == TRANSPARENT) 
+
+            else if (color < 0) 
               {
                 scheme_signal_error ("At position (%d,%d), a color function "
                                      "returned %V, instead of an "
                                      "integer-encoded RGB color.",
                                      col+tx, row+ty, color_object);
               } // invalid color
+
+	    else // it's a valid color
+	      {
 /*
-            t[0] = (unsigned char) irgb_red (color);
-            t[1] = (unsigned char) irgb_green (color);
-            t[2] = (unsigned char) irgb_blue (color);
+                t[0] = (unsigned char) irgb_red (color);
+                t[1] = (unsigned char) irgb_green (color);
+                t[2] = (unsigned char) irgb_blue (color);
  */
-            t[0] = IRGB_RED (color);
-            t[1] = IRGB_GREEN (color);
-            t[2] = IRGB_BLUE (color);
+                t[0] = IRGB_RED (color);
+                t[1] = IRGB_GREEN (color);
+                t[2] = IRGB_BLUE (color);
+              } // valid color
 
             // Advance to the next pixel
             t += tbpp;
@@ -511,21 +531,31 @@ drawable_transform_core (int argc, Scheme_Object **argv)
             params[0] = scheme_make_integer (color); 
             color_object = scheme_apply (fun, 1, params);
             color = scheme_object_to_irgb (color_object);
-            if (color < 0) 
+
+	    if (color == TRANSPARENT)
+	      {
+	        // Do nothing, keep the color as is
+	      } // if (color == TRANSPARENT) 
+
+            else if (color < 0) 
               {
                 scheme_signal_error ("At position (%d,%d), a color function "
                                      "returned %V, instead of an "
                                      "integer-encoded RGB color.",
                                      col+tx, row+ty, color_object);
               } // invalid color
+
+            else // it's a valid color.
+              {
 /*
-            t[0] = (unsigned char) irgb_red (color);
-            t[1] = (unsigned char) irgb_green (color);
-            t[2] = (unsigned char) irgb_blue (color);
+                t[0] = (unsigned char) irgb_red (color);
+                t[1] = (unsigned char) irgb_green (color);
+                t[2] = (unsigned char) irgb_blue (color);
  */
-            t[0] = IRGB_RED (color);
-            t[1] = IRGB_GREEN (color);
-            t[2] = IRGB_BLUE (color);
+                t[0] = IRGB_RED (color);
+                t[1] = IRGB_GREEN (color);
+                t[2] = IRGB_BLUE (color);
+              } // it's a valid color
 
             // Advance to the next pixel
             t += tbpp;
