@@ -81,6 +81,32 @@
 		    (and integer? exact? positive?))))
 
 ;;; Procedure:
+;;;   image-recompute!
+;;; Parameters:
+;;;   image, an image
+;;;   pos2color, a function from two integers to a color
+;;; Purpose:
+;;;   Recompute selected portions or all of the image
+;;; Produces:
+;;;   image, the same image, now modified.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   For all 0 <= i < width, 0 <= j < height
+;;;     If i,j is in the selected region (or nothing is selected)
+;;;       (image-get-pixel image i j) = (pos2color i j)
+(define _image-recompute!
+  (lambda (image pos2color)
+    (let* ([drawable (image-get-layer image)])
+      (_drawable-recompute! image drawable pos2color))))
+      
+(define image-recompute!
+  (guard-proc 'image-recompute!
+              _image-recompute!
+	      (list 'image 'pos2color)
+	      (list image?  procedure?)))
+
+;;; Procedure:
 ;;;   image-transform!
 ;;; Parameters:
 ;;;   image, an image
