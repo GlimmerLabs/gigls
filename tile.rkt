@@ -50,7 +50,7 @@
 	      (list image-id? drawable? (constant #t))))
 
 ;;; Procedure:
-;;;   image-compuate
+;;;   image-compute
 ;;; Parameters:
 ;;;   pos2color, a function from two integers to a color
 ;;;   width, a positive integer
