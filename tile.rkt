@@ -157,3 +157,12 @@
 	      (list 'image 'colorfun)
 	      (list image-id? procedure?)))
 
+;;; Value:
+;;;   IRGB-TRANSPARENT
+;;; Type:
+;;;   integer-encoded RGB color (more or less)
+;;; Description:
+;;;   A value for image-recompute! to indicate "don't change the color."
+;;; Note:
+;;;   The definition might belong in tile-core.c.
+(define IRGB-TRANSPARENT -1)
