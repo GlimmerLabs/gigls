@@ -232,21 +232,28 @@
 ;;;   (hsv->rgb (irgb->hsv rgb)) should be close to rgb.
 (define _hsv->irgb
   (lambda (hsv)
-    (let* ((h (hsv-hue hsv))
-           (s (hsv-saturation hsv))
-           (v (hsv-value hsv))
-           (hi (mod (floor (/ h 60)) 6))
-           (f (- (/ h 60) hi))
-           (p (* v (- 1 s)))
-           (q (* v (- 1 (* f s))))
-           (t (* v (- 1 (* s (- 1 f))))))
+    (let* ([h (hsv-hue hsv)]
+           [s (hsv-saturation hsv)]
+           [v (hsv-value hsv)]
+           [hi (inexact->exact (mod (floor (/ h 60)) 6))]
+           [f (- (/ h 60) hi)]
+           [p (* v (- 1 s))]
+           [q (* v (- 1 (* f s)))]
+           [t (* v (- 1 (* s (- 1 f))))])
       (cond
-        ((equal? hi 0) (irgb (* 255 v) (* 255 t) (* 255 p)))
-        ((equal? hi 1) (irgb (* 255 q) (* 255 v) (* 255 p)))
-        ((equal? hi 2) (irgb (* 255 p) (* 255 v) (* 255 t)))
-        ((equal? hi 3) (irgb (* 255 p) (* 255 q) (* 255 v)))
-        ((equal? hi 4) (irgb (* 255 t) (* 255 p) (* 255 v)))
-        ((equal? hi 5) (irgb (* 255 v) (* 255 p) (* 255 q)))))))
+        [(equal? hi 0) 
+         (irgb (* 255 v) (* 255 t) (* 255 p))]
+        [(equal? hi 1) 
+	 (irgb (* 255 q) (* 255 v) (* 255 p))]
+        [(equal? hi 2) 
+	 (irgb (* 255 p) (* 255 v) (* 255 t))]
+        [(equal? hi 3) 
+	 (irgb (* 255 p) (* 255 q) (* 255 v))]
+        [(equal? hi 4) 
+ 	 (irgb (* 255 t) (* 255 p) (* 255 v))]
+        [(equal? hi 5) 
+	 (irgb (* 255 v) (* 255 p) (* 255 q))]
+	[else 0]))))
 
 (define hsv->irgb
   (guard-hsv-proc 'hsv->irgb _hsv->irgb))
