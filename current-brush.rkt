@@ -294,7 +294,7 @@
 (define context-set-brush-size!
   (guard-unary-proc 'context-set-brush-size!
                     _context-set-brush-size!
-                    "positive real number"
+                    'positive-real-number
                     (^and real? positive?)))
 
 ; +---------------+---------------------------------------------------

@@ -9,6 +9,7 @@
          gigls/current-brush
          gigls/guard
          gigls/image
+         gigls/point
          gigls/utils)
 
 ;;; Procedure:
@@ -36,9 +37,11 @@
           (pen? #t)
           (color (rgb-new 0 0 0))
           (brush "2. Hardness 100")
-          (brush-size 3))
+          (brush-size 3)
+          (visible? #f))
       (lambda (message . params)
         (cond
+          ; Accessors
           ((eq? message ':type) 
            'turtle)
           ((eq? message ':string)
@@ -59,7 +62,10 @@
            brush)
           ((eq? message ':brush-size)
            brush-size)
-          ((eq? message ':set-world)
+          ((eq? message ':visible?)
+           visible?)
+          ; Mutators
+          ((or (eq? message ':set-world) (eq? message ':set-world!))
            (set! world (car params)))
           ((eq? message ':set-col!)
            (set! col (car params)))
@@ -77,6 +83,10 @@
            (set! pen? #f))
           ((eq? message ':down!)
            (set! pen? #t))
+          ((eq? message ':show!)
+           (set! visible? #t))
+          ((eq? message ':hide!)
+           (set! visible? #f))
           (else
            (error (string-append "<turtle>: invalid message \""
                                  (value->string message)
@@ -118,6 +128,19 @@
 (define turtle? _turtle?)
 
 ;;; Procedure:
+;;;   guard-turtle-proc
+;;; Parameters:
+;;;   procname, a symbol
+;;;   proc, a one-parameter procedure that expects a turtle
+;;; Purpose:
+;;;   Build a version of proc that checks its parameter type.
+;;; Produces:
+;;;   guarded-proc, a procedure
+(define guard-turtle-proc
+  (lambda (procname proc)
+   (guard-unary-proc procname proc 'turtle turtle?)))
+
+;;; Procedure:
 ;;;   turtle-clone
 ;;; Parameters:
 ;;;   turtle, a turtle
@@ -139,13 +162,134 @@
       (clone ':set-color! (turtle ':color))
       (clone ':set-brush! (turtle ':brush))
       (clone ':set-brush-size! (turtle ':brush-size))
+      (if (turtle ':visible?)
+          (clone ':show!)
+          (clone ':hide!))
       clone)))
 
-(define turtle-clone
-  (guard-unary-proc 'turtle-clone
-                    _turtle-clone
-                    'turtle
-                    turtle?))
+(define turtle-clone 
+  (guard-turtle-proc 'turtle-clone _turtle-clone))
+
+;;; Procedure:
+;;;   turtle-angle
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the angle in which the turtle is facing.
+;;; Produces:
+;;;   angle, a real number.
+(define _turtle-angle
+  (lambda (turtle)
+    (turtle ':angle)))
+
+(define turtle-angle
+  (guard-turtle-proc 'turtle-angle _turtle-angle))
+
+;;; Procedure:
+;;;   turtle-brush
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the brush that the turtle uses to draw
+;;; Produces:
+;;;   brush, a string that names a Gimp brush.
+(define _turtle-brush
+  (lambda (turtle)
+    (turtle ':brush)))
+
+(define turtle-brush
+  (guard-turtle-proc 'turtle-brush _turtle-brush))
+ 
+;;; Procedure:
+;;;   turtle-brush-size
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the size of the brush that the turtle uses to draw
+;;; Produces:
+;;;   size, an integer
+(define _turtle-brush-size
+  (lambda (turtle)
+    (turtle ':brush-size)))
+
+(define turtle-brush-size
+  (guard-turtle-proc 'turtle-brush-size _turtle-brush-size))
+ 
+;;; Procedure:
+;;;   turtle-col
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the column on which the turtle resides
+;;; Produces:
+;;;   col, a real number
+(define _turtle-col
+  (lambda (turtle)
+    (turtle ':col)))
+
+(define turtle-col
+  (guard-turtle-proc 'turtle-col _turtle-col))
+
+;;; Procedure:
+;;;   turtle-color
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the color the turtle uses to draw
+;;; Produces:
+;;;   color, an integer-encoded RGB color
+(define _turtle-color
+  (lambda (turtle)
+    (turtle ':color)))
+
+(define turtle-color
+  (guard-turtle-proc 'turtle-color _turtle-color))
+
+;;; Procedure:
+;;;   turtle-display
+;;; Parameters:
+;;;   turtle, a turtle (created by turtle-new or turtle-clone)
+;;;   type, a type of arrow (optional; pointy by default)
+;;; Purpose:
+;;;   Diplsyss the turtle on the screen
+;;; Produces:
+;;;   turtle, the same turtle
+(define _turtle-display
+  (let ((d2r (/ pi 180)))
+    (lambda (turtle . rest)
+      (let ((col (turtle ':col))
+            (row (turtle ':row))
+            (angle (turtle ':angle))
+            (type (if (null? rest) 'pointy (car rest))))
+        (let ((back-col (- col (cos (* d2r angle))))
+              (back-row (- row (sin (* d2r angle)))))
+          (let ((saved-color (context-get-fgcolor))
+                (saved-brush (context-get-brush))
+                (turtle-color (turtle ':color)))
+            (when (not (equal? turtle-color saved-color))
+              (context-set-fgcolor! turtle-color))
+            (context-set-brush! "2. Hardness 100" 1)
+            (image-draw-arrow! (turtle ':world)
+                               type
+                               back-col back-row
+                               col row
+                               15 10)
+            (when (context-preserve?)
+              (when (not (equal? turtle-color saved-color))
+                (context-set-fgcolor! saved-color))
+              (context-set-brush! saved-brush)))))
+      turtle)))
+
+(define turtle-display
+  (lambda (turtle . rest)
+    (cond
+      ((not (turtle? turtle))
+       (error/parameter-type 'turtle-display 1 'turtle (cons turtle rest)))
+      ((and (not (null? rest)) (not (null? (cdr rest))))
+       (error/arity 'turtle-display "one or two" (cons turtle rest)))
+      ((and (not (null? rest)) (not (arrow-type? (car rest))))
+       (error/parameter-type 'turtle-display 2 'arrow-type (cons turtle rest)))
+      (else (apply _turtle-display (cons turtle rest))))))
 
 ;;; Procedure:
 ;;;   turtle-direction
@@ -160,7 +304,7 @@
     (turtle ':angle)))
 
 (define turtle-direction
-  (guard-unary-proc 'turtle-direction _turtle-direction 'turtle turtle?))
+  (guard-turtle-proc 'turtle-direction _turtle-direction))
 
 ;;; Procedure:
 ;;;   turtle-down!
@@ -176,10 +320,7 @@
     turtle))
 
 (define turtle-down!
-  (guard-unary-proc 'turtle-down!
-                    _turtle-down!
-                    'turtle
-                    turtle?))
+  (guard-turtle-proc 'turtle-down!  _turtle-down!))
 
 ;;; Procedure:
 ;;;   turtle-face!
@@ -195,8 +336,10 @@
 ;;;   (clockwise from right).
 (define _turtle-face!
   (lambda (turtle angle)
-     (turtle ':set-angle! angle)
-     turtle))
+    (turtle ':set-angle! angle)
+    (when (turtle ':visible?)
+      (turtle-display turtle))
+    turtle))
 
 (define turtle-face!
   (guard-proc 'turtle-face!
@@ -242,7 +385,9 @@
                          (not (equal? turtle-color saved-color)))
                 (context-set-fgcolor! saved-color))))
           (turtle ':set-col! newcol)
-          (turtle ':set-row! newrow)))
+          (turtle ':set-row! newrow)
+          (when (turtle ':visible?)
+            (turtle-display turtle))))
       turtle)))
 
 (define turtle-forward!
@@ -251,12 +396,62 @@
               (list 'turtle 'real)
               (list turtle? real?)))
 
+;;; Procedure:
+;;;   turtle-hide!
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Stop showing the turtle.
+;;; Produces:
+;;;   turtle, the now hidden turtle
+;;; Preconditions:
+;;;   [No additional.]
+;;; Postconditions:
+;;;   The turtle is no longer shown.
+(define _turtle-hide!
+  (lambda (turtle)
+    (turtle ':hide!)
+    turtle))
+
+(define turtle-hide!
+  (guard-turtle-proc 'turtle-hide!  _turtle-hide!))
+
+;;; Procedure:
+;;;   turtle-point
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Get the point at which the turtle resides.
+;;; Produces:
+;;;   pt, a point
+(define _turtle-point
+  (lambda (turtle)
+    (point (turtle ':col) (turtle ':row))))
+
+(define turtle-point
+  (guard-turtle-proc 'turtle_point _turtle-point))
+
+;;; Procedure:
+;;;   turtle-row
+;;; Parameters:
+;;;   turtle, a turtle
+;;; Purpose:
+;;;   Determine the row on which the turtle resides
+;;; Produces:
+;;;   row, a real number
+(define _turtle-row
+  (lambda (turtle)
+    (turtle ':row)))
+
+(define turtle-row
+  (guard-turtle-proc 'turtle-row _turtle-row))
 
 ;;; Procedure:
 ;;;   turtle-set-brush!
 ;;; Parameters:
 ;;;   turtle, a turtle
 ;;;   brush, a string that names a brush
+;;;   size, a positive real number
 ;;; Purpose:
 ;;;   Set the brush with which the turtle draws.
 ;;; Produces:
@@ -279,7 +474,7 @@
          (error "turtle-set-brush! cannot set size for a non-mutable brush")]
         [(and (not (null? rest))
               (or (not (real? (car rest)))
-                  (not (integer? (car rest)))))
+                  (not (positive? (car rest)))))
          (error/parameter-type 'turtle-set-brush! 3 'positive-real params)]
         [else
          (apply _turtle-set-brush! params)]))))
@@ -322,41 +517,26 @@
               (list turtle? image?)))
 
 ;;; Procedure:
-;;;   turtle-show
+;;;   turtle-show!
 ;;; Parameters:
-;;;   turtle, a turtle (created by turtle-new or turtle-clone)
+;;;   turtle, a turtle
 ;;; Purpose:
-;;;   Shows the turtle on the screen
+;;;   Start showing the turtle.
 ;;; Produces:
-;;;   turtle, the same turtle
-(define _turtle-show
-  (let ((d2r (/ pi 180)))
-    (lambda (turtle)
-      (let ((col (turtle ':col))
-            (row (turtle ':row))
-            (angle (turtle ':angle)))
-        (let ((back-col (- col (cos (* d2r angle))))
-              (back-row (- row (sin (* d2r angle)))))
-          (let ((saved-color (context-get-fgcolor))
-                (saved-brush (context-get-brush))
-                (turtle-color (turtle ':color)))
-            (when (not (equal? turtle-color saved-color))
-              (context-set-fgcolor! turtle-color))
-            (context-set-brush! "2. Hardness 100" 1)
-            (image-draw-arrow! (turtle ':world)
-                               'pointy
-                               back-col back-row
-                               col row
-                               15 10)
-            (when (context-preserve?)
-              (when (not (equal? turtle-color saved-color))
-                (context-set-fgcolor! saved-color))
-              (context-set-brush! saved-brush)))))
-      turtle)))
+;;;   turtle, the now visible turtle
+;;; Preconditions:
+;;;   [No additional.]
+;;; Postconditions:
+;;;   The turtle is shown after each call to forward, turn, teleport, and
+;;;   such.
+(define _turtle-show!
+  (lambda (turtle)
+    (turtle ':show!)
+    (turtle-display turtle)
+    turtle))
 
-(define turtle-show
-  (guard-unary-proc 'turtle-show _turtle-show 'turtle turtle?))
-
+(define turtle-show!
+  (guard-turtle-proc 'turtle-show! _turtle-show!))
 
 ;;; Procedure:
 ;;;   turtle-teleport!
@@ -372,6 +552,8 @@
   (lambda (turtle col row)
     (turtle ':set-col! col)
     (turtle ':set-row! row)
+    (when (turtle ':visible?)
+      (turtle-display turtle))
     turtle))
 
 (define turtle-teleport!
@@ -399,6 +581,8 @@
     (lambda (turtle angle)
       (turtle ':set-angle! 
               (fixangle (+ (turtle ':angle) angle)))
+      (when (turtle ':visible?)
+        (turtle-display turtle))
       turtle)))
 
 (define turtle-turn!
@@ -421,10 +605,7 @@
     turtle))
 
 (define turtle-up!
-  (guard-unary-proc 'turtle-up!
-                    _turtle-up!
-                    'turtle
-                    turtle?))
+  (guard-turtle-proc 'turtle-up!  _turtle-up!))
 
 ;;; Procedure:
 ;;;   turtle-world
@@ -439,10 +620,7 @@
     (turtle ':world)))
 
 (define turtle-world
-  (guard-unary-proc 'turtle-world
-                    _turtle-world
-                    'turtle
-                    turtle?))
+  (guard-turtle-proc 'turtle-world _turtle-world))
 
 ;;; Procedure:
 ;;;   turtle-x
@@ -457,7 +635,7 @@
     (turtle ':col)))
 
 (define turtle-x
-  (guard-unary-proc 'turtle-x _turtle-x 'turtle turtle?))
+  (guard-turtle-proc 'turtle-x _turtle-x))
    
 ;;; Procedure:
 ;;;   turtle-y
@@ -472,4 +650,4 @@
     (turtle ':row)))
 
 (define turtle-y
-  (guard-unary-proc 'turtle-y _turtle-y 'turtle turtle?))
+  (guard-turtle-proc 'turtle-y _turtle-y))

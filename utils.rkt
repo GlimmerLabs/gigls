@@ -80,6 +80,27 @@
         (vector-ref sequence n)
         (list-ref sequence n))))
 
+;;; Procedure:
+;;;   sequence->list
+;;; Parameters:
+;;;   seqa list or vector
+;;; Purpose:
+;;;   Convert the sequence to a list
+;;; Produces: 
+;;;   lst, a list
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   For all reasonable i, (sequence-ref seq i) = (list-ref lst i)
+(define sequence->list
+  (lambda (seq)
+    (cond
+     [(vector? seq)
+      (vector->list seq)]
+     [(list? seq)
+      seq]
+     [else
+      (error 'sequnce->list "expects a value of type <sequence>, given" seq)])))
 
 ;;; Procedure:
 ;;;   integer->ordinal
@@ -191,14 +212,15 @@
 ;;; Preconditions:
 ;;;   [No additional]
 ;;; Postconditions:
-;;;   If there is an i s.t. (substring str i (+ i (string-length pattern))) = pattern
+;;;   If there is an i s.t. 
+;;;     (substring str i (+ i (string-length pattern))) = pattern
 ;;;     then contains? is true (#t)
 ;;;   Otherwise, contains is false (#f)
 ;;; Ponderings:
-;;;   This currently has a very straightforward implementation.  A KMP matcher
-;;;   would likely be more efficient.  We could even make it slightly more efficient 
-;;;   by restricting our seach to the positions in which the first character of
-;;;   patterns occurs.
+;;;   This currently has a very straightforward implementation.  A KMP 
+;;;   matcher would likely be more efficient.  We could even make it slightly 
+;;;   more efficient by restricting our seach to the positions in which the 
+;;;   first character of patterns occurs.
 (define _string-contains?
   (lambda (str pattern)
     (or (string=? pattern "")
@@ -249,7 +271,6 @@
                    (cons (car lst) (charlist-escape (cdr lst))))))))
       (lambda (str)
         (list->string (charlist-escape (string->list str)))))))
-
 
 ;;; Procedure:
 ;;;   value->string

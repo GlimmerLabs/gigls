@@ -10,10 +10,9 @@
          gigls/image
          gigls/higher
          gigls/list
-         gigls/positions
+         gigls/point
          gigls/rgb-core
          gigls/utils)
-
 
 ;;; Procedure:
 ;;;   guard-drawing-proc
@@ -151,6 +150,15 @@
                    val))))
 
 (define drawing-rule? _drawing-rule?)
+
+;;; Value: 
+;;;   drawing-blank
+;;; Type:
+;;;   drawing
+;;; Description:
+;;;   A blank drawing.  Included for the sake of completeness and,
+;;;   more importantly, to provide a base case for recursion.
+(define drawing-blank (list 'drawing 'blank))
 
 ;;; Procedure:
 ;;;   drawing-bottom
@@ -528,11 +536,12 @@
 ;;;   img, when shown, contains the given drawing.
 (define drawing->image
   (lambda (drawing width height)
-    (let ((img (image-new width height)))
-      (drawing-render! drawing img)
-      img)))
-
-
+    (let ([bgcolor (context-get-bgcolor)])
+      (context-set-bgcolor! "white")
+      (let ((img (image-new width height)))
+        (drawing-render! drawing img)
+        (context-set-bgcolor! bgcolor)
+        img))))
 
 ;;; Procedure:
 ;;;   drawing-left
@@ -890,10 +899,10 @@
         (else
          (let* ((hh (/ h 2))
                 (vv (/ v 2))
-                (points (list (position-new (- c1 hh) (+ r1 vv))
-                              (position-new (+ c1 hh) (- r1 vv))
-                              (position-new (+ c2 hh) (- r2 vv))
-                              (position-new (- c2 hh) (+ r2 vv)))))
+                (points (list (point (- c1 hh) (+ r1 vv))
+                              (point (+ c1 hh) (- r1 vv))
+                              (point (+ c2 hh) (- r2 vv))
+                              (point (- c2 hh) (+ r2 vv)))))
            (image-select-polygon! image REPLACE points)
            (image-fill-selection! image)
            (image-select-nothing! image))))
@@ -1920,3 +1929,48 @@
 
 (define drawing-rectangle? _drawing-rectangle?)
 
+; +------------------------------------------+------------------------
+; | Alternate versions of drawing procedures |
+; +------------------------------------------+
+
+(define _scale-drawing (swap-params _drawing-scale))
+(define scale-drawing
+  (guard-proc 'scale-drawing
+              _scale-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _hscale-drawing (swap-params _drawing-hscale))
+(define hscale-drawing
+  (guard-proc 'hscale-drawing
+              _hscale-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _vscale-drawing (swap-params _drawing-vscale))
+(define vscale-drawing
+  (guard-proc 'vscale-drawing
+              _vscale-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _hshift-drawing (swap-params _drawing-hshift))
+(define hshift-drawing
+  (guard-proc 'hshift-drawing
+              _hshift-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _vshift-drawing (swap-params _drawing-vshift))
+(define vshift-drawing
+  (guard-proc 'vshift-drawing
+              _vshift-drawing
+              (list 'real 'drawing)
+              (list real? drawing?)))
+
+(define _recolor-drawing (swap-params _drawing-recolor))
+(define recolor-drawing
+  (guard-proc 'recolor-drawing
+              _recolor-drawing
+              (list 'color 'drawing)
+              (list color? drawing?)))

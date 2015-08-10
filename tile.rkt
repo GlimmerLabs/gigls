@@ -50,7 +50,7 @@
 	      (list image-id? drawable? (constant #t))))
 
 ;;; Procedure:
-;;;   image-compuate
+;;;   image-compute
 ;;; Parameters:
 ;;;   pos2color, a function from two integers to a color
 ;;;   width, a positive integer
@@ -79,6 +79,58 @@
 	      (list (constant #t)
 	            (and integer? exact? positive?)
 		    (and integer? exact? positive?))))
+
+;;; Procedure:
+;;;   image-recompute!
+;;; Parameters:
+;;;   image, an image
+;;;   pos2color, a function from two integers to a color
+;;; Purpose:
+;;;   Recompute selected portions or all of the image
+;;; Produces:
+;;;   image, the same image, now modified.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   For all 0 <= i < width, 0 <= j < height
+;;;     If i,j is in the selected region (or nothing is selected)
+;;;       (image-get-pixel image i j) = (pos2color i j)
+(define _image-recompute!
+  (lambda (image pos2color)
+    (let* ([drawable (image-get-layer image)])
+      (_drawable-recompute! image drawable pos2color))))
+      
+(define image-recompute!
+  (guard-proc 'image-recompute!
+              _image-recompute!
+	      (list 'image 'pos2color)
+	      (list image?  procedure?)))
+
+;;; Procedure:
+;;;   image-redo!
+;;; Parameters:
+;;;   image, an image
+;;;   fun, a function from two integers and a color to a color
+;;; Purpose:
+;;;   Redo selected portions or all of the image
+;;; Produces:
+;;;   image, the same image, now modified.
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   For all 0 <= i < width, 0 <= j < height
+;;;     If i,j is in the selected region (or nothing is selected)
+;;;       (image-get-pixel image i j) = (fun i j (image-get-pixel original i j))
+(define _image-redo!
+  (lambda (image fun)
+    (let* ([drawable (image-get-layer image)])
+      (_drawable-redo! image drawable fun))))
+      
+(define image-redo!
+  (guard-proc 'image-redo!
+              _image-redo!
+	      (list 'image 'x-y-color-to-color)
+	      (list image?  procedure?)))
 
 ;;; Procedure:
 ;;;   image-transform!
@@ -131,3 +183,12 @@
 	      (list 'image 'colorfun)
 	      (list image-id? procedure?)))
 
+;;; Value:
+;;;   IRGB-TRANSPARENT
+;;; Type:
+;;;   integer-encoded RGB color (more or less)
+;;; Description:
+;;;   A value for image-recompute! to indicate "don't change the color."
+;;; Note:
+;;;   The definition might belong in tile-core.c.
+(define IRGB-TRANSPARENT -1)

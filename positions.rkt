@@ -3,7 +3,13 @@
 (provide (all-defined-out))
 (require gigls/guard
          gigls/higher
+         gigls/point
          gigls/utils)
+
+;;; Note: Although the first version of this code seems to have been
+;;;   checked in by SamR, the code looks like it was written by his
+;;;   students.  (In particular, the comments don't follow Sam's normal
+;;;   style.)
 
 ;;; Procedure:
 ;;;   position?
@@ -11,11 +17,7 @@
 ;;;   To ascertain whether the given value is a position pair
 ;;; Produces:
 ;;;   True or False
-(define position?
-  (lambda (value)
-    (and (pair? value)
-         (and (integer? (car value))
-              (integer? (cdr value))))))
+(define position? point?)
 
 ;;; Procedure:
 ;;;   position-col
@@ -23,8 +25,8 @@
 ;;;   To get the x component of a position pair
 ;;; Produces:
 ;;;   X, the column
-(define position-col car)
-
+(define position-col
+  (guard-unary-proc 'position-col _point-col 'position position?))
 
 ;;; Procedure:
 ;;;   position-row
@@ -32,7 +34,8 @@
 ;;;   To get the y component of a position pair
 ;;; Produces:
 ;;;   Y, the row
-(define position-row cdr)
+(define position-row
+  (guard-unary-proc 'position-row _point-row 'position position?))
 
 ;;; Procedure:
 ;;;   positions->floats
@@ -57,21 +60,6 @@
 ;;;   not particularly convenient or clear for novice programmers.
 ;;;   This procedure, used primarily by MediaScheme GIMP wrappers, allows
 ;;;   programmers to represent lists of positions in a more natural format.
-(define _positions->floats
-  (lambda (positions)
-    (let* ((len (length positions))
-           (floats (make-vector (* 2 len))))
-      (let kernel ((pos 0)
-                   (remaining positions))
-         (if (null? remaining)
-             floats
-             (begin
-               (vector-set! floats pos 
-                            (exact->inexact (position-col (car remaining))))
-               (vector-set! floats (+ pos 1) 
-                            (exact->inexact (position-row (car remaining))))
-               (kernel (+ pos 2) (cdr remaining))))))))
-
 (define positions->floats
   (lambda (positions)
     (cond
@@ -82,17 +70,46 @@
        (error/parameter-type 'positions->floats 1 'list-of-positions 
                              (list positions)))
       (else
-       (_positions->floats positions)))))
+       (_points->floats positions)))))
+
 ;;; Procedure:
-;;;     position-new
+;;;   position-new
 ;;; Parameters:
-;;;     Two integers
+;;;   x, a real
+;;;   y, a real
 ;;; Purpose:
-;;;     Create an X-Y coordinate pair
+;;;   Create an (x,y) coordinate pair
 ;;; Produces:
-;;;     A pair of integers
-(define position-new 
-  (lambda(x y)
-    (if (and (integer? x) (integer? y))
-        (cons x y)
-        (error "enter two integers, given: " x y))))
+;;;   pos, a position
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (position? pos)
+;;;   (position-col pos) = x
+;;;   (position-row pos) = y
+(define position-new
+  (guard-proc 'position-new
+              _point
+              (list 'real 'real)
+              (list real? real?)))
+
+; The following procedures were in the documentation, but did not get
+; moved from the old gimplib to gigls.  This is an intermediate update
+; as we get ready to get rid of positions.
+(define position-distance
+  (guard-proc 'position-distance
+              _point-distance
+              (list 'position 'position)
+              (list position? position?)))
+
+(define position-interpolate
+  (guard-proc 'position-interpolate
+              _point-interpolate
+              (list 'position 'position 'real)
+              (list position? position? real?)))
+
+(define position-offset
+   (guard-proc 'position-offset
+               _point-offset
+               (list 'position 'real 'real)
+               (list position? real? real?)))

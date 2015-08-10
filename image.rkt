@@ -12,7 +12,7 @@
          gigls/hacks
          gigls/irgb
          gigls/list
-         gigls/positions
+         gigls/point
          gigls/utils)
 
 (provide (all-defined-out))
@@ -82,6 +82,62 @@
                     image?))
 
 ;;; Procedure:
+;;;   image-copy-paste-block!
+;;; Parameters:
+;;;   source, an image id
+;;;   source-col, an integer
+;;;   source-row, an integer
+;;;   target, an image id
+;;;   target-col, an integer
+;;;   target-row, an integer
+;;;   width, an integer
+;;;   height, an integer
+;;; Purpose:
+;;;   Copies a width-x-height block from source to target, with the top-left of
+;;;   each block as specified.
+;;; Produces:
+;;;   [Nothing; called for the side effect.]
+;;; Problems:
+;;;   Need to deal with out-of-bounds issues.  
+;;;     (See paste-buffer! in newgrid.scm for an approach.)
+(define image-copy-paste-block!
+  (lambda (source source-col source-row 
+           target target-col target-row 
+           width height)
+    (image-select-rectangle! source REPLACE source-col source-row width height)
+    (gimp-edit-copy (image-get-layer source))
+    (image-select-rectangle! target REPLACE target-col target-row width height)
+    (gimp-floating-sel-anchor 
+     (car (gimp-edit-paste (image-get-layer target) 0)))
+    (image-select-nothing! source)
+    (image-select-nothing! target)))
+
+;;; Name:
+;;;   arrow-types
+;;; Type:
+;;;   list-of-symbols
+;;; Value:
+;;;   A list of all the valid arrow types
+(define arrow-types
+  (list 'lines 'hollow 'filled 'pointy 'hollow-pointy))
+
+;;; Procedure:
+;;;   arrow-type?
+;;; Parameters:
+;;;   type, a symbol
+;;; Purpose:
+;;;   Determine if type is one of the valid arrow types
+;;; Produces:
+;;;   valid?, a Boolean
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If type is a valid type, valid? is #t.
+;;;   Otherwise, valid? is #f.
+(define arrow-type?
+  (r-s member? arrow-types))
+
+;;; Procedure:
 ;;;   image-draw-arrow!
 ;;; Parameters:
 ;;;   image, an image
@@ -99,7 +155,7 @@
 ;;;   image, the same image (now updated with an arrow)
 ;;; Preconditions:
 ;;;   (from-col,from-row) != (to-col,to-row)
-;;;   type must be one of 'line, 'filled, 'hollow, 'pointy, and
+;;;   type must be one of 'lines, 'filled, 'hollow, 'pointy, and
 ;;;     'hollow-pointy
 (define _image-draw-arrow!
   (lambda (image type from-col from-row to-col to-row head-width head-length)
@@ -146,16 +202,16 @@
              ((eq? type 'filled)
               (image-draw-line! image from-col from-row to-col to-row)
               (image-select-polygon! image REPLACE ; should be INTERSECT, but needs work
-                                     (position-new c1 r1)
-                                     (position-new c2 r2)
-                                     (position-new to-col to-row)))
+                                     (point c1 r1)
+                                     (point c2 r2)
+                                     (point to-col to-row)))
              ((eq? type 'pointy)
               (image-draw-line! image from-col from-row c3 r3)
               (image-select-polygon! image REPLACE ; should be INTERSECT, but needs work
-                                     (position-new c1 r1)
-                                     (position-new c3 r3)
-                                     (position-new c2 r2)
-                                     (position-new to-col to-row))))
+                                     (point c1 r1)
+                                     (point c3 r3)
+                                     (point c2 r2)
+                                     (point to-col to-row))))
            (gimp-selection-grow image 1)
            (when (image-has-selection? image) (image-fill! image))
            (image-selection-load! image sel)
@@ -184,10 +240,9 @@
                     'real 'real 'real 'real 
                     'positive-real 'positive-real)
               (list image?
-                    (r-s member? 
-                         (list 'lines 'hollow 'filled 'pointy 'hollow-pointy))
+                    ^true
                     real? real? real? real?
-                    (and positive? real?) (and positive? real?))))
+                    (^and positive? real?) (^and positive? real?))))
 
 ;;; Procedure:
 ;;;   image-draw-line!
@@ -277,11 +332,14 @@
     (let ((id (and image (image-id image))))
       (and id
            (let ((active (car (gimp-image-get-active-layer id)))
-                 (layers (gimp-image-get-layers id)))
+                 (layers-info (gimp-image-get-layers id)))
              (if (= active -1)
-                 (if (= (car layers) 0)
+                 (if (= (car layers-info) 0)
                      #f
-                     (vector-ref (cadr layers) 0))
+                     (let ((layers (cadr layers-info)))
+                       (if (vector? layers)
+                           (vector-ref layers 0)
+                           (car layers))))
                 active))))))
 
 ;;; Procedure:
@@ -440,6 +498,30 @@
                (else (kernel (+ pos 1)))))))))
 
 ;;; Procedure:
+;;;   image-save
+;;; Parameters:
+;;;   image, an image
+;;;   fname, a file name
+;;; Purpose:
+;;;   Save image in the given file.
+;;; Produces:
+;;;   image, the saved image
+;;; Preconditions:
+;;;   The user can legally write to fname.
+;;;   fname ends in one of the standard image file suffixes (.gif,
+;;;     .jpg, .png, xcf, ...)
+;;; Postconditions:
+;;;   The given file now contains a copy of the image.
+(define image-save
+  (lambda (image fname)
+    (gimp-file-save 1 ; non-interactive
+                    image
+                    (image-get-layer image)
+                    fname
+                    fname)
+    image))
+
+;;; Procedure:
 ;;;   image-selection-drop!
 ;;; Parameters:
 ;;;   image, an image
@@ -571,7 +653,7 @@
 (define image-select-ellipse!
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
-                               "image-select-ellipse!")
+                               'image-select-ellipse!)
     (gimp-ellipse-select image
                          left top
                          width height
@@ -626,13 +708,13 @@
 (define image-select-rectangle!
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
-                               "image-select-rectangle!")
+                               'image-select-rectangle!)
     (gimp-rect-select image
                       left top
                       width height
                       (selection-op operation)
                       0 0)
-    (context-update-displays!)
+    ; (context-update-displays!)
     image))
 
 ;;; Procedure:
@@ -641,17 +723,17 @@
 ;;;   image, an image
 ;;;   operation, one of the selection operations (ADD, SUBTRACT,
 ;;;     INTERSECT, REPLACE)
-;;;   positions, a list of positions 
+;;;   point, a list of points
 ;;;     OR
-;;;   pos1 ... posn, n positions
+;;;   pt1 ... ptn, n points
 ;;; Purpose:
-;;;   Select the polygon bounded by the given positions.
+;;;   Select the polygon bounded by the given points
 ;;; Produces:
 ;;;   image, the image
 (define _image-select-polygon!
   (lambda (image operation first . rest)
-    (let* ((positions (if (null? rest) first (cons first rest)))
-           (floats (positions->floats positions))
+    (let* ((points (if (null? rest) first (cons first rest)))
+           (floats (points->floats points))
            (len (vector-length floats)))
       (gimp-free-select image (vector-length floats) floats
                         operation 1 0 0))))
@@ -659,25 +741,25 @@
 (define image-select-polygon!
   (let ((operations (list ADD SUBTRACT INTERSECT REPLACE)))
     (lambda (image operation first . rest)
-      (let* ((positions (if (null? rest) first (cons first rest)))
-             (params (list image operation positions)))
+      (let* ((points (if (null? rest) first (cons first rest)))
+             (params (list image operation points)))
         (cond
           ((not (image? image))
            (error/parameter-type 'image-select-polygon! 1 'image params))
           ((not (member? operation operations))
            (error/parameter-type 'image-select-polygon! 2 'selection-op params))
-          ((not (list? positions))
+          ((not (list? points))
            (error/parameter-type 'image-select-polygon! 3 
-                                 'list-of-positions params))
-          ((not (all position? positions))
+                                 'list-of-points params))
+          ((not (all point? points))
            (error/parameter-type 'image-select-polygon! 3
-                                 'list-of-positions  params))
-          ((or (null? positions) 
-               (null? (cdr positions)) 
-               (null? (cdr (cdr positions))))
+                                 'list-of-points  params))
+          ((or (null? points) 
+               (null? (cdr points)) 
+               (null? (cdr (cdr points))))
            (error/misc 'image-select-polygon!
-                       (string-append "Requires at least 3 positions, given "
-                                      (number->string (length positions)))
+                       (string-append "Requires at least 3 points, given "
+                                      (number->string (length points)))
                        params))
           (else
            (apply _image-select-polygon! params)))))))
@@ -704,6 +786,7 @@
                     image?))
 
 ;;; Procedure:
+;;;   image-stroke!
 ;;;   image-stroke-selection!
 ;;; Parameters:
 ;;;   image, a gimp image
@@ -717,13 +800,20 @@
 ;;;   image is a valid image
 ;;; Postconditions:
 ;;;   The image has been stroked, as in the stroke menu item.
-(define image-stroke-selection!
+(define _image-stroke-selection!
   (lambda (image)
     (cond 
       ((not (image? image))
        (error "image-stroke-selection!: invalid image" image))
       (else
        (gimp-edit-stroke (image-get-layer image))))))
+
+(define image-stroke-selection!
+  (guard-unary-proc 'image-stroke-selection! _image-stroke-selection!
+                    'image image?))
+(define image-stroke!
+  (guard-unary-proc 'image-stroke! _image-stroke-selection!
+                    'image image?))
 
 ;;; Procedure:
 ;;;   image-transform-pixel!
@@ -826,7 +916,11 @@
 ;;;   Otherwise, it should be safe to do the selection.
 (define image-validate-selection!
   (lambda (image operation left top width height proc)
-    (let ((crash (lambda (message) (error (string-append proc ": " message)))))
+    (let ((crash (lambda (message) 
+                   (error (string-append 
+                           (symbol->string proc) ": " message "\n  in "
+                           (value->string (list proc image operation
+                                                left top width height)))))))
       (cond
         ((not (image? image))
          (crash "invalid image"))
