@@ -379,3 +379,79 @@
 (define irgb-rotate (guard-irgb-proc 'irgb-rotate _irgb-rotate))
 (define rgb-rotate (guard-irgb-proc 'rgb-rotate _irgb-rotate))
 
+; +-----------------+-------------------------------------------------
+; | Color Combiners |
+; +-----------------+
+
+;;; Procedure:
+;;;   irgb-add
+;;; Parameters:
+;;;   irgb1, an irgb color
+;;;   irgb2, an irgb color
+;;; Purpose:
+;;;   "Add" two irgb colors.
+;;; Produces:
+;;;   result, an irgb color
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (irgb-red result) = (min 255 (+ (irgb-red irgb1) (irgb-red irgb2))
+;;;   (irgb-green result) = (min 255 (+ (irgb-green irgb1) (irgb-green irgb2))
+;;;   (irgb-blue result) = (min 255 (+ (irgb-blue irgb1) (irgb-blue irgb2))
+(define _irgb-add
+  (lambda (irgb1 irgb2)
+    (irgb (+ (irgb-red irgb1) (irgb-red irgb2))
+          (+ (irgb-green irgb1) (irgb-green irgb2))
+          (+ (irgb-blue irgb1) (irgb-blue irgb2)))))
+
+(define irgb-add
+  (guard-proc 'irgb-add _irgb-add '(irgb-color irgb-color) (list irgb? irgb?)))
+
+;;; Procedure:
+;;;   irgb-average
+;;; Parameters:
+;;;   irgb1, an irgb color
+;;;   irgb2, an irgb color
+;;; Purpose:
+;;;   "Average" two irgb colors by adding their individual components.
+;;; Produces:
+;;;   result, an irgb color
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (irgb-red result) = (* 1/2 (+ (irgb-red irgb1) (irgb-red irgb2))
+;;;   (irgb-green result) = (* 1/2 (+ (irgb-green irgb1) (irgb-green irgb2))
+;;;   (irgb-blue result) = (* 1/2 (+ (irgb-blue irgb1) (irgb-blue irgb2))
+(define _irgb-average
+  (lambda (irgb1 irgb2)
+    (irgb (* 1/2 (+ (irgb-red irgb1) (irgb-red irgb2)))
+          (* 1/2 (+ (irgb-green irgb1) (irgb-green irgb2)))
+          (* 1/2 (+ (irgb-blue irgb1) (irgb-blue irgb2))))))
+
+(define irgb-average
+  (guard-proc 'irgb-average _irgb-average '(irgb-color irgb-color) (list irgb? irgb?)))
+
+;;; Procedure:
+;;;   irgb-subtract
+;;; Parameters:
+;;;   irgb1, an irgb color
+;;;   irgb2, an irgb color
+;;; Purpose:
+;;;   "Subtracts" irgb2 from irgb1 by substracting individual components.
+;;; Produces:
+;;;   result, an irgb color
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   (irgb-red result) = (max 0 (- (irgb-red irgb1) (irgb-red irgb2))
+;;;   (irgb-green result) = (min 255 (+ (irgb-green irgb1) (irgb-green irgb2))
+;;;   (irgb-blue result) = (min 255 (+ (irgb-blue irgb1) (irgb-blue irgb2))
+(define _irgb-subtract
+  (lambda (irgb1 irgb2)
+    (irgb (- (irgb-red irgb1) (irgb-red irgb2))
+          (- (irgb-green irgb1) (irgb-green irgb2))
+          (- (irgb-blue irgb1) (irgb-blue irgb2)))))
+
+(define irgb-subtract
+  (guard-proc 'irgb-subtract _irgb-subtract '(irgb-color irgb-color) (list irgb? irgb?)))
+
