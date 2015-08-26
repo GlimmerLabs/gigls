@@ -38,6 +38,13 @@
 ; as keys.  Each record also has an element that contains the original
 ; text, with a key of "Source".
 
+; +-------+-----------------------------------------------------------
+; | Hacks |
+; +-------+
+
+(define string-split (lambda params null))
+(define string-join (lambda params ""))
+
 ; +------------+------------------------------------------------------
 ; | Predicates |
 ; +------------+
