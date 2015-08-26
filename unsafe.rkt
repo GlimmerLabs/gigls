@@ -35,6 +35,7 @@
          gigls/positions
          gigls/rgb-core
          gigls/rgb-list
+         gigls/swatch
          gigls/text
          gigls/tile
          gigls/turtles
@@ -62,6 +63,7 @@
          (all-from-out gigls/positions)
          (all-from-out gigls/rgb-core)
          (all-from-out gigls/rgb-list)
+         (all-from-out gigls/swatch)
          (all-from-out gigls/text)
          (all-from-out gigls/tile)
          (all-from-out gigls/turtles)
