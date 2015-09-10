@@ -317,18 +317,24 @@
 ;;;  [No additional]
 (define _irgb->hue
   (lambda (rgb)
-    (let* ((r (irgb-red rgb))
-           (g (irgb-green rgb))
-           (b (irgb-blue rgb))
-           (components (list r g b))
-           (cmax (apply max components))
-           (cmin (apply min components)))
+    (let* ([r (irgb-red rgb)]
+           [g (irgb-green rgb)]
+           [b (irgb-blue rgb)]
+           [components (list r g b)]
+           [cmax (apply max components)]
+           [cmin (apply min components)]
+           [chroma (- cmax cmin)])
       (cond
-        ((equal? cmax cmin) 0)
-        ((and (equal? cmax r) (>= g b)) (* 60 (/ (- g b) (- cmax cmin))))
-        ((and (equal? cmax r) (< g b)) (+ (* 60 (/ (- g b) (- cmax cmin))) 360))
-        ((equal? cmax g) (+ (* 60 (/ (- b r) (- cmax cmin))) 120))
-        ((equal? cmax b) (+ (* 60 (/ (- r g) (- cmax cmin))) 240))))))
+        [(zero? chroma)
+         0]
+        [(and (equal? cmax r) (>= g b))
+         (* 60 (/ (- g b) chroma))]
+        [(and (equal? cmax r) (< g b))
+         (+ (* 60 (/ (- g b) chroma)) 360)]
+        [(equal? cmax g)
+         (+ (* 60 (/ (- b r) chroma)) 120)]
+        [(equal? cmax b)
+         (+ (* 60 (/ (- r g) chroma)) 240)]))))
 
 (define irgb->hue (guard-irgb-proc 'irgb->hue _irgb->hue))
 (define rgb->hue (guard-irgb-proc 'rgb->hue _irgb->hue))
