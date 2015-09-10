@@ -4,9 +4,34 @@
 ;   A few HSV (Hue, Saturation, Value) procedures for the Glimmer Improved
 ;   gimp library for scripting.
 
-(require gigls/guard)
+(require gigls/guard
+         gigls/higher)
 
 (provide (all-defined-out))
+
+;;; Procedure:
+;;;   hsv
+;;; Parameters:
+;;;   hue, a real number, preferably in the range [0..360)
+;;;   saturation, a real number in the range [0..1]
+;;;   value, a real number in the range [0..1]
+;;; Purpose:
+;;;   Create an hsv value.
+;;; Produces:
+;;;   hsv, an hsv value
+;;; Postconditions:
+;;;   (hsv? hsv)
+;;;   (hsv-hue hsv) = hue
+;;;   (hsv-saturation hsv) = saturation
+;;;   (hsv-value hsv) = value
+(define _hsv list)
+(define hsv
+  (guard-proc 'hsv
+              _hsv
+              (list 'real-between-0-and-360 'real-between-0-and-1 'real-between-0-and-1)
+              (list (^and real? (l-s <= 0) (r-s < 360))
+                    (^and real? (l-s <= 0) (r-s <= 1))
+                    (^and real? (l-s <= 0) (r-s <= 1)))))
 
 ;;; Procedure:
 ;;;   hsv?
