@@ -26,7 +26,8 @@
 ;;;   Determines if val names a color.
 ;;; Produces:
 ;;;   is-color-name?, a boolean
-(define color-name?
+(define/contract color-name?
+  (-> any/c boolean?)
   (lambda (val)
     (and (string? val)
          (sequence-contains? all-color-names val))))

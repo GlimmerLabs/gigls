@@ -33,12 +33,51 @@
 ;;;   [No additional]
 ;;; Postconditions
 ;;;   returns #t if val is a valid kind of color, and #f otherwise.
-(define color? 
+(define/contract color? 
+  (-> any/c boolean?)
   (lambda (val)
     (or (irgb? val) 
         (rgb-list? val) 
         (hsv? val)
         (color-name? val))))
+
+;;; Procedure:
+;;;   hue?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if val is a hue
+;;; Produces:
+;;;   is-hue?, a Boolean
+;;; Preconditions
+;;;   [No additional]
+;;; Postconditions
+;;;   returns #t if val is a valid hue, and #f otherwise.
+(define/contract hue? 
+  (-> any/c boolean?)
+  (lambda (val)
+    (and (number? val)
+         (< val 360)
+         (> val 0))))
+
+;;; Procedure:
+;;;   saturation?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if val is between 0 and 1
+;;; Produces:
+;;;   is-between?, a Boolean
+;;; Preconditions
+;;;   [No additional]
+;;; Postconditions
+;;;   returns #t if val is betwen 0 and 1, and #f otherwise.
+(define/contract 0val1? 
+  (-> any/c boolean?)
+  (lambda (val)
+    (and (number? val)
+         (< val 1)
+         (> val 0))))
 
 ; +--------+----------------------------------------------------------
 ; | Guards |
@@ -61,9 +100,9 @@
 ;;;     (guarded-proc val) = (proc val)
 ;;;   Otherwise
 ;;;     (guarded-proc val) reports an error
-(define guard-color-proc
-  (lambda (procname proc)
-    (guard-unary-proc procname proc 'color color?)))
+;(define guard-color-proc
+;  (lambda (procname proc)
+;    (guard-unary-proc procname proc 'color color?)))
 
 ; +---------------------------+---------------------------------------
 ; | Color Conversion: General |
@@ -81,25 +120,26 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   When rendered, color-name and color produce similar colors.
-(define _color->color-name
+(define/contract color->color-name
+  (-> color? string?)
   (lambda (color)
     (cond
       [(color-name? color)
        color]
       [else
-       (irgb->color-name (color->rgb color))])))
+       (irgb->color-name (color->irgb color))])))
 
-(define color->color-name
-  (lambda (color)
-    (cond
-      ; Note: We violate the normal "check preconditions first" order
-      ; for efficiency.  This causes a bit of code duplication.
-      [(color-name? color)
-       color]
-      [(not (color? color))
-       (error/parameter-type 'color->color-name 1 'color (list color))]
-      [else
-       (_color->color-name color)])))
+;(define color->color-name
+;  (lambda (color)
+;    (cond
+;      ; Note: We violate the normal "check preconditions first" order
+;      ; for efficiency.  This causes a bit of code duplication.
+;      [(color-name? color)
+;       color]
+;      [(not (color? color))
+;       (error/parameter-type 'color->color-name 1 'color (list color))]
+;      [else
+;       (_color->color-name color)])))
 
 ;;; Procedure:
 ;;;   color->hsv
@@ -109,7 +149,8 @@
 ;;;   Convert color to an hsv color.
 ;;; Produces:
 ;;;   hsv, an HSV color
-(define _color->hsv
+(define/contract color->hsv
+  (-> color? hsv?)
   (lambda (color)
     (cond
       [(hsv? color)
@@ -119,7 +160,7 @@
       [else
        (irgb->hsv (color->irgb color))])))
 
-(define color->hsv _color->hsv)
+;(define color->hsv _color->hsv)
 
 ;;; Procedure:
 ;;;   color->irgb
@@ -134,7 +175,8 @@
 ;;;   color must be a valid color (color-name, irgb, rgb-list, ...)
 ;;; Postconditions:
 ;;;   rgb-color has the same components as color
-(define _color->irgb
+(define/contract color->irgb
+  (-> color? irgb?)
   (lambda (color)
     (cond
       [(irgb? color) 
@@ -148,8 +190,8 @@
       [else
        (error/parameter-type 'color->irgb 1 'color (list color))])))
 
-(define color->irgb _color->irgb)
-(define color->rgb _color->irgb)
+;(define color->irgb _color->irgb)
+(define color->rgb color->irgb)
 
 ;;; Procedure:
 ;;;   color->rgb-list
@@ -161,13 +203,14 @@
 ;;;   rgb-list, a list of three values
 ;;; Preconditions:
 ;;;  color is a valid color [unverified]
-(define _color->rgb-list
+(define/contract color->rgb-list
+  (-> color? list?)
   (lambda (color)
     (if (rgb-list? color) 
         color
-        (irgb->rgb-list (_color->irgb color)))))
+        (irgb->rgb-list (color->irgb color)))))
 
-(define color->rgb-list _color->rgb-list)
+;(define color->rgb-list _color->rgb-list)
 
 ;;; Procedure:
 ;;;   color->string
@@ -181,7 +224,8 @@
 ;;;   color is a valid rgb color.  That is, (rgb? color) holds.
 ;;; Postconditions:
 ;;;   R is (rgb.red color), G is (rgb.green color), B is (rgb.blue color)
-(define _color->string
+(define/contract color->string
+  (-> color? string?)
   (lambda (color)
     (irgb->string (color->irgb color))))
 
@@ -203,14 +247,14 @@
 ;;;   (color-name? cname) must hold
 ;;; Process 
 ;;;   Calls a function implimented as a GIMP plugin
-(define _color-name->irgb
+(define/contract color-name->irgb
+  (-> string? irgb?)
   (lambda (color-name)
     (car (ggimp-rgb-parse color-name))))
 
-(define color-name->irgb
-  (guard-color-name-proc 'color-name->irgb _color-name->irgb))
-(define color-name->rgb
-  (guard-color-name-proc 'color-name->rgb _color-name->irgb))
+;(define color-name->irgb
+;  (guard-color-name-proc 'color-name->irgb _color-name->irgb))
+(define color-name->rgb color-name->irgb)
 
 ; +-----------------------------------+-------------------------------
 ; | Color Conversion: From HSV Colors |
@@ -230,7 +274,8 @@
 ;;; Postconditions:
 ;;;   (rgb? rgb)
 ;;;   (hsv->rgb (irgb->hsv rgb)) should be close to rgb.
-(define _hsv->irgb
+(define/contract hsv->irgb
+  (-> hsv? irgb?)
   (lambda (hsv)
     (let* ([h (hsv-hue hsv)]
            [s (hsv-saturation hsv)]
@@ -255,8 +300,8 @@
 	 (irgb (* 255 v) (* 255 p) (* 255 q))]
 	[else 0]))))
 
-(define hsv->irgb
-  (guard-hsv-proc 'hsv->irgb _hsv->irgb))
+;(define hsv->irgb
+;  (guard-hsv-proc 'hsv->irgb _hsv->irgb))
 (define hsv->rgb hsv->irgb)
 
 ; +---------------------------------------------------+---------------
@@ -278,10 +323,11 @@
 ;;;   There is no color name k for which
 ;;;     (irgb-distance-squared color (name->color k)
 ;;;        < (irgb-distance-squared color (name->color name)
-(define _irgb->color-name
+(define/contract irgb->color-name
+  (-> irgb? string)
   (let* ((color-names (cadr (ggimp-rgb-list)))
          (color-values (map color-name->rgb color-names))
-         (distance _irgb-distance-squared))
+         (distance irgb-distance-squared))
     (lambda (rgb)
       (let kernel ((guess-name (car color-names))
                    (guess-distance (distance rgb (car color-values)))
@@ -301,8 +347,8 @@
                                  (cdr remaining-names)
                                  (cdr remaining-values)))))))))
 
-(define irgb->color-name (guard-irgb-proc 'irgb->color-name _irgb->color-name))
-(define rgb->color-name (guard-irgb-proc 'rgb->color-name _irgb->color-name))
+;(define irgb->color-name (guard-irgb-proc 'irgb->color-name _irgb->color-name))
+;(define rgb->color-name (guard-irgb-proc 'rgb->color-name _irgb->color-name))
 
 ;;; Procedures:
 ;;;  irgb->hue
@@ -315,7 +361,8 @@
 ;;;  hue, a float between 0 and 360.
 ;;; Preconditions:
 ;;;  [No additional]
-(define _irgb->hue
+(define/contract irgb->hue
+  (-> irgb? hue?)
   (lambda (rgb)
     (let* ([r (irgb-red rgb)]
            [g (irgb-green rgb)]
@@ -336,8 +383,8 @@
         [(equal? cmax b)
          (+ (* 60 (/ (- r g) chroma)) 240)]))))
 
-(define irgb->hue (guard-irgb-proc 'irgb->hue _irgb->hue))
-(define rgb->hue (guard-irgb-proc 'rgb->hue _irgb->hue))
+;(define irgb->hue (guard-irgb-proc 'irgb->hue _irgb->hue))
+(define rgb->hue irgb->hue)
 
 ;;; Procedures:
 ;;;   irgb->hsv
@@ -352,12 +399,13 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (hsv->irgb hsv) is approximately color
-(define _irgb->hsv
+(define/contract irgb->hsv
+  (-> color? hsv?)
   (lambda (color)
-    (list (_irgb->hue color) (_irgb->saturation color) (_irgb->value color))))
+    (list (irgb->hue color) (irgb->saturation color) (irgb->value color))))
 
-(define irgb->hsv (guard-irgb-proc 'irgb->hsv _irgb->hsv))
-(define rgb->hsv (guard-irgb-proc 'rgb->hsv _irgb->hsv))
+;(define irgb->hsv (guard-irgb-proc 'irgb->hsv _irgb->hsv))
+(define rgb->hsv irgb->hsv)
 
 ;;; Procedures:
 ;;;   irgb->rgb-list
@@ -372,12 +420,13 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   The components of rgb-list are the same as those of rgb.
-(define _irgb->rgb-list
+(define/contract irgb->rgb-list
+  (-> irgb? (listof irgb?))
   (lambda (rgb)
     (list (irgb-red rgb) (irgb-green rgb) (irgb-blue rgb))))
 
-(define irgb->rgb-list (guard-irgb-proc 'irgb->rgb-list _irgb->rgb-list))
-(define rgb->rgb-list (guard-irgb-proc 'rgb->rgb-list _irgb->rgb-list))
+;(define irgb->rgb-list (guard-irgb-proc 'irgb->rgb-list _irgb->rgb-list))
+(define rgb->rgb-list irgb->rgb-list)
 
 ;;; Procedures:
 ;;;   rgb->saturation
@@ -390,7 +439,8 @@
 ;;;   saturation, a float between 0 and 1.
 ;;; Preconditions:
 ;;;   [No additional]
-(define _irgb->saturation
+(define/contract irgb->saturation
+  (-> irgb? 0val1?)
   (lambda (col)
     (let* ((color (color->rgb-list col))
           (cmax (apply max color))
@@ -399,8 +449,8 @@
           0
           (- 1 (/ cmin cmax))))))
 
-(define irgb->saturation (guard-irgb-proc 'irgb->saturation _irgb->saturation))
-(define rgb->saturation (guard-irgb-proc 'rgb->saturation _irgb->saturation))
+;(define irgb->saturation (guard-irgb-proc 'irgb->saturation _irgb->saturation))
+(define rgb->saturation irgb->saturation)
 
 ;;; Procedure:
 ;;;   irgb->string
@@ -415,7 +465,8 @@
 ;;;   color is an integer-encoded RGB color
 ;;; Postconditions:
 ;;;   R is (irgb-red color), G is (irgb-green color), B is (irgb-blue color)
-(define _irgb->string
+(define/contract irgb->string
+  (-> irgb? string?)
   (lambda (color)
     (string-append (number->string (irgb-red color)) 
                    "/"
@@ -423,8 +474,8 @@
 		   "/"
 		   (number->string (irgb-blue color)))))
 
-(define irgb->string (guard-irgb-proc 'irgb->string _irgb->string))
-(define rgb->string (guard-irgb-proc 'rgb->string _irgb->string))
+;(define irgb->string (guard-irgb-proc 'irgb->string _irgb->string))
+(define rgb->string irgb->string)
 
 ;;; Procedures:
 ;;;   irgb->value
@@ -437,13 +488,14 @@
 ;;;   value, a real number between 0 and 1.
 ;;; Preconditions:
 ;;;   [No additional]
-(define _irgb->value
+(define/contract irgb->value
+  (-> irgb? 0val1?)
   (lambda (col)
     (let ((color (color->rgb-list col)))
       (/ (apply max color) 255))))
 
-(define irgb->value (guard-irgb-proc 'irgb->value _irgb->value))
-(define rgb->value (guard-irgb-proc 'rgb->value _irgb->value))
+;(define irgb->value (guard-irgb-proc 'irgb->value _irgb->value))
+(define rgb->value irgb->value)
 
 ; +----------------------------------+--------------------------------
 ; | Color Conversion: From RGB Lists |
@@ -461,14 +513,14 @@
 ;;;     integers, all in the range [0..255].
 ;;; Postconditions:
 ;;;   rgb represents the same color as color.
-(define _rgb-list->irgb
+(define/contract rgb-list->irgb
+  (-> (listof irgb?) irgb?)
   (lambda (color)
     (irgb (car color) (cadr color) (caddr color))))
 
-(define rgb-list->irgb
-  (guard-rgb-list-proc 'rgb-list->irgb _rgb-list->irgb))
-(define rgb-list->rgb
-  (guard-rgb-list-proc 'rgb-list->rgb _rgb-list->irgb))
+;(define rgb-list->irgb
+;  (guard-rgb-list-proc 'rgb-list->irgb _rgb-list->irgb))
+(define rgb-list->rgb rgb-list->irgb)
 
 ; +------------------------+------------------------------------------
 ; | Misc. Color Procedures |
@@ -482,7 +534,8 @@
 ;;;   Determine what representation is used for color
 ;;; Produces:
 ;;;   representation, a symbol (or #f)
-(define _color-representation
+(define/contract color-representation
+  (-> color? boolean?)
   (lambda (color)
     (cond
       ((irgb? color) 'IRGB)
@@ -491,5 +544,5 @@
       ((color-name? color) 'COLOR-NAME)
       (else #f))))
 
-(define color-representation _color-representation)
+;(define color-representation _color-representation)
 

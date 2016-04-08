@@ -59,15 +59,16 @@
 ;;;   color is a one of the valid forms of color.
 ;;; Postconditions:
 ;;;   The background color is now the specified color.
-(define _context-set-bgcolor!
+(define/contract context-set-bgcolor!
+  (-> color? any/c)
   (lambda (color)
     (gimp-context-set-background  (color->rgb color))))
 
-(define context-set-bgcolor!
-  (guard-unary-proc 'context-set-bgcolor!
-                    _context-set-bgcolor!
-                    'color
-                    color?))
+;(define context-set-bgcolor!
+;  (guard-unary-proc 'context-set-bgcolor!
+;                    _context-set-bgcolor!
+;                    'color
+;                    color?))
 
 ;;; Procedure:
 ;;;   context-set-fgcolor!
@@ -81,16 +82,17 @@
 ;;;   color is one of the valid forms of color.
 ;;; Postconditions:
 ;;;   The foreground color is now the specified color.
-(define _context-set-fgcolor!
+(define/contract context-set-fgcolor!
+  (-> color? any/c)
   (lambda (color)
     (process-gimp-result
      (gimp-context-set-foreground (color->rgb color)))))
 
-(define context-set-fgcolor!
-  (guard-unary-proc 'context-set-fgcolor!
-                    _context-set-fgcolor!
-                    'color
-                    color?))
+;(define context-set-fgcolor!
+;  (guard-unary-proc 'context-set-fgcolor!
+;                    _context-set-fgcolor!
+;                    'color
+;                    color?))
 
 ;;; Procedure:
 ;;;  context-list-brushes
@@ -109,7 +111,8 @@
 ;;;     contains the pattern.
 ;;;   For each reasonable i,
 ;;;     (brush? (list-ref brushes i))
-(define _context-list-brushes
+(define/contract context-list-brushes
+  (-> string? (listof string?))
   (lambda restriction
     (let* ((pattern (if (null? restriction) "" (car restriction)))
            (brushes (cadr (gimp-brushes-get-list (string-escape pattern)))))
@@ -117,14 +120,14 @@
           (vector->list brushes) 
           brushes))))
 
-(define context-list-brushes
-  (lambda restriction
-    (let ((pattern (if (null? restriction) "" (car restriction))))
-      (cond
-        ((not (string? pattern))
-         (error "context-list-brushes: Invalid restriction: " pattern))
-        (else
-         (apply _context-list-brushes restriction))))))
+;(define context-list-brushes
+;  (lambda restriction
+;    (let ((pattern (if (null? restriction) "" (car restriction))))
+;      (cond
+;        ((not (string? pattern))
+;         (error "context-list-brushes: Invalid restriction: " pattern))
+;        (else
+;         (apply _context-list-brushes restriction))))))
 
 ;;; Procedures:
 ;;;   context-get-color-names
@@ -143,7 +146,8 @@
 ;;;   All of the colors recognized by the GIMP
 ;;; NOTE:
 ;;;   Calls a function implimented as a GIMP plugin
-(define _context-list-color-names
+(define/contract context-list-color-names
+  (-> string? (listof string?))
   (lambda args
     (if (null? args)
         all-color-names
@@ -151,17 +155,17 @@
           (list-select all-color-names 
                        (lambda (color) (string-contains? color pattern)))))))
 
-(define context-list-color-names
-  (lambda args
-    (cond
-      [(null? args)
-       (_context-list-color-names)]
-      [(not (null? (cdr args)))
-       (error/arity 'context-list-color-names "zero or one" args)]
-      [(not (string? (car args)))
-       (error/parameter-type 'context-list-color-names 1 'string args)]
-      [else
-       (_context-list-color-names (car args))])))
+;(define context-list-color-names
+;  (lambda args
+;    (cond
+;      [(null? args)
+;       (_context-list-color-names)]
+;      [(not (null? (cdr args)))
+;       (error/arity 'context-list-color-names "zero or one" args)]
+;      [(not (string? (car args)))
+;       (error/parameter-type 'context-list-color-names 1 'string args)]
+;      [else
+;       (_context-list-color-names (car args))])))
 
 (define context-get-color-names context-list-color-names)
 (define context-list-colors context-list-color-names)
@@ -175,7 +179,8 @@
 ;;;   the fonts whose name contains pattern.
 ;;; Produces:
 ;;;   font-list, a list of strings
-(define _context-list-fonts
+(define/contract context-list-fonts
+  (-> string? (listof string?))
   (lambda restriction
     (cond
       ((null? restriction)
@@ -183,17 +188,17 @@
       (else
        (sequence->list (cadr (gimp-fonts-get-list (car restriction))))))))
 
-(define context-list-fonts
-  (lambda restriction
-    (cond
-      ((null? restriction)
-       (_context-list-fonts))
-      ((not (string? (car restriction)))
-       (error "context-get-fonts: Pattern must be a string"))
-      ((not (null? (cdr restriction)))
-       (error "context-get-fonts: Only one pattern accepted"))
-      (else
-       (_context-list-fonts (car restriction))))))
+;(define context-list-fonts
+;  (lambda restriction
+;    (cond
+;      ((null? restriction)
+;       (_context-list-fonts))
+;      ((not (string? (car restriction)))
+;       (error "context-get-fonts: Pattern must be a string"))
+;      ((not (null? (cdr restriction)))
+;       (error "context-get-fonts: Only one pattern accepted"))
+;      (else
+;       (_context-list-fonts (car restriction))))))
 
 
 ; +------------------------------------------+----------------------------------

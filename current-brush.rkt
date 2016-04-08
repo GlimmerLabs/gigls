@@ -186,7 +186,8 @@
 ;;;   (brush? brush)
 ;;; Postconditions
 ;;;   GIMP's current brush is now set to the given brush
-(define _context-set-brush!
+(define/contract context-set-brush!
+  (->* (string?) ((and/c real? positive?)) brush?)
   (lambda (brush . rest)
     (let ([radius (if (null? rest)
                       (brush-get-radius (brush-original brush))
@@ -200,26 +201,26 @@
             (context-refresh-current-brush!))
           (gimp-context-set-brush brush)))))
 
-(define context-set-brush!
-  (lambda (brush . rest)
-    (cond
-      [(not (string? brush))
-       (error "context-set-brush!: expects a string as a parameter, received"
-              brush)]
-      [(not (brush? brush))
-       (error "context-set-brush!: invalid brush:" brush)]
-      [(and (not (brush-generated? brush)) (not (null? rest)))
-       (error "context-set-brush!: cannot set radius for a non-mutable brush"
-              brush)]
-      [(and (not (null? rest)) 
-            (or (not (real? (car rest)))
-                (not (positive? (car rest)))))
-       (error/parameter-type 'context-set-brush! 
-                             1 
-                             'positive-real
-                             (cons brush rest))]
-      [else 
-       (apply _context-set-brush! (cons brush rest))])))
+;(define context-set-brush!
+;  (lambda (brush . rest)
+;    (cond
+;      [(not (string? brush))
+;       (error "context-set-brush!: expects a string as a parameter, received"
+;              brush)]
+;      [(not (brush? brush))
+;       (error "context-set-brush!: invalid brush:" brush)]
+;      [(and (not (brush-generated? brush)) (not (null? rest)))
+;       (error "context-set-brush!: cannot set radius for a non-mutable brush"
+;              brush)]
+;      [(and (not (null? rest)) 
+;            (or (not (real? (car rest)))
+;                (not (positive? (car rest)))))
+;       (error/parameter-type 'context-set-brush! 
+;                             1 
+;                             'positive-real
+;                             (cons brush rest))]
+;      [else 
+;       (apply _context-set-brush! (cons brush rest))])))
 
 ;;; Procedure:
 ;;;   context-set-brush-aspect-ratio!
@@ -241,7 +242,8 @@
 ;;;   brush, a string representing the current brush.
 ;;; Preconditions:
 ;;;   The current brush is 
-(define _context-set-brush-angle!
+(define/contract context-set-brush-angle!
+  (-> real? brush?)
   (lambda (angle)
     (context-verify-current-brush-mutable! 'context-set-brush-angle!)
     (let ([brush (context-make-current-brush-editable!)])
@@ -249,11 +251,11 @@
       (brush-set-radius! context-current-brush (brush-get-angle brush))
       brush)))
 
-(define context-set-brush-angle!
-  (guard-unary-proc 'context-set-brush-angle!
-                    _context-set-brush-angle!
-                    "real number"
-                    real?))
+;(define context-set-brush-angle!
+;  (guard-unary-proc 'context-set-brush-angle!
+;                    _context-set-brush-angle!
+;                    "real number"
+;                    real?))
 
 ;;; Procedure:
 ;;;   context-set-brush-radius!
@@ -264,7 +266,8 @@
 ;;;   (or an editable version thereof).
 ;;; Produces:
 ;;;   brush, the current brush.
-(define _context-set-brush-radius!
+(define/contract context-set-brush-radius!
+  (-> real? brush?)
   (lambda (radius)
     (context-verify-current-brush-mutable! 'context-set-brush-radius!)
     (let ([brush (context-make-current-brush-editable!)])
@@ -272,11 +275,11 @@
       (brush-set-radius! context-current-brush radius)
       brush)))
 
-(define context-set-brush-radius!
-  (guard-unary-proc 'context-set-brush-radius!
-                    _context-set-brush-radius!
-                    "positive real number"
-                    (^and real? positive?)))
+;(define context-set-brush-radius!
+;  (guard-unary-proc 'context-set-brush-radius!
+;                    _context-set-brush-radius!
+;                    "positive real number"
+;                    (^and real? positive?)))
 
 ;;; Procedure:
 ;;;   context-set-brush-size!
@@ -286,16 +289,17 @@
 ;;;   Set the size of the current brush (or an editable version thereof).
 ;;; Produces:
 ;;;   brush, the current brush.
-(define _context-set-brush-size!
+(define/contract context-set-brush-size!
+  (-> real? brush?)
   (lambda (size)
     (context-verify-current-brush-mutable! 'context-set-brush-size!)
-    (_context-set-brush-radius! (* 0.5 size))))
+    (context-set-brush-radius! (* 0.5 size))))
 
-(define context-set-brush-size!
-  (guard-unary-proc 'context-set-brush-size!
-                    _context-set-brush-size!
-                    'positive-real-number
-                    (^and real? positive?)))
+;(define context-set-brush-size!
+;  (guard-unary-proc 'context-set-brush-size!
+;                    _context-set-brush-size!
+;                    'positive-real-number
+;                    (^and real? positive?)))
 
 ; +---------------+---------------------------------------------------
 ; | Miscellaneous |

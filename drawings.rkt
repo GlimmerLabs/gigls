@@ -40,7 +40,8 @@
 ;;;   Determine if val is one of the drawing shapes
 ;;; Produces:
 ;;;   is-shape?, a Boolean
-(define _drawing-shape?
+(define/contract drawing-shape?
+  (-> any/c boolean?)
   (let* ((nnr? (^and real? (^not negative?))))
     (lambda (val)
       (check-list? (list (l-s eq? 'drawing) 
@@ -54,7 +55,7 @@
                          )
                     val))))
 
-(define drawing-shape? _drawing-shape?)
+;(define drawing-shape? _drawing-shape?)
 
 ;;; Procedure:
 ;;;   drawing?
@@ -65,7 +66,8 @@
 ;;;   drawing
 ;;; Produces:
 ;;;   is-drawing?, a Boolean
-(define drawing? 
+(define/contract drawing?
+  (-> any/c boolean?)
   (lambda (val)
     (or (drawing-blank? val)
         (drawing-group? val)
@@ -81,13 +83,14 @@
 ;;;   Determine if val is a  blank drawing.
 ;;; Produces:
 ;;;   is-blank?, a Boolean
-(define _drawing-blank?
+(define/contract drawing-blank?
+  (-> any/c boolean?)
   (lambda (val)
     (check-list? (list (l-s eq? 'drawing) 
                        (l-s eq? 'blank))
                  val)))
 
-(define drawing-blank? _drawing-blank?)
+;(define drawing-blank? _drawing-blank?)
 
 ;;; Procedure:
 ;;;   drawing-group?
@@ -97,14 +100,15 @@
 ;;;   Determine if val is a drawing-group
 ;;; Produces:
 ;;;   is-group?, a Boolean
-(define _drawing-group?
+(define/contract drawing-group?
+  (-> any/c boolean?)
   (lambda (val)
     (check-list? (list (l-s eq? 'drawing) 
                        (l-s eq? 'group)
                        (l-s all drawing?))
                  val)))
 
-(define drawing-group? _drawing-group?)
+;(define drawing-group? _drawing-group?)
 
 ;;; Procedure:
 ;;;   drawing-line?
@@ -120,7 +124,8 @@
 ;;;   If val can be used with the various drawing-line-PROC procedures,
 ;;;     is-line? is true.
 ;;;   Otherwise is-line? is false.
-(define _drawing-line?
+(define/contract drawing-line?
+  (-> any/c boolean?)
   (let* ((nnr? (^and real? (^not negative?))))
     (lambda (val)
       (check-list? (list (l-s eq? 'drawing) (l-s eq? 'line)
@@ -129,7 +134,7 @@
                          nnr? nnr?)
                    val))))
 
-(define drawing-line? _drawing-line?)
+;(define drawing-line? _drawing-line?)
 
 ;;; Procedure:
 ;;;   drawing-rule?
@@ -139,7 +144,8 @@
 ;;;   Determine if val can be interpreted as a rule in a drawing
 ;;; Produces:
 ;;;   is-rule?, a boolean
-(define _drawing-rule?
+(define/contract drawing-rule?
+  (-> any/c boolean?)
   (let* ((nnr? (^and real? (^not negative?)))
          (types (list (l-s eq? 'drawing) (l-s eq? 'rule)
                       real? real? real? real?)))
@@ -149,7 +155,7 @@
                          real? real? real? real?)
                    val))))
 
-(define drawing-rule? _drawing-rule?)
+;(define drawing-rule? _drawing-rule?)
 
 ;;; Value: 
 ;;;   drawing-blank
@@ -168,14 +174,15 @@
 ;;;   Find the bottom edge of drawing
 ;;; Produces:
 ;;;   bottom, a real
-(define _drawing-bottom
+(define/contract drawing-bottom
+  (-> drawing? real?)
   (lambda (drawing)
     (let ((type (_drawing-type drawing)))
       (cond
         ((eq? type 'blank)
          0)
         ((eq? type 'group)
-         (apply max (map _drawing-bottom (_drawing-members drawing))))
+         (apply max (map drawing-bottom (_drawing-members drawing))))
         ((eq? type 'line)
          (_drawing-line-bottom drawing))
         ((eq? type 'rule)
@@ -185,8 +192,8 @@
         (else
          (error "drawing-bottom: Unknown drawing type: " type))))))
 
-(define drawing-bottom
-  (guard-drawing-proc 'drawing-bottom _drawing-bottom))
+;(define drawing-bottom
+;  (guard-drawing-proc 'drawing-bottom _drawing-bottom))
 
 ;;; Procedure:
 ;;;   drawing-brush 
@@ -196,7 +203,8 @@
 ;;;   Get the brush associated with the drawing
 ;;; Produces:
 ;;;   brush, a string
-(define _drawing-brush
+(define/contract drawing-brush
+  (-> drawing? string?)
   (lambda (drawing)
     (let ((type (_drawing-type drawing)))
       (cond
@@ -213,8 +221,8 @@
         (else
          (error "drawing-brush: unknown drawing type" type))))))
 
-(define drawing-brush
-  (guard-drawing-proc 'drawing-brush _drawing-brush))
+;(define drawing-brush
+;  (guard-drawing-proc 'drawing-brush _drawing-brush))
 
 
 ;;; Procedure:
@@ -225,7 +233,8 @@
 ;;;   Get the color of drawing.
 ;;; Produces:
 ;;;   type, a color
-(define _drawing-color 
+(define/contract drawing-color 
+  (-> drawing? color?)
   (lambda (drawing)
     (let ((type (_drawing-type drawing)))
       (cond 
@@ -234,11 +243,11 @@
         ((eq? type 'group)
          (rgb-new 0 0 0))
         ((eq? type 'line)
-         (_drawing-line-color drawing))
+         (drawing-line-color drawing))
         ((eq? type 'rule)
-         (_drawing-rule-color drawing))
+         (drawing-rule-color drawing))
         ((or (eq? type 'ellipse) (eq? type 'rectangle))
-         (_drawing-shape-color drawing))
+         (drawing-shape-color drawing))
         (else
          (error "drawing-color: unknown drawing type" type))))))
 
@@ -252,21 +261,22 @@
 ;;;   composed, a drawing
 ;;; Preconditions:
 ;;;   (length drawings) >= 1
-(define _drawing-compose 
+(define/contract drawing-compose
+  (-> (listof drawing?) drawing?)
   (lambda (drawings)
-    (apply _drawing-group drawings)))
+    (apply drawing-group drawings)))
 
-(define drawing-compose
-  (lambda (drawings)
-    (cond
-      ((null? drawings)
-       (error "drawing-compose: expects at least one parameter"))
-      ((not (all drawing? drawings))
-       (error "drawing-compose: called with at least one non-drawing"))
-      (else (_drawing-compose drawings)))))
+;(define drawing-compose
+;  (lambda (drawings)
+;    (cond
+;      ((null? drawings)
+;       (error "drawing-compose: expects at least one parameter"))
+;      ((not (all drawing? drawings))
+;       (error "drawing-compose: called with at least one non-drawing"))
+;      (else (_drawing-compose drawings)))))
 
-(define drawing-color
-  (guard-drawing-proc 'drawing-color _drawing-color))
+;(define drawing-color
+;  (guard-drawing-proc 'drawing-color _drawing-color))
 
 ;;; Procedure:
 ;;;   drawing-ellipse
@@ -285,15 +295,16 @@
 ;;;   When rendered, ellipse will be drawn as a filled ellipse, 
 ;;;   with the specified left margin, top margin, width, and
 ;;;   height.
-(define _drawing-ellipse
+(define/contract drawing-ellipse
+  (-> real? real? (and/c real? positive?) (and/c real? positive?) drawing?)
   (lambda (left right width height)
-    (_drawing-shape 'ellipse (rgb-new 0 0 0) "" left right width height)))
+    (drawing-shape 'ellipse (rgb-new 0 0 0) "" left right width height)))
 
-(define drawing-ellipse
-  (guard-proc 'drawing-ellipse
-              _drawing-ellipse
-              (list 'real 'real 'positive-real 'positive-real)
-              (list real? real? (^and real? positive?) (^and real? positive?))))
+;(define drawing-ellipse
+;  (guard-proc 'drawing-ellipse
+;              _drawing-ellipse
+;              (list 'real 'real 'positive-real 'positive-real)
+;              (list real? real? (^and real? positive?) (^and real? positive?))))
 
 
 ;;; Procedure:
@@ -304,14 +315,15 @@
 ;;;   Determine if drawing is filled.
 ;;; Produces:
 ;;;   filled?, a Boolean
-(define _drawing-filled?
+(define/contract drawing-filled?
+  (-> drawing? boolean?)
   (lambda (drawing)
     (let ((type (_drawing-type drawing)))
       (and (or (eq? type 'ellipse) (eq? type 'rectangle))
            (string=? "" (drawing-brush drawing))))))
 
-(define drawing-filled? 
-  (guard-drawing-proc 'drawing-filled? _drawing-filled?))
+;(define drawing-filled? 
+;  (guard-drawing-proc 'drawing-filled? _drawing-filled?))
 
 ;;; Procedure:
 ;;;   drawing-format
@@ -321,14 +333,15 @@
 ;;;   Shows the format of drawing values of the same type as drawing
 ;;; Produces:
 ;;;   format, a list
-(define _drawing-format
+(define/contract drawing-format
+  (-> symbol? list?)
   (lambda (type)
     (cond
       ((eq? type 'blank)
        '(drawing blank))
       ((eq? type 'group)
        '(drawing group (drawing1 drawing2)))
-      ((eq? type 'elllipse)
+      ((eq? type 'ellipse)
        '(drawing ellipse color brush left top width height))
       ((eq? type 'line)
        '(drawing line color col1 row col2 row2 hscale vscale))
@@ -339,7 +352,7 @@
       (else
        (error "drawing-format: unknown type of drawing: " type)))))
 
-(define drawing-format _drawing-format)
+;(define drawing-format _drawing-format)
 
 ;;; Procedure:
 ;;;   drawing-group
@@ -351,18 +364,19 @@
 ;;;   grouped, a drawing
 ;;; Preconditions:
 ;;;   There is at least one parameter.
-(define _drawing-group
+(define/contract drawing-group
+  (->* (drawing?) () #:rest (listof drawing?) drawing?)
   (lambda drawings
     (list 'drawing 'group drawings)))
 
-(define drawing-group
-  (lambda drawings
-    (cond
-      ((null? drawings)
-       (error "drawing-group: expects at least one parameter"))
-      ((not (all drawing? drawings))
-       (error "drawing-group: called with at least one non-drawing"))
-      (else (apply _drawing-group drawings)))))
+;(define drawing-group
+;  (lambda drawings
+;    (cond
+;      ((null? drawings)
+;       (error "drawing-group: expects at least one parameter"))
+;      ((not (all drawing? drawings))
+;       (error "drawing-group: called with at least one non-drawing"))
+;      (else (apply _drawing-group drawings)))))
 
 
 ;;; Procedure:
@@ -409,7 +423,7 @@
         ((eq? type 'blank)
          0)
         ((eq? type 'group)
-         (- (_drawing-bottom drawing) (_drawing-top drawing)))
+         (- (drawing-bottom drawing) (_drawing-top drawing)))
         ((eq? type 'line)
          (_drawing-line-height drawing))
         ((eq? type 'rule)
@@ -448,19 +462,19 @@
         ((eq? type 'line)
          (drawing-line-hscale drawing factor))
         ((eq? type 'rule)
-         (drawing-rule-core (_drawing-rule-color drawing)
+         (drawing-rule-core (drawing-rule-color drawing)
                             (* factor (_drawing-rule-left drawing))
-                            (_drawing-rule-top drawing)
+                            (drawing-rule-top drawing)
                             (* factor (_drawing-rule-right drawing))
-                            (_drawing-rule-bottom drawing)))
+                            (drawing-rule-bottom drawing)))
         ((or (eq? type 'ellipse) (eq? type 'rectangle))
          (drawing-shape type
-                        (_drawing-color drawing) 
-                        (_drawing-brush drawing)
-                        (* factor (_drawing-left drawing))
-                        (_drawing-top drawing)
-                        (* factor (_drawing-width drawing)) 
-                        (_drawing-height drawing)))
+                        (drawing-color drawing) 
+                        (drawing-brush drawing)
+                        (* factor (drawing-left drawing))
+                        (drawing-top drawing)
+                        (* factor (drawing-width drawing)) 
+                        (drawing-height drawing)))
         (else
          (error "drawing-hscale: unknown drawing type" type))))))
 
@@ -834,11 +848,11 @@
         ((or (eq? type 'ellipse) (eq? type 'rectangle))
          (drawing-shape type
                         (color->rgb color) 
-                        (_drawing-brush drawing)
-                        (_drawing-left drawing) 
-                        (_drawing-top drawing)
-                        (_drawing-width drawing) 
-                        (_drawing-height drawing)))
+                        (drawing-brush drawing)
+                        (drawing-left drawing) 
+                        (drawing-top drawing)
+                        (drawing-width drawing) 
+                        (drawing-height drawing)))
         (else
          (error "drawing-recolor: unknown drawing type" type))))))
 
@@ -1458,23 +1472,23 @@
         ((eq? type 'group)
          (apply drawing-group
                 (map (r-s drawing-scale factor)
-                     (_drawing-members drawing))))
+                     (drawing-members drawing))))
         ((eq? type 'line)
          (_drawing-line-scale drawing factor))
         ((eq? type 'rule)
-         (drawing-rule-core (_drawing-rule-color drawing)
-                            (* factor (_drawing-rule-left drawing))
-                            (* factor (_drawing-rule-top drawing))
-                            (* factor (_drawing-rule-right drawing))
-                            (* factor (_drawing-rule-bottom drawing))))
+         (drawing-rule-core (drawing-rule-color drawing)
+                            (* factor (drawing-rule-left drawing))
+                            (* factor (drawing-rule-top drawing))
+                            (* factor (drawing-rule-right drawing))
+                            (* factor (drawing-rule-bottom drawing))))
         ((or (eq? type 'ellipse) (eq? type 'rectangle))
          (drawing-shape type
-                        (_drawing-color drawing) 
-                        (_drawing-brush drawing)
-                        (* factor (_drawing-left drawing))
-                        (* factor (_drawing-top drawing))
-                        (* factor (_drawing-width drawing)) 
-                        (* factor (_drawing-height drawing))))
+                        (drawing-color drawing) 
+                        (drawing-brush drawing)
+                        (* factor (drawing-left drawing))
+                        (* factor (drawing-top drawing))
+                        (* factor (drawing-width drawing)) 
+                        (* factor (drawing-height drawing))))
         (else
          (error "drawing-scale: unknown drawing type" type))))))
 
@@ -1806,12 +1820,12 @@
                             (* factor (_drawing-rule-bottom drawing))))
         ((or (eq? type 'ellipse) (eq? type 'rectangle))
          (drawing-shape type
-                        (_drawing-color drawing) 
-                        (_drawing-brush drawing)
-                        (_drawing-left drawing)
-                        (* factor (_drawing-top drawing))
-                        (_drawing-width drawing)
-                        (* factor (_drawing-height drawing))))
+                        (drawing-color drawing) 
+                        (drawing-brush drawing)
+                        (drawing-left drawing)
+                        (* factor (drawing-top drawing))
+                        (drawing-width drawing)
+                        (* factor (drawing-height drawing))))
         (else
          (error "drawing-vscale: unknown drawing type" type))))))
 
@@ -1848,19 +1862,19 @@
         ((eq? type 'line)
          (_drawing-line-vshift drawing amt))
         ((eq? type 'rule)
-         (drawing-rule-core (_drawing-rule-color drawing)
-                            (_drawing-rule-left drawing)
-                            (+ amt (_drawing-rule-top drawing))
-                            (_drawing-rule-right drawing)
-                            (+ amt (_drawing-rule-bottom drawing))))
+         (drawing-rule-core (drawing-rule-color drawing)
+                            (drawing-rule-left drawing)
+                            (+ amt (drawing-rule-top drawing))
+                            (drawing-rule-right drawing)
+                            (+ amt (drawing-rule-bottom drawing))))
         ((or (eq? type 'ellipse) (eq? type 'rectangle))
          (drawing-shape type
-                        (_drawing-color drawing) 
-                        (_drawing-brush drawing)
-                        (_drawing-left drawing)
-                        (+ amt (_drawing-top drawing))
-                        (_drawing-width drawing) 
-                        (_drawing-height drawing)))
+                        (drawing-color drawing) 
+                        (drawing-brush drawing)
+                        (drawing-left drawing)
+                        (+ amt (drawing-top drawing))
+                        (drawing-width drawing) 
+                        (drawing-height drawing)))
         (else
          (error "drawing-vshift: unknown drawing type" type))))))
 

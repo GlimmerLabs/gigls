@@ -20,7 +20,8 @@
 ;;;   (e.g., if it was produced by brush-info)
 ;;; Produces:
 ;;;   is-brush-info?, a Boolean
-(define brush-info?
+(define/contract brush-info?
+  (-> any/c boolean?)
   (lambda (val)
     (and (vector? val)
          (= (vector-length val) 9)
@@ -43,12 +44,13 @@
 ;;;   Determines if brush names a string
 ;;; Produces:
 ;;;   is-brush-name?, a boolean value
-(define _brush-name?
+(define/contract brush-name?
+  (-> any/c boolean?)
   (lambda (brush)
     (and (string? brush)
          (member? brush (brushes-list brush)))))
 
-(define brush-name? _brush-name?)
+;(define brush-name? _brush-name?)
 
 ;;; Procedure:
 ;;;   brush?
@@ -61,18 +63,21 @@
 ;;; Points:
 ;;;   The #t at the end may seem a bit odd, since it's pointless.  However,
 ;;;   it ensures that brush? returns a Boolean.
-(define brush?
-  (^or brush-name? brush-info?))
+(define/contract brush?
+  (-> any/c (-> any/c boolean?))
+  (lambda (val)
+    (and string? (or brush-name? brush-info?))))
 
 ;;; Procedure:
 ;;;   brush-generated?
 ;;; Parameters:
-;;;   brush, as tring
+;;;   brush, a string
 ;;; Purpose:
 ;;;   Determine if it's a generated brush (which means that we get 
 ;;;   various attributes
 ;;;   values).
-(define brush-generated?
+(define/contract brush-generated?
+  (-> string? boolean?)
   (lambda (brush)
     (and (string? brush)
          (brush-name? brush)
@@ -103,7 +108,8 @@
 ;;;   Determines if angle is a valid angle for a brush
 ;;; Produces:
 ;;;   is-valid?, a boolean
-(define brush-valid-angle?
+(define/contract brush-valid-angle?
+  (-> real? boolean?)
   (lambda (val)
     (and (real? val) (<= 0 val 180))))
 
@@ -115,7 +121,8 @@
 ;;;   Determines if aspect-ration is a valid aspect ratio for a brush
 ;;; Produces:
 ;;;   is-valid?, a boolean
-(define brush-valid-aspect-ratio?
+(define/contract brush-valid-aspect-ratio?
+  (-> real? boolean?)
   (lambda (val)
     (and (real? val (<= 1 val 1000)))))
 
@@ -171,18 +178,19 @@
 ;;;   List all of the brushes containing the pattern.
 ;;; Produces:
 ;;;   brushes, a list
-(define _brushes-list
+(define/contract brushes-list
+  (-> string? (listof string?))
   (lambda (pattern)
     (let ((brushes (cadr (gimp-brushes-get-list (string-escape pattern)))))
       (if (vector? brushes)
           (vector->list brushes)
           brushes))))
 
-(define brushes-list
-  (guard-unary-proc 'brushes-list
-                    _brushes-list
-                    'string
-                    string?))
+;(define brushes-list
+;  (guard-unary-proc 'brushes-list
+;                    _brushes-list
+;                    'string
+;                    string?))
 
 ;;; Procedure:
 ;;;   brush-get-angle
@@ -192,7 +200,8 @@
 ;;;   Get the angle of the brush
 ;;; Produces:
 ;;;   angle, a real
-(define _brush-get-angle
+(define/contract brush-get-angle
+  (-> brush? real?)
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -206,7 +215,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-angle _brush-get-angle)
+;(define brush-get-angle _brush-get-angle)
 
 ;;; Procedure:
 ;;;   brush-get-aspect-ratio
@@ -216,7 +225,8 @@
 ;;;   Get the aspect ratio of the brush
 ;;; Produces:
 ;;;   aspect-ratio, a real
-(define _brush-get-aspect-ratio
+(define/contract brush-get-aspect-ratio
+  (-> brush? real?)
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -230,7 +240,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-aspect-ratio _brush-get-aspect-ratio)
+;(define brush-get-aspect-ratio _brush-get-aspect-ratio)
 
 ;;; Procedure:
 ;;;   brush-get-hardness
@@ -240,7 +250,8 @@
 ;;;   Get the hardness of the brush
 ;;; Produces:
 ;;;   hardness, a real
-(define _brush-get-hardness
+(define/contract brush-get-hardness
+  (-> brush? real?)
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -254,7 +265,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-hardness _brush-get-hardness)
+;(define brush-get-hardness _brush-get-hardness)
 
 ;;; Procedure:
 ;;;   brush-get-radius
@@ -264,7 +275,8 @@
 ;;;   Get the radius of the brush
 ;;; Produces:
 ;;;   radius, a real
-(define _brush-get-radius
+(define/contract brush-get-radius
+  (-> brush? real?)
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -278,7 +290,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-radius _brush-get-radius)
+;(define brush-get-radius _brush-get-radius)
 
 ;;; Procedure:
 ;;;   brush-get-shape
@@ -290,7 +302,8 @@
 ;;;   shape, a symbol
 ;;; Postconditions:
 ;;;   (member? shape '(circle square diamond other))
-(define _brush-get-shape
+(define/contract brush-get-shape
+  (-> brush? symbol?)
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -304,7 +317,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-shape _brush-get-shape)
+;(define brush-get-shape _brush-get-shape)
 
 ;;; Procedure:
 ;;;   brush-get-spacing
@@ -314,7 +327,8 @@
 ;;;   Get the spacing of the brush
 ;;; Produces:
 ;;;   spacing, a real
-(define _brush-get-spacing
+(define/contract brush-get-spacing
+  (-> brush? real?)
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -326,7 +340,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-spacing _brush-get-spacing)
+;(define brush-get-spacing _brush-get-spacing)
 
 ;;; Procedure:
 ;;;   brush-get-spikes
@@ -336,7 +350,8 @@
 ;;;   Get the number of spikes for the brush
 ;;; Produces:
 ;;;   spikes, an integer
-(define _brush-get-spikes
+(define/contract brush-get-spikes
+  (-> brush? (and/c number? integer?))
   (lambda (brush)
     (cond
       [(brush-name? brush)
@@ -350,7 +365,7 @@
                                   'brush
                                   (list brush))])))
 
-(define brush-get-spikes _brush-get-spikes)
+;(define brush-get-spikes _brush-get-spikes)
 
 ;;; Procedure:
 ;;;   brush-info
@@ -359,7 +374,8 @@
 ;;; Purpose:
 ;;;   To create a new vector that represents the
 ;;;   current brush info
-(define _brush-info
+(define/contract brush-info
+  (-> string? any/c)
   (lambda (name)
     (vector 'brush                        ; 0
             name                          ; 1
@@ -371,9 +387,9 @@
             (brush-get-angle name)        ; 7
             (brush-get-spacing name))))   ; 8
 
-(define brush-info
-  (guard-unary-proc 'brush-info _brush-info
-                    "brush name" brush-name?))
+;(define brush-info
+;  (guard-unary-proc 'brush-info _brush-info
+;                    "brush name" brush-name?))
 
 ;;; Procedure:
 ;;;   brush-original
@@ -383,23 +399,24 @@
 ;;;   Finds the original version of brush.
 ;;; Produces:
 ;;;   original, a string
-(define _brush-original
+(define/contract brush-original
+  (-> string? string?)
   (lambda (brush)
     (cond
       [(string-ends-with? brush " (editable)")
        (substring brush 
                   0 
                   (- (string-length brush) (string-length " (editable)")))]
-
+      
       [(string-ends-with? brush " copy")
        (substring brush 0 (- (string-length brush) (string-length " copy")))]
       [else brush])))
 
-(define brush-original
-  (guard-unary-proc 'brush-original
-                    _brush-original
-                    'string
-                    string?))
+;(define brush-original
+;  (guard-unary-proc 'brush-original
+;                    _brush-original
+;                    'string
+;                    string?))
 
 ;;; Procedure:
 ;;;   brush-shape-to-number
@@ -409,7 +426,8 @@
 ;;;   Convert a shape (number or name) to the corresponding number
 ;;; Produces:
 ;;;   num, a shape number
-(define _brush-shape-to-number
+(define/contract brush-shape-to-number
+  (-> brush-valid-shape? number?)
   (lambda (shape)
     (cond
       ([eq? shape 'circle] 0)
@@ -417,11 +435,11 @@
       ([eq? shape 'diamond] 2)
       (else shape))))
 
-(define brush-shape-to-number
-  (guard-unary-proc 'brush-shape-to-number
-                    _brush-shape-to-number
-                    'shape
-                    brush-valid-shape?))
+;(define brush-shape-to-number
+;  (guard-unary-proc 'brush-shape-to-number
+;                    _brush-shape-to-number
+;                    'shape
+;                    brush-valid-shape?))
 
 ;;; Procedure:
 ;;;   brush-shape-number-to-name
@@ -431,15 +449,16 @@
 ;;;   Converts a shape number to a corresponding symbol
 ;;; Produces:
 ;;;   shapename, a symbol
-(define _brush-shape-number-to-name
+(define/contract brush-shape-number-to-name
+  (-> (and/c number? integer?) symbol?)
   (lambda (shape)
     (vector-ref #(circle square diamond) shape)))
 
-(define brush-shape-number-to-name
-  (guard-unary-proc 'brush-shape-number-to-name
-                    _brush-shape-number-to-name
-                    'shape
-                    (r-s member? '(0 1 2))))
+;(define brush-shape-number-to-name
+;  (guard-unary-proc 'brush-shape-number-to-name
+;                    _brush-shape-number-to-name
+;                    'shape
+;                    (r-s member? '(0 1 2))))
 
 
 ; +----------+--------------------------------------------------------
@@ -458,7 +477,8 @@
 ;;;   (brush-name? name)
 ;;; Postconditions:
 ;;;   editable names an editable brush
-(define _brush-make-editable
+(define/contract brush-make-editable
+  (-> string? string?)
   (lambda (brush)
     (let ([editable (if (string-contains? brush " (editable)")
                         brush
@@ -468,11 +488,11 @@
           (gimp-brush-rename duplicate-brush editable)))
       editable)))
 
-(define brush-make-editable
-  (guard-unary-proc 'brush-make-editable
-                    _brush-make-editable
-                    'brush-name
-                    brush-name?))
+;(define brush-make-editable
+;  (guard-unary-proc 'brush-make-editable
+;                    _brush-make-editable
+;                    'brush-name
+;                    brush-name?))
 
 ;;; Procedure:
 ;;;   brush-set-angle!
@@ -589,7 +609,7 @@
     (cond
       [(not (brush-valid-shape? shape))
        (error error/parameter-type 'brush-set-shape! 2 'brush-shape
-                                   (list brush shape))]
+              (list brush shape))]
       [(brush-name? brush)
        (when (not (brush-generated? brush))
          (error "brush-set-shape!: Cannot set shape of brush " brush))
@@ -623,7 +643,7 @@
     (cond
       [(not (brush-valid-spikes? spikes))
        (error error/parameter-type 'brush-set-spikes! 2 brush-valid-spikes 
-                                   (list brush spikes))]
+              (list brush spikes))]
       [(brush-name? brush)
        (let ([editable (brush-make-editable brush)])
          (gimp-brush-set-spikes brush spikes)

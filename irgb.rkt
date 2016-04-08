@@ -107,24 +107,25 @@
 ;;;   It's easy to compute the squared distance.  It takes additional
 ;;;   (and unnecessary) power to compute the normal distance, so we
 ;;;   usually just use the squared distance.
-(define _irgb-distance-squared
+(define/contract irgb-distance-squared
+  (-> irgb? irgb? integer?)
   (let ((square (lambda (x) (* x x))))
     (lambda (color1 color2)
       (+ (square (- (irgb-red color1) (irgb-red color2)))
          (square (- (irgb-green color1) (irgb-green color2)))
          (square (- (irgb-blue color1) (irgb-blue color2)))))))
 
-(define irgb-distance-squared
-  (guard-proc 'irgb-distance-squared
-              _irgb-distance-squared
-              (list 'integer-encoded-rgb-color 'integer-encoded-rgb-color)
-              (list irgb? irgb?)))
+;(define irgb-distance-squared
+;  (guard-proc 'irgb-distance-squared
+;              _irgb-distance-squared
+;              (list 'integer-encoded-rgb-color 'integer-encoded-rgb-color)
+;              (list irgb? irgb?)))
 
-(define rgb-distance-squared
-  (guard-proc 'rgb-distance-squared
-              _irgb-distance-squared
-              (list 'integer-encoded-rgb-color 'integer-encoded-rgb-color)
-              (list irgb? irgb?)))
+;(define rgb-distance-squared
+;  (guard-proc 'rgb-distance-squared
+;              irgb-distance-squared
+;              (list 'integer-encoded-rgb-color 'integer-encoded-rgb-color)
+;              (list irgb? irgb?)))
 
 ;;; Procedures:
 ;;;   irgb-map
@@ -144,17 +145,18 @@
 ;;;   (irgb-red new-rgb) = (func (irgb-red rgb))
 ;;;   (irgb-green new-rgb) = (func (irgb-green rgb))
 ;;;   (irgb-blue new-rgb) = (func (irgb-blue rgb))
-(define _irgb-map
+(define/contract irgb-map
+  (-> irgb? (-> any/c integer?) irgb?)
   (lambda (color func)
     (irgb (func (irgb-red color))
           (func (irgb-green color))
           (func (irgb-blue color)))))
 
-(define irgb-map 
-  (guard-proc 'irgb-map
-              _irgb-map
-              (list 'irgb-color 'procedure)
-              (list irgb? procedure?)))
+;(define irgb-map 
+;  (guard-proc 'irgb-map
+;              _irgb-map
+;              (list 'irgb-color 'procedure)
+;              (list irgb? procedure?)))
 
 ; +-----------------+-------------------------------------------------
 ; | Transformations |
@@ -176,14 +178,15 @@
 ;;;     (irgb-blue bluer) > (irgb-blue rgb)
 ;;;   Else
 ;;;     (irgb-blue bluer) = 255
-(define _irgb-bluer
+(define/contract irgb-bluer
+  (-> irgb? irgb?) 
   (lambda (color)
     (irgb (irgb-red color)
           (irgb-green color)
           (min 255 (+ 32 (irgb-blue color))))))
 
-(define irgb-bluer (guard-irgb-proc 'irgb-bluer _irgb-bluer))
-(define rgb-bluer (guard-irgb-proc 'rgb-bluer _irgb-bluer))
+;(define irgb-bluer (guard-irgb-proc 'irgb-bluer _irgb-bluer))
+;(define rgb-bluer (guard-irgb-proc 'rgb-bluer _irgb-bluer))
 
 ;;; Procedures:
 ;;;   irgb-complement
@@ -199,11 +202,12 @@
 ;;;   (+ (irgb-red rgb) (irgb-red complement)) = 255
 ;;;   (+ (irgb-green rgb) (irgb-green complement)) = 255
 ;;;   (+ (irgb-blue rgb) (irgb-blue complement)) = 255
-(define _irgb-complement
+(define/contract irgb-complement
+  (-> irgb? irgb?)
   (r-s irgb-map (l-s - 255)))
 
-(define irgb-complement (guard-irgb-proc 'irgb-complement _irgb-complement))
-(define rgb-complement (guard-irgb-proc 'rgb-complement _irgb-complement))
+;(define irgb-complement (guard-irgb-proc 'irgb-complement _irgb-complement))
+;(define rgb-complement (guard-irgb-proc 'rgb-complement _irgb-complement))
 
 ;;; Procedures:
 ;;;   irgb-darker
@@ -229,11 +233,12 @@
 ;;;     (irgb-blue darker) < (irgb-blue rgb)
 ;;;   Otherwise
 ;;;     (irgb-blue darker) = 0
-(define _irgb-darker
-  (r-s _irgb-map (o (l-s max 0) (r-s - 16))))
+(define/contract irgb-darker
+  (-> irgb? irgb?)
+  (r-s irgb-map (o (l-s max 0) (r-s - 16))))
 
-(define irgb-darker (guard-irgb-proc 'irgb-darker _irgb-darker))
-(define rgb-darker (guard-irgb-proc 'rgb-darker _irgb-darker))
+;(define irgb-darker (guard-irgb-proc 'irgb-darker _irgb-darker))
+;(define rgb-darker (guard-irgb-proc 'rgb-darker _irgb-darker))
 
 ;;; Procedure:
 ;;;   irgb-greener
@@ -251,14 +256,15 @@
 ;;;     (irgb-green greener) > (irgb-green rgb)
 ;;;   Otherwise
 ;;;     (irgb-green rgb) = 255
-(define _irgb-greener
+(define/contract irgb-greener
+  (-> irgb? irgb?)
   (lambda (color)
     (irgb (irgb-red color)
           (min 255 (+ 32 (irgb-green color)))
           (irgb-blue color))))
 
-(define irgb-greener (guard-irgb-proc 'irgb-greener _irgb-greener))
-(define rgb-greener (guard-irgb-proc 'rgb-greener _irgb-greener))
+;(define irgb-greener (guard-irgb-proc 'irgb-greener _irgb-greener))
+;(define rgb-greener (guard-irgb-proc 'rgb-greener _irgb-greener))
 
 ;;; Procedures:
 ;;;   irgb-greyscale
@@ -274,15 +280,16 @@
 ;;; Postconditions:
 ;;;   (irgb-red grey) = (irgb-green grey) = (irgb-blue grey).
 ;;;   grey has a similar brightness to color.
-(define _irgb-greyscale
+(define/contract irgb-greyscale
+  (-> irgb? irgb?)
   (lambda (color)
     (let ((ave (+ (* 0.30 (irgb-red color)) 
                   (* 0.59 (irgb-green color)) 
                   (* 0.11 (irgb-blue color)))))
       (irgb-new ave ave ave))))
 
-(define irgb-greyscale (guard-irgb-proc 'irgb-greyscale _irgb-greyscale))
-(define rgb-greyscale (guard-irgb-proc 'rgb-greyscale _irgb-greyscale))
+;(define irgb-greyscale (guard-irgb-proc 'irgb-greyscale _irgb-greyscale))
+;(define rgb-greyscale (guard-irgb-proc 'rgb-greyscale _irgb-greyscale))
 
 ;;; Procedures:
 ;;;   irgb-lighter
@@ -308,11 +315,12 @@
 ;;;     (irgb-blue lighter) > (irgb-blue color)
 ;;;   Otherwise
 ;;;     (irgb-blue lighter) = 255
-(define _irgb-lighter
-  (r-s _irgb-map (o (l-s min 255) (r-s + 16))))
+(define/contract irgb-lighter
+  (-> irgb? irgb?)
+  (r-s irgb-map (o (l-s min 255) (r-s + 16))))
 
-(define irgb-lighter (guard-irgb-proc 'irgb-lighter _irgb-lighter))
-(define rgb-lighter (guard-irgb-proc 'rgb-lighter _irgb-lighter))
+;(define irgb-lighter (guard-irgb-proc 'irgb-lighter _irgb-lighter))
+;(define rgb-lighter (guard-irgb-proc 'rgb-lighter _irgb-lighter))
 
 ;;; Procedures:
 ;;;   irgb-phaseshift
@@ -324,11 +332,12 @@
 ;;;   to 128 and subtracting 128 from components greater than 128.
 ;;; Produces:
 ;;;   shifted, an integer-encoded RGB color
-(define _irgb-phaseshift
-  (r-s _irgb-map (o (r-s modulo 256) (l-s + 128))))
+(define/contract irgb-phaseshift
+  (-> irgb? irgb?)
+  (r-s irgb-map (o (r-s modulo 256) (l-s + 128))))
 
-(define irgb-phaseshift (guard-irgb-proc 'irgb-phaseshift _irgb-phaseshift))
-(define rgb-phaseshift (guard-irgb-proc 'rgb-phaseshift _irgb-phaseshift))
+;(define irgb-phaseshift (guard-irgb-proc 'irgb-phaseshift _irgb-phaseshift))
+;(define rgb-phaseshift (guard-irgb-proc 'rgb-phaseshift _irgb-phaseshift))
 
 ;;; Procedures:
 ;;;   irgb-redder
@@ -346,14 +355,15 @@
 ;;;     (irgb-red redder) > (irgb-red rgb)
 ;;;   Otherwise
 ;;;     (irgb-red redder) = 255
-(define _irgb-redder
+(define/contract irgb-redder
+  (-> irgb? irgb?)
   (lambda (color)
     (irgb (min 255 (+ 32 (irgb-red color)))
           (irgb-green color)
           (irgb-blue color))))
 
-(define irgb-redder (guard-irgb-proc 'irgb-redder _irgb-redder))
-(define rgb-redder (guard-irgb-proc 'rgb-redder _irgb-redder))
+;(define irgb-redder (guard-irgb-proc 'irgb-redder _irgb-redder))
+;(define rgb-redder (guard-irgb-proc 'rgb-redder _irgb-redder))
 
 ;;; Procedures:
 ;;;   irgb-rotate
@@ -370,14 +380,15 @@
 ;;;   (rgb-red rotated) = (rgb-green color)
 ;;;   (rgb-green rotated) = (rgb-blue color)
 ;;;   (rgb-blue rotated) = (rgb-red color)
-(define _irgb-rotate
+(define/contract irgb-rotate
+  (-> irgb? irgb?)
   (lambda (color)
     (irgb (irgb-green color)
           (irgb-blue color)
           (irgb-red color))))
 
-(define irgb-rotate (guard-irgb-proc 'irgb-rotate _irgb-rotate))
-(define rgb-rotate (guard-irgb-proc 'rgb-rotate _irgb-rotate))
+;(define irgb-rotate (guard-irgb-proc 'irgb-rotate _irgb-rotate))
+;(define rgb-rotate (guard-irgb-proc 'rgb-rotate _irgb-rotate))
 
 ; +-----------------+-------------------------------------------------
 ; | Color Combiners |
@@ -398,14 +409,15 @@
 ;;;   (irgb-red result) = (min 255 (+ (irgb-red irgb1) (irgb-red irgb2))
 ;;;   (irgb-green result) = (min 255 (+ (irgb-green irgb1) (irgb-green irgb2))
 ;;;   (irgb-blue result) = (min 255 (+ (irgb-blue irgb1) (irgb-blue irgb2))
-(define _irgb-add
+(define/contract irgb-add
+  (-> irgb? irgb? irgb?)
   (lambda (irgb1 irgb2)
     (irgb (+ (irgb-red irgb1) (irgb-red irgb2))
           (+ (irgb-green irgb1) (irgb-green irgb2))
           (+ (irgb-blue irgb1) (irgb-blue irgb2)))))
 
-(define irgb-add
-  (guard-proc 'irgb-add _irgb-add '(irgb-color irgb-color) (list irgb? irgb?)))
+;(define irgb-add
+;  (guard-proc 'irgb-add _irgb-add '(irgb-color irgb-color) (list irgb? irgb?)))
 
 ;;; Procedure:
 ;;;   irgb-average
@@ -422,14 +434,15 @@
 ;;;   (irgb-red result) = (* 1/2 (+ (irgb-red irgb1) (irgb-red irgb2))
 ;;;   (irgb-green result) = (* 1/2 (+ (irgb-green irgb1) (irgb-green irgb2))
 ;;;   (irgb-blue result) = (* 1/2 (+ (irgb-blue irgb1) (irgb-blue irgb2))
-(define _irgb-average
+(define/contract irgb-average
+  (-> irgb? irgb? irgb?)
   (lambda (irgb1 irgb2)
     (irgb (* 1/2 (+ (irgb-red irgb1) (irgb-red irgb2)))
           (* 1/2 (+ (irgb-green irgb1) (irgb-green irgb2)))
           (* 1/2 (+ (irgb-blue irgb1) (irgb-blue irgb2))))))
 
-(define irgb-average
-  (guard-proc 'irgb-average _irgb-average '(irgb-color irgb-color) (list irgb? irgb?)))
+;(define irgb-average
+;  (guard-proc 'irgb-average _irgb-average '(irgb-color irgb-color) (list irgb? irgb?)))
 
 ;;; Procedure:
 ;;;   irgb-subtract
@@ -446,12 +459,13 @@
 ;;;   (irgb-red result) = (max 0 (- (irgb-red irgb1) (irgb-red irgb2))
 ;;;   (irgb-green result) = (min 255 (+ (irgb-green irgb1) (irgb-green irgb2))
 ;;;   (irgb-blue result) = (min 255 (+ (irgb-blue irgb1) (irgb-blue irgb2))
-(define _irgb-subtract
+(define/contract irgb-subtract
+  (-> irgb? irgb? irgb?)
   (lambda (irgb1 irgb2)
     (irgb (- (irgb-red irgb1) (irgb-red irgb2))
           (- (irgb-green irgb1) (irgb-green irgb2))
           (- (irgb-blue irgb1) (irgb-blue irgb2)))))
 
-(define irgb-subtract
-  (guard-proc 'irgb-subtract _irgb-subtract '(irgb-color irgb-color) (list irgb? irgb?)))
+;(define irgb-subtract
+;  (guard-proc 'irgb-subtract _irgb-subtract '(irgb-color irgb-color) (list irgb? irgb?)))
 
