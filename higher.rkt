@@ -16,7 +16,8 @@
 ;;;   If there is an i such that (pred? (list-ref lst i))
 ;;;     fails to hold, then ok? is false.
 ;;;   Otherwise, ok? is true.
-(define all
+(define/contract all
+  (-> (-> any/c boolean?) list? boolean?)
   (lambda (pred? lst)
     (or (null? lst)
         (and (pred? (car lst))
@@ -38,11 +39,12 @@
 ;;;     ok? is true.
 ;;;   If for all i, (pred? (list-ref list i)) does not hold, then
 ;;;     ok? is false.
-(define any
+(define/contract any
+  (-> (-> any/c boolean?) list? boolean?)
   (lambda (pred? lst)
     (and (not (null? lst))
          (or (pred? (car lst))
-	     (any pred? (cdr lst))))))
+             (any pred? (cdr lst))))))
 
 ;;; Procedure:
 ;;;   range-checker
@@ -53,24 +55,25 @@
 ;;;   Create a procedure that determines if its parameter is between
 ;;;   lb and ub.
 ;;; Produces:
-;;;   checker, a boolean
+;;;   checker, procedure that produces a boolean
 ;;; Preconditions:
 ;;;   No additional
 ;;; Postconditions:
 ;;;   (checker val) holds iff (<= lb val ub)
-(define _range-checker
+(define/contract range-checker
+  (-> real? real? (-> any/c boolean?))
   (lambda (lb ub)
     (lambda (val)
       (<= lb val ub))))
 
-(define range-checker
-  (lambda (lb ub)
-    (cond
-      [(not (real? lb))
-       (error "range-checker expected real for param 1, received" lb)]
-      [(not (real? ub))
-       (error "range-checker expected real for param 2, received" ub)]
-      [else (_range-checker lb ub)])))
+;(define range-checker
+;  (lambda (lb ub)
+;    (cond
+;      [(not (real? lb))
+;       (error "range-checker expected real for param 1, received" lb)]
+;      [(not (real? ub))
+;       (error "range-checker expected real for param 2, received" ub)]
+;      [else (_range-checker lb ub)])))
 
 ;;; Procedure:
 ;;;   constant
@@ -83,7 +86,8 @@
 ;;;   constant func, a function
 ;;; Postconditions:
 ;;;   (constant func x) = val for all x.
-(define constant
+(define/contract constant
+  (-> any/c (-> any/c any/c))
   (lambda (val)
     (lambda stuff val)))
 
@@ -101,7 +105,8 @@
 ;;; Postconditions:
 ;;;   (fun val1 ... valm) =
 ;;;     (and (f1 val1 ... valm) (f2 val1 ... valm) ... (fn val1 ... valm))
-(define higher-and
+(define/contract higher-and
+  (->* ((->* (any/c) any/c)) () #:rest (listof (-> any/c any/c)) (-> any/c any/c))
   (letrec ((kernel
             (lambda (funs args)
               (or (null? funs)
@@ -110,6 +115,7 @@
     (lambda funs
       (lambda args
         (kernel funs args)))))
+
 (define ^and higher-and)
 
 ;;; Procedures:
