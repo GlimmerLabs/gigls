@@ -57,13 +57,14 @@
 ;;;   Determine if the string represents a six-P style header
 ;;; Produces:
 ;;;   header?, a boolean
-(define _sixps-header?
+(define/contract sixps-header?
+  (-> string? boolean?)
   (lambda (str)
     (and (sixps-line? str)
          (char-upper-case? (string-ref str 4)))))
 
-(define sixps-header?
-  _sixps-header?)
+;(define sixps-header?
+;  _sixps-header?)
 
 ;;; Procedure:
 ;;;   sixps-line?
@@ -73,14 +74,15 @@
 ;;;   Determines if str is a line of six-p-style documentation
 ;;; Produces:
 ;;;   is-line?, a boolean
-(define _sixps-line?
+(define/contract sixps-line?
+  (-> string? boolean?)
   (lambda (str)
     (and (string? str)
          (>= (string-length str) 3)
          (string=? ";;;" (substring str 0 3)))))
 
-(define sixps-line? 
-  _sixps-line?)
+;(define sixps-line? 
+;  _sixps-line?)
 
 ; +------------+------------------------------------------------------
 ; | Procedures |
@@ -99,7 +101,8 @@
 ;;; Postconditions:
 ;;;   docs contains all of the lines in the files that begin with
 ;;;   three semicolons, with subsequent lines grouped together.
-(define _extract-documentation
+(define/contract extract-documentation
+  (->* (path-string?) () #:rest (listof path-string?) (listof string?))
   (lambda filenames
     (let kernel ([port (open-input-file (car filenames))]
                  [current-item ""]
@@ -134,8 +137,8 @@
             [else
              (kernel port "" all-items remaining-files)])))))
 
-(define extract-documentation 
-  _extract-documentation)
+;(define extract-documentation 
+;  _extract-documentation)
 
 ;;; Procedure:
 ;;;   extract-documentation-from-file
@@ -150,7 +153,8 @@
 ;;; Postconditions:
 ;;;   docs contains all of the lines in the file that begin with
 ;;;   three semicolons, with subsequent lines grouped together.
-(define _extract-documentation-from-file
+(define/contract extract-documentation-from-file
+  (-> string? (listof string?))
   (lambda (fname)
     (let ([port (open-input-file fname)])
       (let kernel ([current-item ""]
@@ -167,11 +171,11 @@
                  (kernel current-item items)
                  (kernel "" (cons current-item items)))]))))))
 
-(define extract-documentation-from-file
-  (lambda (fname)
-    (when (not (file-exists? fname))
-      (error "extract-documentation: The file does not exist: " fname))
-    (_extract-documentation-from-file fname)))
+;(define extract-documentation-from-file
+;  (lambda (fname)
+;    (when (not (file-exists? fname))
+;      (error "extract-documentation: The file does not exist: " fname))
+;    (_extract-documentation-from-file fname)))
 
 ;;; Procedure:
 ;;;   sixps-extract-data
@@ -185,18 +189,19 @@
 ;;;   str begins with three semicolons
 ;;; Postconditions:
 ;;;   data is str with the leading semicolons and spaces stripped
-(define _sixps-extract-data
+(define/contract sixps-extract-data
+  (-> string? string?)
   (let ([cleanup (o (r-s string-remove-trailing-chars char-whitespace?)
                     (r-s string-remove-leading-chars char-whitespace?)
                     (r-s string-remove-leading-chars (l-s char=? #\;)))])
     (lambda (str)
       (cleanup str))))
 
-(define sixps-extract-data
-  (guard-unary-proc 'sixps-extract-data
-                    _sixps-extract-data
-                    'string
-                    string?))
+;(define sixps-extract-data
+;  (guard-unary-proc 'sixps-extract-data
+;                    _sixps-extract-data
+;                    'string
+;                    string?))
     
 ;;; Procedure:
 ;;;   sixps-extract-header
@@ -210,7 +215,8 @@
 ;;;   (sixps-header? str)
 ;;; Postconditions:
 ;;;   header is the header (e.g., "Procedure")
-(define _sixps-extract-header
+(define/contract sixps-extract-header
+  (-> string? string?)
   (let ([cleanup (o (r-s string-remove-trailing-chars (l-s char=? #\:))
                     (r-s string-remove-trailing-chars char-whitespace?)
                     (r-s string-remove-leading-chars char-whitespace?)
@@ -218,11 +224,11 @@
     (lambda (str)
       (cleanup str))))
  
-(define sixps-extract-header
-  (guard-unary-proc 'sixps-extract-header
-                    _sixps-extract-header
-                    'sixp-style-header
-                    sixps-header?))
+;(define sixps-extract-header
+;  (guard-unary-proc 'sixps-extract-header
+;                    _sixps-extract-header
+;                    'sixp-style-header
+;                    sixps-header?))
 
 ;;; Procedure:
 ;;;   convert-sixps
@@ -235,7 +241,8 @@
 ;;; Preconditions:
 ;;;   sixps has the appropriate form (a sequence of lines, each of which
 ;;;   starts with three semicolons)
-(define _convert-sixps
+(define/contract convert-sixps
+  (-> string? list?)
   (lambda (sixps)
     (let ([lines (string-split sixps "\n")])
       (let kernel ([header (sixps-extract-header (car lines))]
@@ -256,8 +263,8 @@
                     entries
                     (cdr remaining))])))))
 
-(define convert-sixps
-  _convert-sixps)
+;(define convert-sixps
+;  _convert-sixps)
 
 ;;; Procedure:
 ;;;   sixps-short
@@ -267,7 +274,8 @@
 ;;;   Create a string with the short documentation for doc
 ;;; Produces:
 ;;;   short, a string
-(define sixps-short
+(define/contract sixps-short
+  (-> list? string?)
   (lambda (doc)
     (let ([proc (cdr (assoc "Procedure" doc))]
           [params (string-join (map (o car (r-s string-split ","))
