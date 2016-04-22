@@ -38,7 +38,12 @@
 ;;;     uses 0.
 ;;;   If irgb is provided a component greater than 255, it
 ;;;     uses 255.
-(define irgb irgb-new)
+(define/contract irgb 
+  (-> (and/c integer? positive?)
+      (and/c integer? positive?)
+      (and/c integer? positive?) 
+      (and/c integer? positive?))
+      irgb-new)
 
 ; +------------+------------------------------------------------------
 ; | Predicates |
@@ -57,7 +62,9 @@
 ;;; Postconditions:
 ;;;   If is-irgb holds, then val can be used for the various irgb-*
 ;;;     procedures.
-(define irgb? integer?)
+(define/contract irgb?
+  (-> any/c boolean?)
+  integer?)
 
 ; +--------+----------------------------------------------------------
 ; | Guards |

@@ -22,27 +22,32 @@
 ;;;   > (define example! (make-bi-cycle 'a 'b 'c 'd))
 ;;;   > (repeat 20 (lambda () (display (example!))))
 ;;;   abcdcbabcdcbabcdcbab
-(define _make-bi-cycle
+(define/contract make-bi-cycle
+  (-> (flat-named-contract
+       'a-list-with-length-longer-than-2
+       (lambda (lst)
+         (> (length lst) 2)))
+      (-> any/c))
   (lambda contents
     (let* ((stuff (if (null? (cdr contents)) (car contents) contents)))
       (make-cycle (append stuff (cdr (reverse (cdr stuff))))))))
 
-(define make-bi-cycle
-  (lambda contents
-    (cond
-      ((null? contents)
-       (error/arity 'make-bi-cycle 1 contents))
-      ((and (null? (cdr contents)) 
-            (not (list? (car contents))))
-       (error/parameter-type 'make-bi-cycle 1 'list contents))
-      ((and (null? (cdr contents))
-            (< (length (car contents)) 3))
-       (error/misc 'make-bi-cycle "requires at least three elements" contents))
-      ((and (not (null? (cdr contents)))
-            (< (length contents) 3))
-       (error/misc 'make-bi-cycle "requires at least three elements" contents))
-      (else
-       (apply _make-bi-cycle contents)))))
+;(define make-bi-cycle
+;  (lambda contents
+;    (cond
+;      ((null? contents)
+;       (error/arity 'make-bi-cycle 1 contents))
+;      ((and (null? (cdr contents)) 
+;            (not (list? (car contents))))
+;       (error/parameter-type 'make-bi-cycle 1 'list contents))
+;      ((and (null? (cdr contents))
+;            (< (length (car contents)) 3))
+;       (error/misc 'make-bi-cycle "requires at least three elements" contents))
+;      ((and (not (null? (cdr contents)))
+;            (< (length contents) 3))
+;       (error/misc 'make-bi-cycle "requires at least three elements" contents))
+;      (else
+;       (apply _make-bi-cycle contents)))))
 ; [From iascm/hop/make-cycle.scm]
 
 ;;; Procedure:
@@ -68,7 +73,8 @@
 ;;;   3
 ;;;   > (simple!)
 ;;;   1
-(define _make-cycle
+(define/contract make-cycle
+  (-> list? (-> any/c))
   (lambda contents
     (let* ((stuff (if (null? (cdr contents)) (car contents) contents))
            (vec (list->vector stuff))
@@ -78,17 +84,17 @@
         (set! pos (modulo (+ pos 1) len))
         (vector-ref vec pos)))))
 
-(define make-cycle
-  (lambda contents
-    (cond
-      ((null? contents)
-       (error/arity 'make-cycle 1 contents))
-      ((and (null? (cdr contents)) 
-            (or (null? (car contents))
-                (not (list? (car contents)))))
-       (error/parameter-type 'make-cycle 1 'non-empty-list contents))
-      (else
-       (apply _make-cycle contents)))))
+;(define make-cycle
+;  (lambda contents
+;    (cond
+;      ((null? contents)
+;       (error/arity 'make-cycle 1 contents))
+;      ((and (null? (cdr contents)) 
+;            (or (null? (car contents))
+;                (not (list? (car contents)))))
+;       (error/parameter-type 'make-cycle 1 'non-empty-list contents))
+;      (else
+;       (apply _make-cycle contents)))))
 ; [From iascm/hop/make-flag.scm]
 
 ;;; Procedure:
@@ -105,7 +111,10 @@
 ;;;   (proc) gets the state.  That is, returns the last val for which
 ;;;     there was a call to (proc val).  If there was no such call,
 ;;;     returns #t.
-(define make-flag
+; No contract for this one because Gemma doesn't know how to make contracts
+; for functions that produce functions with varying inputs
+(define/contract make-flag
+  (-> (->* () (any/c) boolean?))
   (lambda ()
     (let ((flag #t))
       (lambda params
@@ -132,7 +141,8 @@
 ;;;   (proc) gets the state.  That is, returns the last val for which
 ;;;     there was a call to (proc val).  If there was no such call,
 ;;;     returns init.
-(define make-state
+(define/contract make-state
+  (-> any/c (->* () (any/c) any/c))
   (lambda (init)
     (let ((state init))
       (lambda params

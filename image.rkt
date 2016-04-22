@@ -18,12 +18,41 @@
 (provide (all-defined-out))
 
 ;;; Procedure:
-;;;   image?
+;;;   image-id?
 ;;; Parameters:
 ;;;   val, a Scheme value
 ;;; Purpose:
+;;;   Determine whether or not val is a valid image id
+(define/contract image-id?
+  (-> any/c boolean?)
+  (lambda (val)
+    (and (integer? val)
+         (not (= 0 (car (gimp-image-is-valid val)))))))
+
+;;; Procedure:
+;;;   image-name?
+;;; Parameters:
+;;;   str, a string
+;;; Purpose:
+;;;   Determines if str names an image
+;;; Produces:
+;;;   is-image, a boolean
+(define/contract image-name?
+  (-> string? boolean?)
+  (lambda (str)
+    (and (string? str) (image-name->image-id str) #t)))
+
+
+;;; Procedure:
+;;;   image?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Produces
+;;;   is-image, a boolean
+;;; Purpose:
 ;;;   Determine if val is one of the valid image descriptions.
-(define image?
+(define/contract image?
+  (-> any/c boolean?)
   (lambda (val)
     (or (image-id? val)
         (image-name? val))))
@@ -46,15 +75,16 @@
 ;;; Postconditions:
 ;;;   image contains an additional spot at (col,row)
 ;;;   That spot may not yet be visible.
-(define _image-blot!
+(define/contract image-blot!
+  (-> image? integer? integer? image?)
   (lambda (image x y)
     (gimp-paintbrush-default (image-get-layer image) 2 (vector x y))
     image))
 
-(define image-blot!
-  (guard-proc 'image-blot! _image-blot!
-              '(image real real)
-              (list image? real? real?)))
+;(define image-blot!
+;  (guard-proc 'image-blot! _image-blot!
+;              '(image real real)
+;              (list image? real? real?)))
 
 ;;; Procedure:
 ;;;   image-clear-selection!
@@ -70,16 +100,17 @@
 ;;;    All pixels inside the current selection in image are now the 
 ;;;    background color (or transparent if the active layer has an
 ;;;    alpha channel)
-(define _image-clear-selection!
+(define/contract image-clear-selection!
+  (-> image? image?)
   (lambda (image)
     (gimp-edit-clear (image-get-layer image))
     image))
 
-(define image-clear-selection!
-  (guard-unary-proc 'image-clear-selection!
-                    _image-clear-selection!
-                    'image
-                    image?))
+;(define image-clear-selection!
+;  (guard-unary-proc 'image-clear-selection!
+;                    _image-clear-selection!
+;                    'image
+;                    image?))
 
 ;;; Procedure:
 ;;;   image-copy-paste-block!
@@ -100,7 +131,12 @@
 ;;; Problems:
 ;;;   Need to deal with out-of-bounds issues.  
 ;;;     (See paste-buffer! in newgrid.scm for an approach.)
-(define image-copy-paste-block!
+(define/contract image-copy-paste-block!
+  (-> image-id? integer? 
+      integer? image-id? 
+      integer? integer? 
+      integer? integer?
+      image?)
   (lambda (source source-col source-row 
            target target-col target-row 
            width height)
@@ -134,7 +170,8 @@
 ;;; Postconditions:
 ;;;   If type is a valid type, valid? is #t.
 ;;;   Otherwise, valid? is #f.
-(define arrow-type?
+(define/contract arrow-type?
+  (-> symbol? boolean?)
   (r-s member? arrow-types))
 
 ;;; Procedure:
@@ -157,7 +194,9 @@
 ;;;   (from-col,from-row) != (to-col,to-row)
 ;;;   type must be one of 'lines, 'filled, 'hollow, 'pointy, and
 ;;;     'hollow-pointy
-(define _image-draw-arrow!
+(define/contract image-draw-arrow!
+  (-> image? symbol? real? real? real? real?
+      (and/c real? positive?) (and/c real? positive?) image?)
   (lambda (image type from-col from-row to-col to-row head-width head-length)
     (let* ((delta-col (- to-col from-col))
            (delta-row (- to-row from-row))           
@@ -232,17 +271,17 @@
                      (list image type from-col from-row to-col to-row 
                            head-width head-length)))))))
 
-(define image-draw-arrow!
-  (guard-proc 'image-draw-arrow!
-              _image-draw-arrow!
-              (list 'image 
-                    'arrow-type
-                    'real 'real 'real 'real 
-                    'positive-real 'positive-real)
-              (list image?
-                    ^true
-                    real? real? real? real?
-                    (^and positive? real?) (^and positive? real?))))
+;(define image-draw-arrow!
+;  (guard-proc 'image-draw-arrow!
+;              _image-draw-arrow!
+;              (list 'image 
+;                    'arrow-type
+;                    'real 'real 'real 'real 
+;                    'positive-real 'positive-real)
+;              (list image?
+;                    ^true
+;                    real? real? real? real?
+;                    (^and positive? real?) (^and positive? real?))))
 
 ;;; Procedure:
 ;;;   image-draw-line!
@@ -257,7 +296,8 @@
 ;;;   beginning at (col1,row1) and ending at (col2, row2).
 ;;; Produces:
 ;;;   image, the original image
-(define _image-draw-line!
+(define/contract image-draw-line!
+  (-> image? real? real? real? real? image?)
   (lambda (image col1 row1 col2 row2)
     (gimp-paintbrush-default (image-get-layer image)
                              4                   
@@ -265,11 +305,11 @@
     (cond ((context-immediate-updates?) (context-update-displays!)))
     image))
 
-(define image-draw-line!
-  (guard-proc 'image-draw-line!
-              _image-draw-line!
-              (list 'image 'real 'real 'real 'real)
-              (list image? real? real? real? real?)))
+;(define image-draw-line!
+;  (guard-proc 'image-draw-line!
+;              _image-draw-line!
+;              (list 'image 'real 'real 'real 'real)
+;              (list image? real? real? real? real?)))
 
 ;;; Procedure
 ;;;   image-fill!
@@ -285,14 +325,15 @@
 ;;; Postconditions
 ;;;   All the pixels of the active layer in the current selection are filled 
 ;;;   with the current foreground color
-(define _image-fill! 
+(define/contract image-fill! 
+  (-> image? image?)
   (lambda (image)
     (gimp-edit-fill (image-get-layer image) 0)
     (cond ((context-immediate-updates?) (context-update-displays!)))
     image))
 
-(define image-fill!
-  (guard-unary-proc 'image-fill! _image-fill! 'image image?))
+;(define image-fill!
+;  (guard-unary-proc 'image-fill! _image-fill! 'image image?))
 
 ;;; Procedure
 ;;;   image-fill-selection!
@@ -308,7 +349,8 @@
 ;;; Postconditions
 ;;;   All the pixels of the active layer in the current selection are filled 
 ;;;   with the current foreground color
-(define image-fill-selection! 
+(define/contract image-fill-selection! 
+  (-> image? image?)
   (lambda (image)
     (cond
       ((not (image? image))
@@ -327,7 +369,8 @@
 ;;;   layer, a layer
 ;;; Postconditions:
 ;;;   If the image has no active layer, returns #f
-(define image-get-layer
+(define/contract image-get-layer
+  (-> image? real?)
   (lambda (image)
     (let ((id (and image (image-id image))))
       (and id
@@ -352,7 +395,8 @@
 ;;;   Extract the pixel at (col,row) from image.
 ;;; Produces:
 ;;;   color, a color
-(define image-get-pixel
+(define/contract image-get-pixel
+  (-> image? integer? integer? color?)
   (lambda (image col row)
     (let* ((drawable (car (gimp-image-get-active-layer image)))
            (color (cadr (gimp-drawable-get-pixel drawable col row))))
@@ -367,13 +411,14 @@
 ;;;   Determine if anything is selected on the image
 ;;; Produces:
 ;;;   has-selection?, a Boolean
-(define _image-has-selection?
+(define/contract image-has-selection?
+  (-> image? boolean?)
   (lambda (image)
     (zero? (car (gimp-selection-is-empty (image-id image))))))
 
-(define image-has-selection?
-  (guard-unary-proc 'image-has-selection? _image-has-selection?
-                    'image image?))
+;(define image-has-selection?
+;  (guard-unary-proc 'image-has-selection? _image-has-selection?
+;                    'image image?))
 
 ;;; Procedure:
 ;;;   image-height
@@ -387,7 +432,8 @@
 ;;;   image is a valid image
 ;;; Postconditions:
 ;;;   heith is the height of image.
-(define image-height
+(define/contract image-height
+  (-> image? integer?)
   (lambda (image)
     (cond 
       ((not (image? image))
@@ -405,23 +451,14 @@
 ;;;   imageid, the GIMP id for the image.
 ;;; Problems:
 ;;;   Returns #f if it does not seem to be an image.
-(define image-id
+(define/contract image-id
+  (-> image? image-id?)
   (lambda (image)
     (cond
       ((and (integer? image) (image-id? image)) image)
       ((string? image) (image-name->image-id image))
       (else #f))))
 
-;;; Procedure:
-;;;   image-id?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determine whether or not val is a valid image id
-(define image-id?
-  (lambda (val)
-    (and (integer? val)
-         (not (= 0 (car (gimp-image-is-valid val)))))))
 
 ;;; Procedure:
 ;;;   image-load
@@ -434,7 +471,8 @@
 ;;;     in the given file.
 ;;; Preconditions:
 ;;;   fname names a valid image file.
-(define image-load
+(define/contract image-load
+  (-> string? image?)
   (lambda (fname)
     (cond
       ((not (file-exists? fname))
@@ -453,24 +491,14 @@
 ;;;   name, a string
 ;;; Preconditions:
 ;;;   image is an image. That is (image? image) holds.
-(define image-name
+(define/contract image-name
+  (-> image? string?)
   (lambda (image)
     (cond
       ((image-id? image) (car (gimp-image-get-name image)))
       ((string? image) image)
       (else #f))))
 
-;;; Procedure:
-;;;   image-name?
-;;; Parameters:
-;;;   str, a string
-;;; Purpose:
-;;;   Determines if str names an image
-;;; Produces:
-;;;   is-image, a boolean
-(define image-name?
-  (lambda (str)
-    (and (string? str) (image-name->image-id str) #t)))
 
 ;;; Procedure:
 ;;;   image-name->image-id
@@ -484,7 +512,8 @@
 ;;;   If there is an image with the given name, imageid is one such image.
 ;;;     That is (image-name imageid) returns name.
 ;;;   If there is no such image, imageid is #f.
-(define image-name->image-id
+(define/contract image-name->image-id
+  (-> string? image-id?)
   (lambda (name)
     (and (string? name)
          (let* ((stuff (gimp-image-list))
@@ -512,7 +541,8 @@
 ;;;     .jpg, .png, xcf, ...)
 ;;; Postconditions:
 ;;;   The given file now contains a copy of the image.
-(define image-save
+(define/contract image-save
+  (-> image? string? image?)
   (lambda (image fname)
     (gimp-file-save 1 ; non-interactive
                     image
@@ -534,7 +564,11 @@
 ;;; Preconditions:
 ;;;   selection must have been created with (image-selection-save image)
 ;;;   selection must not have been previously dropped
-(define image-selection-drop!
+
+; Note: Contract may not be most effective due to the fact that Gemma
+;  couldn't figure out what a selection was.
+(define/contract image-selection-drop!
+  (-> image? any/c void)
   (lambda (image selection)
     (gimp-image-remove-channel image selection)
     (void)))
@@ -551,7 +585,11 @@
 ;;; Preconditions:
 ;;;   selection must have been created with (image-save-selection image).
 ;;;   selection must not have been previously deleted with image-drop-selection.
-(define image-selection-load!
+
+; Note: Contract may not be most effective due to the fact that Gemma
+;  couldn't figure out what a selection was.
+(define/contract image-selection-load!
+  (-> image? any/c void)
   (lambda (image selection)
     (gimp-selection-load selection)
     (void)))
@@ -569,7 +607,8 @@
 ;;; Postconditions:
 ;;;   The image is unaffected.
 ;;;   (image-restore-selection image selection) will restore the selection.
-(define image-selection-save
+(define/contract image-selection-save
+  (-> image? any/c)
   (lambda (image)
     (car (gimp-selection-save image))))
 
@@ -584,7 +623,8 @@
 ;;;   Sets the pixel at (col,row) to color.
 ;;; Produces:
 ;;;   [Nothing; called for the side effect]
-(define _image-set-pixel!
+(define/contract image-set-pixel!
+  (-> image? integer? integer? irgb? void)
   (lambda (image col row color)
     (when (>= col (image-width image))
        (error "image-set-pixel!: column too large" col))
@@ -598,17 +638,17 @@
                                         (irgb-blue irgb))))
     (void)))
 
-(define image-set-pixel!
-  (guard-proc 'image-set-pixel!
-              _image-set-pixel!
-              (list 'image 
-                    'non-negative-integer 
-                    'non-negative-integer 
-                    'color)
-              (list image?
-                    (^and integer? (^not negative?))
-                    (^and integer? (^not negative?))
-                    color?)))
+;(define image-set-pixel!
+;  (guard-proc 'image-set-pixel!
+;              _image-set-pixel!
+;              (list 'image 
+;                    'non-negative-integer 
+;                    'non-negative-integer 
+;                    'color)
+;              (list image?
+;                    (^and integer? (^not negative?))
+;                    (^and integer? (^not negative?))
+;                    color?)))
 
 ;;; Procedure:
 ;;;   image-select-all!
@@ -622,7 +662,8 @@
 ;;;   image is a valid image
 ;;; Postconditions:
 ;;;   All pixels in image have been selected.
-(define image-select-all!
+(define/contract image-select-all!
+  (-> image? void)
   (lambda (image)
     (let ((id (image-id image)))
       (if id
@@ -636,7 +677,7 @@
 ;;;   operation, one of the valid GIMP operations
 ;;;   left, an integer
 ;;;   top, an integer
-;;;   width, an integer;
+;;;   width, an integer
 ;;;   height, an integer
 ;;; Purpose:
 ;;;   Select an ellipse according to the selection mode specfied by 
@@ -650,7 +691,8 @@
 ;;;   left, top, width, and height describe an ellipse.
 ;;; Postconditions
 ;;;   An appropriate ellipse is selected.
-(define image-select-ellipse!
+(define/contract image-select-ellipse!
+  (-> image? (-> any/c any/c) integer? integer? integer? integer? void)
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
                                'image-select-ellipse!)
@@ -674,7 +716,8 @@
 ;;;   image is a valid image
 ;;; Postconditions:
 ;;;   No pixels in image are selected.
-(define image-select-nothing!
+(define/contract image-select-nothing!
+  (-> image? void)
   (lambda (image)
     (cond
       ((not (image? image))
@@ -705,7 +748,11 @@
 ;;;   left, top, width, and height descirbe an area onscreen in image.
 ;;; Postconditions:
 ;;;   The given rectangle is now selected.
-(define image-select-rectangle!
+(define/contract image-select-rectangle!
+  (-> image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
+                (lambda (val)
+                  (member val (list ADD SUBTRACT REPLACE INTERSECT))))
+      integer? integer? integer? integer? void)
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
                                'image-select-rectangle!)
@@ -730,7 +777,14 @@
 ;;;   Select the polygon bounded by the given points
 ;;; Produces:
 ;;;   image, the image
-(define _image-select-polygon!
+
+; Note: The contract for image-select-polygon! does not work at the moment, but
+;  that will be fixed in soon.
+(define/contract image-select-polygon!
+  (->* (image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
+                (lambda (val)
+                  (member val (list ADD SUBTRACT REPLACE INTERSECT))))
+                real?) () #:rest (listof real?) image?)
   (lambda (image operation first . rest)
     (let* ((points (if (null? rest) first (cons first rest)))
            (floats (points->floats points))
@@ -738,31 +792,31 @@
       (gimp-free-select image (vector-length floats) floats
                         operation 1 0 0))))
 
-(define image-select-polygon!
-  (let ((operations (list ADD SUBTRACT INTERSECT REPLACE)))
-    (lambda (image operation first . rest)
-      (let* ((points (if (null? rest) first (cons first rest)))
-             (params (list image operation points)))
-        (cond
-          ((not (image? image))
-           (error/parameter-type 'image-select-polygon! 1 'image params))
-          ((not (member? operation operations))
-           (error/parameter-type 'image-select-polygon! 2 'selection-op params))
-          ((not (list? points))
-           (error/parameter-type 'image-select-polygon! 3 
-                                 'list-of-points params))
-          ((not (all point? points))
-           (error/parameter-type 'image-select-polygon! 3
-                                 'list-of-points  params))
-          ((or (null? points) 
-               (null? (cdr points)) 
-               (null? (cdr (cdr points))))
-           (error/misc 'image-select-polygon!
-                       (string-append "Requires at least 3 points, given "
-                                      (number->string (length points)))
-                       params))
-          (else
-           (apply _image-select-polygon! params)))))))
+;(define image-select-polygon!
+;  (let ((operations (list ADD SUBTRACT INTERSECT REPLACE)))
+;    (lambda (image operation first . rest)
+;      (let* ((points (if (null? rest) first (cons first rest)))
+;             (params (list image operation points)))
+;        (cond
+;          ((not (image? image))
+;           (error/parameter-type 'image-select-polygon! 1 'image params))
+;          ((not (member? operation operations))
+;           (error/parameter-type 'image-select-polygon! 2 'selection-op params))
+;          ((not (list? points))
+;           (error/parameter-type 'image-select-polygon! 3 
+;                                 'list-of-points params))
+;          ((not (all point? points))
+;           (error/parameter-type 'image-select-polygon! 3
+;                                 'list-of-points  params))
+;          ((or (null? points) 
+;               (null? (cdr points)) 
+;               (null? (cdr (cdr points))))
+;           (error/misc 'image-select-polygon!
+;                       (string-append "Requires at least 3 points, given "
+;                                      (number->string (length points)))
+;                       params))
+;          (else
+;           (apply _image-select-polygon! params)))))))
 
 ;;; Procedure:
 ;;;   image-show
@@ -774,16 +828,17 @@
 ;;;   image, the original image.gimp
 ;;; Preconditions:
 ;;;   image must be a valid image (created by create-image or image-load).
-(define _image-show 
+(define/contract image-show 
+  (-> image? image?)
   (lambda (image)
     (gimp-display-new (image-id image))
     image))
 
-(define image-show
-  (guard-unary-proc 'image-show
-                    _image-show
-                    'image
-                    image?))
+;(define image-show
+;  (guard-unary-proc 'image-show
+;                    _image-show
+;                    'image
+;                    image?))
 
 ;;; Procedure:
 ;;;   image-stroke!
@@ -800,7 +855,8 @@
 ;;;   image is a valid image
 ;;; Postconditions:
 ;;;   The image has been stroked, as in the stroke menu item.
-(define _image-stroke-selection!
+(define/contract image-stroke-selection!
+  (-> image? image?)
   (lambda (image)
     (cond 
       ((not (image? image))
@@ -808,12 +864,10 @@
       (else
        (gimp-edit-stroke (image-get-layer image))))))
 
-(define image-stroke-selection!
-  (guard-unary-proc 'image-stroke-selection! _image-stroke-selection!
-                    'image image?))
-(define image-stroke!
-  (guard-unary-proc 'image-stroke! _image-stroke-selection!
-                    'image image?))
+;(define image-stroke-selection!
+;  (guard-unary-proc 'image-stroke-selection! _image-stroke-selection!
+;                    'image image?))
+(define image-stroke! image-stroke-selection!)
 
 ;;; Procedure:
 ;;;   image-transform-pixel!
@@ -834,7 +888,11 @@
 ;;; Postconditions:
 ;;;   Let c be (image.get-pixel image col row) prior to this call.
 ;;;   After this call, (image.get-pixel image col row) is now (ctrans c).
-(define image-transform-pixel!
+
+; Note: Gemma could not get image-transform-pixel! to work with or without its
+;  contract, but Gemma wrote one for it anyway.
+(define/contract image-transform-pixel!
+  (-> image? integer? integer? (-> irgb? irgb?) void)
   (lambda (image col row ctrans)
     (image-set-pixel! image col row
                       (ctrans (image-get-pixel image col row)))))
@@ -848,7 +906,8 @@
 ;;;   Create an image of the given width and height.
 ;;; Produces:
 ;;;   img, an encapsulated image
-(define _image-new
+(define/contract image-new
+  (-> integer? integer? image?)
   (lambda (width height)
     (let* ((image (car (gimp-image-new width height 0)))
            (layer (car (gimp-layer-new image width height 0 "Layer" 100 0))))
@@ -862,12 +921,12 @@
       (gimp-selection-none image)
       image)))
 
-(define image-new
-  (guard-proc 'image-new
-              _image-new
-              (list 'positive-integer 'positive-integer)
-              (list (^and integer? positive?)
-                    (^and integer? positive?))))
+;(define image-new
+;  (guard-proc 'image-new
+;              _image-new
+;              (list 'positive-integer 'positive-integer)
+;              (list (^and integer? positive?)
+;                    (^and integer? positive?))))
 
 ;;; Procedure:
 ;;;   image-refresh-display
@@ -881,7 +940,8 @@
 ;;;   [No additional.]
 ;;; Postconditions:
 ;;;   The display has been refreshed (hopefully, showing all the updates)
-(define _image-refresh-display!
+(define/contract image-refresh-display!
+  (-> image? void)
   (lambda (img)
     ; Hack!  Rotating it twice seems to get context-update-displays
     ; to work.
@@ -889,12 +949,12 @@
     (gimp-image-rotate img 1)
     (context-update-displays!)))
   
-(define image-refresh-display!
-  (guard-unary-proc
-   'image-refresh-display!
-   _image-refresh-display!
-   'image
-   image?))
+;(define image-refresh-display!
+;  (guard-unary-proc
+;   'image-refresh-display!
+;   _image-refresh-display!
+;   'image
+;   image?))
 
 ;;; Procedure:
 ;;;   image-validate-selection!
@@ -914,7 +974,11 @@
 ;;; Postconditions:
 ;;;   If any parameter is invalid, throws an exception.
 ;;;   Otherwise, it should be safe to do the selection.
-(define image-validate-selection!
+(define/contract image-validate-selection!
+  (-> image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
+                (lambda (val)
+                  (member val (list ADD SUBTRACT REPLACE INTERSECT))))
+      integer? integer? integer? integer?  string? void)
   (lambda (image operation left top width height proc)
     (let ((crash (lambda (message) 
                    (error (string-append 
@@ -950,7 +1014,8 @@
 ;;;   image is a valid image
 ;;; Postconditions
 ;;;   returns the width of image, an integer
-(define image-width
+(define/contract image-width
+  (-> image? integer?)
   (lambda (image)
     (cond 
       ((not (image? image))

@@ -255,7 +255,7 @@
 ;;;     0 <= (position-row (list-ref points i)) < rows
 (define _random-points
   (lambda (n cols rows)
-    (_list-random n (lambda () (point (random cols) (random rows))))))
+    (list-random n (lambda () (point (random cols) (random rows))))))
 
 (define random-points
   (guard-proc 'random-points

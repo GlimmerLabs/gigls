@@ -131,8 +131,11 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (fun v1 ... vm) = #t
+; no contract because I'm not sure this function doesn't return a function like
+; the documentation says it does.
 (define higher-false
   (lambda args #f))
+  
 (define ^false higher-false)
 
 ;;; Procedures:
@@ -152,12 +155,14 @@
 ;;;     (if (test? val1 ... valn) 
 ;;;         (yes val1 ... valn) 
 ;;;         (no val1 ... valn))
-(define higher-if
+(define/contract higher-if
+  (-> (-> any/c boolean?) (-> any/c any/c) (-> any/c any/c) (-> any/c any/c))
   (lambda (test? yes no)
     (lambda params
       (if (apply test? params)
           (apply yes params)
           (apply no params)))))
+
 (define ^if higher-if)
 
 ;;; Procedures:
@@ -172,10 +177,12 @@
 ;;;   not-pred?, a predicate
 ;;; Postconditions:
 ;;;   (not-pred? val1 ... valn) = (not (pred? val1 ... valn))
-(define higher-not
+(define/contract higher-not
+  (-> (-> any/c boolean?) (-> any/c boolean?))
   (lambda (pred?)
     (lambda params
       (not (apply pred? params)))))
+
 (define ^not higher-not)
 
 ;;; Procedures:
@@ -192,7 +199,8 @@
 ;;; Postconditions:
 ;;;   (fun val1 ... valm) =
 ;;;     (or (f1 val1 ... valm) (f2 val1 ... valm) ... (fn val1 ... valm))
-(define higher-or
+(define/contract higher-or
+  (->* ((-> any/c any/c)) () #:rest (listof (-> any/c any/c)) (-> any/c any/c))
   (letrec ((kernel
             (lambda (funs args)
               (and (not (null? funs))
@@ -201,6 +209,7 @@
     (lambda funs
       (lambda args
         (kernel funs args)))))
+
 (define ^or higher-or)
 
 ;;; Procedure:
@@ -216,7 +225,8 @@
 ;;;   function.
 ;;; Postconditions:
 ;;;   (fun x) = (fun1 (fun2 (.... (funn x)...)))
-(define o
+(define/contract o
+  (->* ((-> any/c any/c)) () #:rest (listof (-> any/c any/c)) (-> any/c any/c))
   (lambda funs
     (lambda (x)
       (let kernel ((remaining (reverse funs))
@@ -238,8 +248,11 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (fun v1 ... vm) = #t
+; no contract because I'm not sure this function doesn't return a function like
+; the documentation says it does.
 (define higher-true
   (lambda args #t))
+
 (define ^true higher-true)
 
 ;;; Procedures:
@@ -257,9 +270,11 @@
 ;;;   left is a valid first parameter for binproc.
 ;;; Postconditions:
 ;;;   (unproc right) = (binproc left right)
-(define left-section
+(define/contract left-section
+  (-> (-> any/c any/c any/c) any/c (-> any/c any/c))
   (lambda (binproc left)
     (lambda (right) (binproc left right))))
+
 (define l-s left-section)
 
 ;;; Procedures:
@@ -277,7 +292,8 @@
 ;;;   left is a valid first parameter for binproc.
 ;;; Postconditions:
 ;;;   (unproc left) = (binproc left right)
-(define right-section
+(define/contract right-section
+  (-> (-> any/c any/c any/c) any/c (-> any/c any/c))
   (lambda (binproc right)
     (lambda (left) (binproc left right))))
 (define r-s right-section)
@@ -295,7 +311,8 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (newproc x y) = (binproc y x)
-(define swap-params
+(define/contract swap-params
+  (-> (-> any/c any/c any/c) (-> any/c any/c any/c))
   (lambda (binproc)
     (lambda (x y)
       (binproc y x))))

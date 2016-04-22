@@ -21,7 +21,9 @@
 ;;;   incremented = (+ 1 val)
 ;;; Ponderings:
 ;;;   An obvious procedure, but one that is often useful.
-(define increment (l-s + 1))
+(define/contract increment
+  (-> number? number?)
+  (l-s + 1))
 
 ;;; Procedure:
 ;;;   iota
@@ -36,17 +38,18 @@
 ;;; Postconditions:
 ;;;   (length ints) = n
 ;;;   ints has the form (0 1 2 3 ...)
-(define _iota
+(define/contract iota
+  (-> (and/c integer? positive?) (listof integer?))
   (lambda (n)
     (let kernel ((i 0))
       (if (= i n)
           null
           (cons i (kernel (+ i 1)))))))
 
-(define iota 
-  (lambda (n)
-    (validate-param! 'iota 'non-negative-integer (^and integer? (^not negative?)) (list n))
-    (_iota n)))
+;(define iota 
+;  (lambda (n)
+;    (validate-param! 'iota 'non-negative-integer (^and integer? (^not negative?)) (list n))
+;    (_iota n)))
 
 
 ;;; Procedure:
@@ -63,7 +66,9 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   The procedure has been applied the specified number of times.
-(define _repeat
+(define/contract repeat
+  (->* ((and/c integer? positive?) (-> any/c any/c))
+       () #:rest (listof any/c) void)
   (lambda (i proc! . args)
     (let kernel ((i i))
       (cond 
@@ -71,16 +76,16 @@
          (apply proc! args)
          (kernel (- i 1)))))))
 
-(define repeat
-  (lambda (i proc! . args)
-    (let ((params (cons i (cons proc! args))))
-      (cond
-        ((or (not (integer? i)) (negative? i))
-         (error/parameter-type 'repeat 1 'positive-integer params))
-        ((not (procedure? proc!))
-         (error/parameter-type 'repeat 2 'procedure params))
-        (else 
-         (apply _repeat params))))))
+;(define repeat
+;  (lambda (i proc! . args)
+;    (let ((params (cons i (cons proc! args))))
+;      (cond
+;        ((or (not (integer? i)) (negative? i))
+;         (error/parameter-type 'repeat 1 'positive-integer params))
+;        ((not (procedure? proc!))
+;         (error/parameter-type 'repeat 2 'procedure params))
+;        (else 
+;         (apply _repeat params))))))
 
 (define repeat! repeat)
 
@@ -96,6 +101,7 @@
 ;;;   [No additional preconditions]
 ;;; Postconditions:
 ;;;   nsquared = n*n
-(define square
+(define/contract square
+  (-> number? number?)
   (lambda (n)
     (* n n)))

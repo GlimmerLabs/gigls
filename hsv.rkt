@@ -10,6 +10,27 @@
 (provide (all-defined-out))
 
 ;;; Procedure:
+;;;   hsv?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if val could represent a hue-saturation-value color.
+;;; Produces:
+;;;   is-hsv?, a Boolean
+(define/contract hsv?
+  (-> any/c boolean?)
+  (lambda (val)
+    (and (list? val)
+         (= (length val) 3)
+         (real? (car val))
+         ; (<= 0 (car val) 360)
+         (real? (cadr val))
+         (<= 0 (cadr val) 1)
+         (real? (caddr val))
+         (<= 0 (caddr val) 1))))
+
+
+;;; Procedure:
 ;;;   hsv
 ;;; Parameters:
 ;;;   hue, a real number, preferably in the range [0..360)
@@ -24,33 +45,25 @@
 ;;;   (hsv-hue hsv) = hue
 ;;;   (hsv-saturation hsv) = saturation
 ;;;   (hsv-value hsv) = value
-(define _hsv list)
-(define hsv
-  (guard-proc 'hsv
-              _hsv
-              (list 'real-between-0-and-360 'real-between-0-and-1 'real-between-0-and-1)
-              (list (^and real? (l-s <= 0) (r-s < 360))
-                    (^and real? (l-s <= 0) (r-s <= 1))
-                    (^and real? (l-s <= 0) (r-s <= 1)))))
+(define/contract hsv 
+  (-> real?
+    (flat-named-contract 'a-number-between-0-and-1
+                               (lambda (x) (and (< x 1)
+                                                (> x 0))))
+    (flat-named-contract 'a-number-between-0-and-1
+                               (lambda (x) (and (< x 1)
+                                                (> x 0))))
+    hsv?)
+  list)
 
-;;; Procedure:
-;;;   hsv?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determines if val could represent a hue-saturation-value color.
-;;; Produces:
-;;;   is-hsv?, a Boolean
-(define hsv?
-  (lambda (val)
-    (and (list? val)
-         (= (length val) 3)
-         (real? (car val))
-         ; (<= 0 (car val) 360)
-         (real? (cadr val))
-         (<= 0 (cadr val) 1)
-         (real? (caddr val))
-         (<= 0 (caddr val) 1))))
+;(define hsv
+;  (guard-proc 'hsv
+;              _hsv
+;              (list 'real-between-0-and-360 'real-between-0-and-1 'real-between-0-and-1)
+;              (list (^and real? (l-s <= 0) (r-s < 360))
+;                    (^and real? (l-s <= 0) (r-s <= 1))
+;                    (^and real? (l-s <= 0) (r-s <= 1)))))
+
 
 ;;; Procedure:
 ;;;   guard-hsv-proc
@@ -85,8 +98,12 @@
 ;;;   (hsv? hsv)
 ;;; Postconditions:
 ;;;   0 <= hue <= 360
-(define _hsv-hue car)
-(define hsv-hue (guard-hsv-proc 'hsv-hue _hsv-hue))
+(define/contract hsv-hue
+(-> hsv? (flat-named-contract 'a-number-between-0-and-360
+                               (lambda (x) (and (< x 360)
+                                                (> x 0)))))
+  car)
+;(define hsv-hue (guard-hsv-proc 'hsv-hue _hsv-hue))
 
 ;;; Procedure:
 ;;;   hsv-saturation
@@ -100,9 +117,13 @@
 ;;;   (hsv? hsv)
 ;;; Postconditions:
 ;;;   0 <= saturation <= 1
-(define _hsv-saturation cadr)
-(define hsv-saturation 
-  (guard-hsv-proc 'hsv-saturation _hsv-saturation))
+(define/contract hsv-saturation
+  (-> hsv? (flat-named-contract 'a-number-between-0-and-1
+                               (lambda (x) (and (< x 1)
+                                                (> x 0)))))
+      cadr)
+;(define hsv-saturation 
+;  (guard-hsv-proc 'hsv-saturation _hsv-saturation))
 
 ;;; Procedure:
 ;;;   hsv-value
@@ -116,7 +137,11 @@
 ;;;   (hsv? hsv)
 ;;; Postconditions:
 ;;;   0 <= value <= 1
-(define _hsv-value caddr)
-(define hsv-value
-  (guard-hsv-proc 'hsv-value _hsv-value))
+(define/contract hsv-value
+  (-> hsv? (flat-named-contract 'a-number-between-0-and-1
+                               (lambda (x) (and (< x 1)
+                                                (> x 0)))))
+  caddr)
+;(define hsv-value
+;  (guard-hsv-proc 'hsv-value _hsv-value))
 
