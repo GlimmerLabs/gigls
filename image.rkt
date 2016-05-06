@@ -38,7 +38,7 @@
 ;;; Produces:
 ;;;   is-image, a boolean
 (define/contract image-name?
-  (-> string? boolean?)
+  (-> any/c boolean?)
   (lambda (str)
     (and (string? str) (image-name->image-id str) #t)))
 
@@ -196,7 +196,7 @@
 ;;;     'hollow-pointy
 (define/contract image-draw-arrow!
   (-> image? symbol? real? real? real? real?
-      (and/c real? positive?) (and/c real? positive?) image?)
+      (and/c real? positive?) (and/c real? positive?) void)
   (lambda (image type from-col from-row to-col to-row head-width head-length)
     (let* ((delta-col (- to-col from-col))
            (delta-row (- to-row from-row))           
@@ -565,8 +565,6 @@
 ;;;   selection must have been created with (image-selection-save image)
 ;;;   selection must not have been previously dropped
 
-; Note: Contract may not be most effective due to the fact that Gemma
-;  couldn't figure out what a selection was.
 (define/contract image-selection-drop!
   (-> image? any/c void)
   (lambda (image selection)
@@ -586,8 +584,6 @@
 ;;;   selection must have been created with (image-save-selection image).
 ;;;   selection must not have been previously deleted with image-drop-selection.
 
-; Note: Contract may not be most effective due to the fact that Gemma
-;  couldn't figure out what a selection was.
 (define/contract image-selection-load!
   (-> image? any/c void)
   (lambda (image selection)
@@ -692,7 +688,10 @@
 ;;; Postconditions
 ;;;   An appropriate ellipse is selected.
 (define/contract image-select-ellipse!
-  (-> image? (-> any/c any/c) integer? integer? integer? integer? void)
+  (-> image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
+                (lambda (val)
+                  (member val (list ADD SUBTRACT REPLACE INTERSECT))))
+      number? number? number? number? void)
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
                                'image-select-ellipse!)
@@ -752,7 +751,7 @@
   (-> image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
                 (lambda (val)
                   (member val (list ADD SUBTRACT REPLACE INTERSECT))))
-      integer? integer? integer? integer? void)
+      number? number? number? number? void)
   (lambda (image operation left top width height)
     (image-validate-selection! image operation left top width height
                                'image-select-rectangle!)
@@ -784,7 +783,7 @@
   (->* (image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
                 (lambda (val)
                   (member val (list ADD SUBTRACT REPLACE INTERSECT))))
-                real?) () #:rest (listof real?) image?)
+                pair?) () #:rest (listof pair?) null)
   (lambda (image operation first . rest)
     (let* ((points (if (null? rest) first (cons first rest)))
            (floats (points->floats points))
@@ -856,7 +855,7 @@
 ;;; Postconditions:
 ;;;   The image has been stroked, as in the stroke menu item.
 (define/contract image-stroke-selection!
-  (-> image? image?)
+  (-> image? void)
   (lambda (image)
     (cond 
       ((not (image? image))
@@ -890,7 +889,7 @@
 ;;;   After this call, (image.get-pixel image col row) is now (ctrans c).
 
 ; Note: Gemma could not get image-transform-pixel! to work with or without its
-;  contract, but Gemma wrote one for it anyway.
+;  contract, but she wrote one for it anyway.
 (define/contract image-transform-pixel!
   (-> image? integer? integer? (-> irgb? irgb?) void)
   (lambda (image col row ctrans)
@@ -978,7 +977,7 @@
   (-> image? (flat-named-contract 'ADD-SUBTRACT-REPLACE-or-INTERSECT
                 (lambda (val)
                   (member val (list ADD SUBTRACT REPLACE INTERSECT))))
-      integer? integer? integer? integer?  string? void)
+      number? number? number? number?  (or/c symbol? string?) void)
   (lambda (image operation left top width height proc)
     (let ((crash (lambda (message) 
                    (error (string-append 

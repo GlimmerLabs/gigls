@@ -58,7 +58,8 @@
 ;;; Postconditions:
 ;;;   (brush? brush)
 ;;;   The commands that use a brush (e.g., image-draw-line!) will use brush.
-(define context-get-brush
+(define/contract context-get-brush
+  (-> string?)
   (lambda ()
     (car (gimp-context-get-brush))))
 
@@ -73,7 +74,8 @@
 ;;; Postconditions:
 ;;;   (brush-name? brush)
 ;;;   The commands that use a brush (e.g., image-draw-line!) will use brush.
-(define context-get-brush-name
+(define/contract context-get-brush-name
+  (-> string?)
   (lambda ()
     (car (gimp-context-get-brush))))
 
@@ -94,7 +96,8 @@
 ;;;     Element 6: The aspect ratio of the brush
 ;;;     Element 7: The angle of the brush
 ;;;     Element 8: The spacing of the brush
-(define context-get-brush-info
+(define/contract context-get-brush-info
+  (-> brush-info?)
   (lambda ()
     context-current-brush))
 
@@ -106,13 +109,14 @@
 ;;;   Get the radius of the current brush
 ;;; Produces:
 ;;;   radius, a real
-(define _context-get-brush-radius
+(define/contract context-get-brush-radius
+  (-> real?)
   (lambda ()
-    (if (_context-get-brush-info-locally)
+    (if (context-get-brush-info-locally)
         (brush-get-radius context-current-brush)
         (car (gimp-brush-get-radius (context-get-brush))))))
 
-(define context-get-brush-radius _context-get-brush-radius)
+;(define context-get-brush-radius _context-get-brush-radius)
 
 
 ; +----------------+--------------------------------------------------
@@ -137,7 +141,8 @@
 ;;;   If the current brush is not editable and an editable
 ;;;   version of the brush exists, should we make sure
 ;;;   all of its parameters match?
-(define _context-make-current-brush-editable!
+(define/contract context-make-current-brush-editable!
+  (-> brush?)
   (lambda ()
     (let* ([brush (context-get-brush)]
            [radius (brush-get-radius brush)]
@@ -147,10 +152,10 @@
         (context-set-brush! editable radius))
       editable)))
 
-(define context-make-current-brush-editable!
-  (lambda ()
-    (context-verify-current-brush-mutable! 'context-make-current-brush-editable)
-    (_context-make-current-brush-editable!)))
+;(define context-make-current-brush-editable!
+;  (lambda ()
+;    (context-verify-current-brush-mutable! 'context-make-current-brush-editable)
+;    (_context-make-current-brush-editable!)))
 
 ;;; Procedure:
 ;;;   context-refresh-current-brush!
@@ -160,7 +165,8 @@
 ;;;   Resets the current brush to whatever it can get from the GIMP.
 ;;; Produces:
 ;;;   brushinfo, info on the current brush
-(define context-refresh-current-brush!
+(define/contract context-refresh-current-brush!
+  (-> brush-info?)
   (lambda ()
     (let* ([name (car (gimp-context-get-brush))]
            [brush context-current-brush]
@@ -187,7 +193,7 @@
 ;;; Postconditions
 ;;;   GIMP's current brush is now set to the given brush
 (define/contract context-set-brush!
-  (->* (string?) ((and/c real? positive?)) brush?)
+  (->* (string?) ((and/c real? positive?)) void)
   (lambda (brush . rest)
     (let ([radius (if (null? rest)
                       (brush-get-radius (brush-original brush))
@@ -267,7 +273,7 @@
 ;;; Produces:
 ;;;   brush, the current brush.
 (define/contract context-set-brush-radius!
-  (-> real? brush?)
+  (-> real? void)
   (lambda (radius)
     (context-verify-current-brush-mutable! 'context-set-brush-radius!)
     (let ([brush (context-make-current-brush-editable!)])
@@ -321,11 +327,12 @@
 ;;;     flag
 ;;;   If called with one parameter, sets the current state of the flag
 ;;;     to that parameter.
-(define _context-get-brush-info-locally
+(define/contract context-get-brush-info-locally
+  (->* () (boolean?) boolean?)
   (make-flag))
 
-(define context-get-brush-info-locally
-  (guard-flag 'context-get-brush-info-locally _context-get-brush-info-locally))
+;(define context-get-brush-info-locally
+;  (guard-flag 'context-get-brush-info-locally _context-get-brush-info-locally))
 
 ;;; Procedure:
 ;;;   context-verify-current-brush-mutable!
@@ -340,7 +347,8 @@
 ;;; Postconditions:
 ;;;   If the current brush is mutable, does nothing.
 ;;;   If the current brush is not mutable, throws an error.
-(define context-verify-current-brush-mutable!
+(define/contract context-verify-current-brush-mutable!
+  (-> symbol? void)
   (lambda (procname)
     (let ((name (car (gimp-context-get-brush))))
       (when (not (brush-mutable? name))
@@ -359,9 +367,10 @@
 ;;;   [Nothing; called for the side effect]
 ;;; Postconditions:
 ;;;   It is difficult to predict the brush.
-(define context-select-random-brush!
+(define/contract context-select-random-brush!
+  (-> void)
   (lambda ()
-    (context-set-brush! (list-random-element (brushes-list)))))
+    (context-set-brush! (list-random-element (brushes-list "")))))
 
 ;;; Procedure:
 ;;;   context-cleanup-brushes!
@@ -373,7 +382,8 @@
 ;;;   [Nothing; Called for the side effect]
 ;;; Postconditions:
 ;;;   No more brushes with the name "(editable)" exist.
-(define context-cleanup-brushes!
+(define/contract context-cleanup-brushes!
+  (-> void)
   (lambda () 
     (for-each (lambda (brush) (gimp-brush-delete brush))
               (brushes-list "(editable)"))))

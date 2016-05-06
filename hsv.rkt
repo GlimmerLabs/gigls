@@ -48,11 +48,11 @@
 (define/contract hsv 
   (-> real?
     (flat-named-contract 'a-number-between-0-and-1
-                               (lambda (x) (and (< x 1)
-                                                (> x 0))))
+                               (lambda (x) (and (<= x 1)
+                                                (>= x 0))))
     (flat-named-contract 'a-number-between-0-and-1
-                               (lambda (x) (and (< x 1)
-                                                (> x 0))))
+                               (lambda (x) (and (<= x 1)
+                                                (>= x 0))))
     hsv?)
   list)
 
@@ -100,8 +100,8 @@
 ;;;   0 <= hue <= 360
 (define/contract hsv-hue
 (-> hsv? (flat-named-contract 'a-number-between-0-and-360
-                               (lambda (x) (and (< x 360)
-                                                (> x 0)))))
+                               (lambda (x) (and (<= x 360)
+                                                (>= x 0)))))
   car)
 ;(define hsv-hue (guard-hsv-proc 'hsv-hue _hsv-hue))
 
@@ -119,8 +119,8 @@
 ;;;   0 <= saturation <= 1
 (define/contract hsv-saturation
   (-> hsv? (flat-named-contract 'a-number-between-0-and-1
-                               (lambda (x) (and (< x 1)
-                                                (> x 0)))))
+                               (lambda (x) (and (<= x 1)
+                                                (>= x 0)))))
       cadr)
 ;(define hsv-saturation 
 ;  (guard-hsv-proc 'hsv-saturation _hsv-saturation))
@@ -139,8 +139,8 @@
 ;;;   0 <= value <= 1
 (define/contract hsv-value
   (-> hsv? (flat-named-contract 'a-number-between-0-and-1
-                               (lambda (x) (and (< x 1)
-                                                (> x 0)))))
+                               (lambda (x) (and (<= x 1)
+                                                (>= x 0)))))
   caddr)
 ;(define hsv-value
 ;  (guard-hsv-proc 'hsv-value _hsv-value))

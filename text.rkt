@@ -35,7 +35,8 @@
 ;;;   Determine if name is a font name
 ;;; Produces:
 ;;;   is-font-name, a Boolean
-(define font-name?
+(define/contract font-name?
+  (-> any/c boolean?)
   (lambda (name)
     (and (string? name) 
          (sequence-contains? (cadr (gimp-fonts-get-list name)) name))))
@@ -52,16 +53,17 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   Any member of font-names can be used by context-set-font-name.
-(define _context-list-font-names
+(define/contract context-list-font-names
+  (->* () (string?) (listof string?))
   (lambda params
     (let ([pattern (if (null? params) "" (car params))])
       (sequence->list (cadr (gimp-fonts-get-list pattern))))))
 
-(define context-list-font-names
-  (guard-01-proc 'context-list-font-names
-                 _context-list-font-names
-                 'string
-                 string?))
+;(define context-list-font-names
+;  (guard-01-proc 'context-list-font-names
+;                 _context-list-font-names
+;                 'string
+;                 string?))
 
 ;;; Procedure:
 ;;;   context-get-font-name
@@ -71,10 +73,11 @@
 ;;;   Get the current font name.
 ;;; Produces:
 ;;;   font-name, a string
-(define _context-get-font-name
+(define/contract context-get-font-name
+  (-> string?)
   (lambda ()
     (car (gimp-context-get-font))))
-(define context-get-font-name _context-get-font-name)
+;(define context-get-font-name _context-get-font-name)
 
 ;;; Procedure:
 ;;;   context-set-font-name!
@@ -88,16 +91,17 @@
 ;;;   (member? font-name (context-list-font-names))
 ;;; Postconditions:
 ;;;   Subsequent calls to (context-get-font-name) return font-name
-(define _context-set-font-name!
+(define/contract context-set-font-name!
+  (-> string? void)
   (lambda (font-name)
     (gimp-context-set-font font-name)
     (void)))
 
-(define context-set-font-name!
-  (guard-unary-proc 'context-set-font-name! 
-                    _context-set-font-name!
-                    'font-name
-                    font-name?))
+;(define context-set-font-name!
+;  (guard-unary-proc 'context-set-font-name! 
+;                    _context-set-font-name!
+;                    'font-name
+;                    font-name?))
 
 ;;; Procedure:
 ;;;   font-size
@@ -113,12 +117,15 @@
 ;;;   If called with no parameters, returns the current font size.
 ;;;   If called with a parameter, sets the current font size and
 ;;;     then returns it.
-(define _font-size (make-state 12))
-(define font-size
-  (guard-01-proc 'font-size 
-                 _font-size 
-                 'positive-integer 
-                 (and integer? positive?)))
+(define/contract font-size
+  (->* () ((and/c integer? positive?)) integer?)
+  (make-state 12))
+
+;(define font-size
+;  (guard-01-proc 'font-size 
+;                 _font-size 
+;                 'positive-integer 
+;                 (and integer? positive?)))
 
 ;;; Name:
 ;;;   context-set-font-size!
@@ -132,16 +139,17 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   Future calls to context-get-font-size return size.
-(define _context-set-font-size! 
+(define/contract context-set-font-size! 
+  (-> (and/c integer? positive?) void)
   (lambda (size)
-    (_font-size size)
+    (font-size size)
     (void)))
 
-(define context-set-font-size!
-  (guard-unary-proc 'context-set-font-size!
-                    _context-set-font-size!
-                    'positive-integer
-                    (^and integer? positive?)))
+;(define context-set-font-size!
+;  (guard-unary-proc 'context-set-font-size!
+;                    _context-set-font-size!
+;                    'positive-integer
+;                    (^and integer? positive?)))
  
 ;;; Procedure:
 ;;;   context-get-font-size
@@ -151,9 +159,11 @@
 ;;;   Get the current font size
 ;;; Produces:
 ;;;   size, an integer
-(define _context-get-font-size _font-size)
-(define context-get-font-size
-  (lambda () (_context-get-font-size)))
+(define/contract context-get-font-size
+  (-> integer?)
+  font-size)
+;(define context-get-font-size
+;  (lambda () (_context-get-font-size)))
 
 ;;; Names:
 ;;;   ALIGN-LEFT
@@ -187,7 +197,8 @@
 ;;;   image, the updated image
 ;;; Problems:
 ;;;   Requires a subsequent call to context-update-displays!
-(define _image-display-text-basic!
+(define/contract image-display-text-basic!
+  (-> image? string? number? number? image?)
   (lambda (image text x y)
     (gimp-text-fontname image -1 
                         x y
@@ -200,11 +211,11 @@
     (gimp-image-flatten image)
     image))
 
-(define image-display-text-basic!
-  (guard-proc 'image-display-text-basic!
-              _image-display-text-basic!
-              (list 'image 'string 'real 'real)
-              (list image? string? real? real?)))
+;(define image-display-text-basic!
+;  (guard-proc 'image-display-text-basic!
+;              _image-display-text-basic!
+;              (list 'image 'string 'real 'real)
+;              (list image? string? real? real?)))
 
 ;;; Procedure:
 ;;;   image-display-text!
@@ -219,7 +230,15 @@
 ;;;   Display the text using the current font name and size.
 ;;; Produces:
 ;;;   image, the same image
-(define _image-display-text!
+(define/contract image-display-text!
+  (-> image-id? string? number? number?
+      (flat-named-contract 'ALIGN-CENTER-or-ALIGN-LEFT-or-ALIGN-RIGHT
+                (lambda (val)
+                  (member val (list ALIGN-CENTER ALIGN-LEFT ALIGN-RIGHT))))
+      (flat-named-contract 'ALIGN-CENTER-or-ALIGN-TOP-or-ALIGN-BOTTOM
+                (lambda (val)
+                  (member val (list ALIGN-CENTER ALIGN-TOP ALIGN-BOTTOM))))
+      image?)
   (lambda (image text x y halign valign)
     (let* ([bbox (text-bbox text)]
            [left (cond 
@@ -236,19 +255,19 @@
                    (- y (caddr bbox))]
                   [else
                    (+ y (cadddr bbox))])])
-      (_image-display-text-basic! image text left top))))
+      (image-display-text-basic! image text left top))))
 
-(define image-display-text!
-  (guard-proc 'image-display-text!
-              _image-display-text!
-              (list 'image 'string 
-                    'real 'real 
-                    'horizontal-alignment
-                    'vertical-alignment)
-              (list image? string?
-                    real? real?
-                    (r-s member? (list ALIGN-LEFT ALIGN-RIGHT ALIGN-CENTER))
-                    (r-s member? (list ALIGN-TOP ALIGN-BOTTOM ALIGN-CENTER)))))
+;(define image-display-text!
+;  (guard-proc 'image-display-text!
+;              _image-display-text!
+;              (list 'image 'string 
+;                    'real 'real 
+;                    'horizontal-alignment
+;                    'vertical-alignment)
+;              (list image? string?
+;                    real? real?
+;                    (r-s member? (list ALIGN-LEFT ALIGN-RIGHT ALIGN-CENTER))
+;                    (r-s member? (list ALIGN-TOP ALIGN-BOTTOM ALIGN-CENTER)))))
 
 ;;; Procedure:
 ;;;   text-bbox
@@ -258,15 +277,16 @@
 ;;    Get the bounding box info for the text
 ;;; Produces:
 ;;;   bbox, a list of the form (width height ascender descender)
-(define _text-bbox
+(define/contract text-bbox
+  (-> string? list?)
   (lambda (text)
     (gimp-text-get-extents-fontname text
                                     (context-get-font-size)
                                     0
                                     (context-get-font-name))))
 
-(define text-bbox
-  (guard-unary-proc 'text-bbox _text-bbox 'string string?))
+;(define text-bbox
+;  (guard-unary-proc 'text-bbox _text-bbox 'string string?))
 
 ;;; Procedure:
 ;;;   text-height
@@ -276,14 +296,15 @@
 ;;;   Determines the height of the given text in the current font settings.
 ;;; Produces:
 ;;;   height, a real
-(define _text-height
+(define/contract text-height
+  (-> string? real?)
   (lambda (text)
     (cadr (gimp-text-get-extents-fontname text
                                           (context-get-font-size)
                                           0
                                           (context-get-font-name)))))
-(define text-height 
-  (guard-unary-proc 'text-height _text-height 'string string?))
+;(define text-height 
+;  (guard-unary-proc 'text-height _text-height 'string string?))
 
 ;;; Procedure:
 ;;;   text-width
@@ -293,13 +314,14 @@
 ;;;   Determines the width of the given text in the current font settings.
 ;;; Produces:
 ;;;   width, a real
-(define _text-width
+(define/contract text-width
+  (-> string? real?)
   (lambda (text)
     (car (gimp-text-get-extents-fontname text
                                           (context-get-font-size)
                                           0
                                           (context-get-font-name)))))
-(define text-width 
-  (guard-unary-proc 'text-width _text-width 'string string?))
+;(define text-width 
+;  (guard-unary-proc 'text-width _text-width 'string string?))
 
 

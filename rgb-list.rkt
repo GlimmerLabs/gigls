@@ -22,7 +22,8 @@
 ;;;   Returns #t if val is an rgb color represented as a list of
 ;;;     the three components.
 ;;;   Returns #f otherwise.
-(define rgb-list?
+(define/contract rgb-list?
+  (-> any/c boolean?)
   (lambda (val)
     (and (list? val) (equal? (length val) 3) (all-integer? val))))
 

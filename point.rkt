@@ -26,21 +26,18 @@
 ;;;   (point? pos)
 ;;;   (point-col pos) = x
 ;;;   (point-row pos) = y
-(define _point
+(define/contract point
+  (-> real? real? pair?)
   (lambda (x y)
     (cons x y)))
 
-(define point-new
-  (guard-proc 'point-new
-              _point
-              (list 'real 'real)
-              (list real? real?)))
+(define point-new point)
 
-(define point
-  (guard-proc 'point
-              _point
-              (list 'real 'real)
-              (list real? real?)))
+;(define point
+;  (guard-proc 'point
+;              _point
+;              (list 'real 'real)
+;              (list real? real?)))
 
 ;;; Procedure:
 ;;;   point?
@@ -55,12 +52,13 @@
 ;;; Postconditions:
 ;;;   If value can be interpreted as a point, is-point is true.
 ;;;   Otherwise, is-point is false.
-(define _point?
+(define/contract point?
+  (-> any/c boolean?)
   (lambda (value)
     (and (pair? value)
          (and (real? (car value))
               (real? (cdr value))))))
-(define point? _point?)
+;(define point? _point?)
 
 ;;; Procedure:
 ;;;   point-col
@@ -74,10 +72,12 @@
 ;;;   (point? point)
 ;;; Postconditions:
 ;;;   x represents the x coordinate (column) of the point.
-(define _point-col car)
+(define/contract point-col
+  (-> point? real?)
+  car)
 
-(define point-col
-  (guard-unary-proc 'point-col _point-col 'point point?))
+;(define point-col
+;  (guard-unary-proc 'point-col _point-col 'point point?))
 
 ;;; Procedure:
 ;;;   point-distance
@@ -92,16 +92,17 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   A line from p1 to p2 will have length distance.
-(define _point-distance
+(define/contract point-distance
+  (-> point? point? (and/c real? (not/c negative?)))
   (lambda (p1 p2)
       (sqrt (+ (square (- (point-col p1) (point-col p2)))
                (square (- (point-row p1) (point-row p2)))))))
 
-(define point-distance
-  (guard-proc 'point-distance
-              _point-distance
-              (list 'point 'point)
-              (list point? point?)))
+;(define point-distance
+;  (guard-proc 'point-distance
+;              _point-distance
+;              (list 'point 'point)
+;              (list point? point?)))
 
 ;;; Procedure:
 ;;;   point-interpolate
@@ -123,7 +124,8 @@
 ;;;          (- (point-col newpt) (point-col p1)))
 ;;;       = (/ (- (point-row p2) (point-row p1))
 ;;;            (- (point-col p2) (point-col p1)))
-(define _point-interpolate
+(define/contract point-interpolate
+  (-> point? point? real? point?)
   (lambda (p1 p2 p)
     (let ((q (- 1 p)))
       (point-new (+ (* p (point-col p2))
@@ -131,11 +133,11 @@
                  (+ (* p (point-row p2))
                     (* q (point-row p1)))))))
 
-(define point-interpolate
-  (guard-proc 'point-interpolate
-              _point-interpolate
-              (list 'point 'point 'real)
-              (list point? point? real?)))
+;(define point-interpolate
+;  (guard-proc 'point-interpolate
+;              _point-interpolate
+;              (list 'point 'point 'real)
+;              (list point? point? real?)))
 
 ;;; Procedure:
 ;;;   point-offset
@@ -152,16 +154,17 @@
 ;;; Postconditions:
 ;;;   (point-col new-point) = (point-col point) + col_offset
 ;;;   (point-row new-point) = (point-row point) + row_offset
-(define _point-offset
+(define/contract point-offset
+  (-> point? real? real? point?)
   (lambda (point delta-col delta-row)
     (point (+ (point-col point) delta-col)
            (+ (point-row point) delta-row))))
 
-(define point-offset
-  (guard-proc 'point-offset
-              _point-offset
-              (list 'point 'real 'real)
-              (list point? real? real?)))
+;(define point-offset
+;  (guard-proc 'point-offset
+;              _point-offset
+;              (list 'point 'real 'real)
+;              (list point? real? real?)))
 
 ;;; Procedure:
 ;;;   point-row
@@ -175,10 +178,12 @@
 ;;;   (point? point)
 ;;; Postconditions:
 ;;;   y represents the y coordinate (row) of the point.
-(define _point-row cdr)
+(define/contract point-row
+  (-> point? real?)
+  cdr)
 
-(define point-row
-  (guard-unary-proc 'point-row _point-row 'point point?))
+;(define point-row
+;  (guard-unary-proc 'point-row _point-row 'point point?))
 
 ;;; Procedure:
 ;;;   points->floats
@@ -203,7 +208,8 @@
 ;;;   not particularly convenient or clear for novice programmers.
 ;;;   This procedure, used primarily by MediaScheme GIMP wrappers, allows
 ;;;   programmers to represent lists of points in a more natural format.
-(define _points->floats
+(define/contract points->floats
+  (-> (listof point?) vector?)
   (lambda (points)
     (let* ((len (length points))
            (floats (make-vector (* 2 len))))
@@ -213,22 +219,22 @@
              floats
              (begin
                (vector-set! floats pos 
-                            (exact->inexact (_point-col (car remaining))))
+                            (exact->inexact (point-col (car remaining))))
                (vector-set! floats (+ pos 1) 
-                            (exact->inexact (_point-row (car remaining))))
+                            (exact->inexact (point-row (car remaining))))
                (kernel (+ pos 2) (cdr remaining))))))))
 
-(define points->floats
-  (lambda (points)
-    (cond
-      ((not (list? points))
-       (error/parameter-type 'points->floats 1 'list-of-points 
-                             (list points)))
-      ((not (all point? points))
-       (error/parameter-type 'points->floats 1 'list-of-points 
-                             (list points)))
-      (else
-       (_points->floats points)))))
+;(define points->floats
+;  (lambda (points)
+;    (cond
+;      ((not (list? points))
+;       (error/parameter-type 'points->floats 1 'list-of-points 
+;                             (list points)))
+;      ((not (all point? points))
+;       (error/parameter-type 'points->floats 1 'list-of-points 
+;                             (list points)))
+;      (else
+;       (_points->floats points)))))
 
 ;;; Procedure:
 ;;;   random-points
@@ -253,14 +259,15 @@
 ;;;     (integer? (position-row (list-ref points i)))
 ;;;     0 <= (position-col (list-ref points i)) < cols
 ;;;     0 <= (position-row (list-ref points i)) < rows
-(define _random-points
+(define/contract random-points
+  (-> integer? integer? integer? (listof point?))
   (lambda (n cols rows)
     (list-random n (lambda () (point (random cols) (random rows))))))
 
-(define random-points
-  (guard-proc 'random-points
-              _random-points
-              (list 'non-negative-integer 'positive-integer 'positive-integer)
-              (list (^and integer? (r-s >= 0))
-                    (^and integer? (r-s > 0))
-                    (^and integer? (r-s > 0)))))
+;(define random-points
+;  (guard-proc 'random-points
+;              _random-points
+;              (list 'non-negative-integer 'positive-integer 'positive-integer)
+;              (list (^and integer? (r-s >= 0))
+;                    (^and integer? (r-s > 0))
+;                    (^and integer? (r-s > 0)))))

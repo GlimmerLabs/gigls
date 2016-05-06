@@ -35,7 +35,7 @@
 ;;; Procedure:
 ;;;   drawing-shape?
 ;;; Parameters:
-;;;   val, a value
+;;;   val, a value (a list)
 ;;; Purpose:
 ;;;   Determine if val is one of the drawing shapes
 ;;; Produces:
@@ -44,7 +44,8 @@
   (-> any/c boolean?)
   (let* ((nnr? (^and real? (^not negative?))))
     (lambda (val)
-      (check-list? (list (l-s eq? 'drawing) 
+      (and (list? val)
+           (check-list? (list (l-s eq? 'drawing) 
                          (r-s member '(ellipse rectangle))
                          color?         ; color
                          string?        ; brush
@@ -53,7 +54,7 @@
                          nnr?           ; width
                          nnr?           ; height
                          )
-                   val))))
+                   val)))))
 
 ;(define drawing-shape? _drawing-shape?)
 
@@ -69,11 +70,12 @@
 (define/contract drawing?
   (-> any/c boolean?)
   (lambda (val)
-    (or (drawing-blank? val)
+    (and (list? val)
+         (or (drawing-blank? val)
         (drawing-group? val)
         (drawing-line? val)
         (drawing-rule? val)
-        (drawing-shape? val))))
+        (drawing-shape? val)))))
 
 ;;; Procedure:
 ;;;   drawing-blank?
@@ -86,9 +88,10 @@
 (define/contract drawing-blank?
   (-> any/c boolean?)
   (lambda (val)
-    (check-list? (list (l-s eq? 'drawing) 
+    (and (list? val)
+         (check-list? (list (l-s eq? 'drawing) 
                        (l-s eq? 'blank))
-                 val)))
+                 val))))
 
 ;(define drawing-blank? _drawing-blank?)
 
@@ -103,10 +106,11 @@
 (define/contract drawing-group?
   (-> any/c boolean?)
   (lambda (val)
-    (check-list? (list (l-s eq? 'drawing) 
+    (and (list? val)
+         (check-list? (list (l-s eq? 'drawing) 
                        (l-s eq? 'group)
                        (l-s all drawing?))
-                 val)))
+                 val))))
 
 ;(define drawing-group? _drawing-group?)
 
@@ -128,11 +132,12 @@
   (-> any/c boolean?)
   (let* ((nnr? (^and real? (^not negative?))))
     (lambda (val)
-      (check-list? (list (l-s eq? 'drawing) (l-s eq? 'line)
+      (and (list? val)
+           (check-list? (list (l-s eq? 'drawing) (l-s eq? 'line)
                          color?
                          real? real? real? real?
                          nnr? nnr?)
-                   val))))
+                   val)))))
 
 ;(define drawing-line? _drawing-line?)
 
@@ -150,10 +155,11 @@
          (types (list (l-s eq? 'drawing) (l-s eq? 'rule)
                       real? real? real? real?)))
     (lambda (val)
-      (check-list? (list (l-s eq? 'drawing) (l-s eq? 'rule)
+      (and (list? val)
+           (check-list? (list (l-s eq? 'drawing) (l-s eq? 'rule)
                          color?
                          real? real? real? real?)
-                   val))))
+                   val)))))
 
 ;(define drawing-rule? _drawing-rule?)
 
@@ -296,7 +302,7 @@
 ;;;   with the specified left margin, top margin, width, and
 ;;;   height.
 (define/contract drawing-ellipse
-  (-> real? real? (and/c real? positive?) (and/c real? positive?) drawing?)
+  (-> real? real? (and/c real? positive?) (and/c real? positive?) list?)
   (lambda (left right width height)
     (drawing-shape 'ellipse (rgb-new 0 0 0) "" left right width height)))
 
@@ -1110,8 +1116,8 @@
 ;;; Parameters:
 ;;;   drawing, a drawing
 ;;;   image, an image
-;;; Sam has forgotten to document the rest of this procedure. I guess it
-;;;  determines whether the drawing can be put on the image and returns a
+;;; Sam has forgotten to document the rest of this procedure. I(Gemma) guess
+;;;  it determines whether the drawing can be put on the image and returns a
 ;;;   boolean.
 (define/contract drawing-on-image?
   (-> drawing? image? boolean?)
@@ -1130,8 +1136,8 @@
 ;;; Procedure:
 ;;;   drawing-render!
 ;;; Parameters:
-;;;   image, an image
 ;;;   drawing, a drawing
+;;;   image, an image
 ;;; Purpose:
 ;;;   Render drawing on image.
 ;;; Produces:
@@ -1142,7 +1148,7 @@
 ;;; Postconditions:
 ;;;   image has been extended by the appropriate drawing.
 (define/contract drawing-render!
-  (-> image? drawing? image?)
+  (-> drawing? image? image?)
   (lambda (drawing image)
     (let ((type (drawing-type drawing)))
       (cond
@@ -1202,7 +1208,7 @@
 ;;;   with the specified left margin, top margin, width, and
 ;;;   height.
 (define/contract drawing-rectangle
-  (-> real? real? (and/c real? positive?) (and/c real? positive?) drawing?)
+  (-> real? real? (and/c real? positive?) (and/c real? positive?) list?)
   (lambda (left right width height)
     (drawing-shape 'rectangle (rgb-new 0 0 0) "" left right width height)))
 
@@ -1372,7 +1378,7 @@
 ;;; Postconditions:
 ;;;   image has been extended by the appropriate drawing.
 (define/contract drawing-rule-render!
-  (-> image? drawing-rule? image?)
+  (-> drawing-rule? image? image?)
   (lambda (drawing image)
     (let ((c1 (drawing-rule-left drawing))
           (r1 (drawing-rule-top drawing))
@@ -1384,7 +1390,8 @@
       (gimp-pencil (image-get-layer image)
                    4
                    (vector c1 r1 c2 r2))
-      (context-set-brush! "Circle (01)")
+      (context-set-brush! "2. Hardness 100") ;Changed to 2. Hardness 100 because
+                                             ; "Circle (01)" is not a brush.
       ; (image-draw-line! image c1 r1 c2 r2)
       (cond (saved-color (context-set-fgcolor! saved-color)))
       (cond (saved-brush (context-set-brush! saved-brush)))
@@ -1564,7 +1571,7 @@
 ;;;   (drawing-width drawing) = width
 ;;;   (drawing-height drawing) = height
 (define/contract drawing-shape
-  (-> symbol? color? string? real? real? real? real? drawing?)
+  (-> symbol? color? string? real? real? real? real? list?)
   (lambda (type color brush left top width height)
     (list 'drawing type color brush left top width height)))
 
@@ -1776,8 +1783,8 @@
 ;;; Procedure:
 ;;;   drawing-shape-render!
 ;;; Parameters:
-;;;   image, an image
 ;;;   drawing, a drawing shape (ellipse or rectangle)
+;;;   image, an image
 ;;; Purpose:
 ;;;   Render drawing on image.
 ;;; Produces:
@@ -1788,7 +1795,7 @@
 ;;; Postconditions:
 ;;;   image has been extended by the appropriate drawing.
 (define/contract drawing-shape-render!
-  (-> image? drawing-shape? image?)
+  (-> drawing-shape? image? void)
   (lambda (drawing image)
     (let ((select! (if (eq? (drawing-type drawing) 'ellipse) 
                        image-select-ellipse! 

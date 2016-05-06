@@ -26,7 +26,8 @@
 ;;;   Gets the current background color (as an RGB color).
 ;;; Produces:
 ;;;   color, an RGB color.
-(define context-get-bgcolor
+(define/contract context-get-bgcolor
+  (-> color?)
   (lambda ()
     (color->rgb (car (gimp-context-get-background)))))
 
@@ -38,7 +39,8 @@
 ;;;   Gets the current foreground color (as an RGB color).
 ;;; Produces:
 ;;;   color, an RGB color.
-(define context-get-fgcolor
+(define/contract context-get-fgcolor
+  (-> color?)
   (lambda ()
     (color->rgb (car (gimp-context-get-foreground)))))
 
@@ -60,7 +62,7 @@
 ;;; Postconditions:
 ;;;   The background color is now the specified color.
 (define/contract context-set-bgcolor!
-  (-> color? any/c)
+  (-> color? void)
   (lambda (color)
     (gimp-context-set-background  (color->rgb color))))
 
@@ -83,7 +85,7 @@
 ;;; Postconditions:
 ;;;   The foreground color is now the specified color.
 (define/contract context-set-fgcolor!
-  (-> color? any/c)
+  (-> color? void)
   (lambda (color)
     (process-gimp-result
      (gimp-context-set-foreground (color->rgb color)))))
@@ -112,7 +114,7 @@
 ;;;   For each reasonable i,
 ;;;     (brush? (list-ref brushes i))
 (define/contract context-list-brushes
-  (-> string? (listof string?))
+  (->* () (string?) (listof string?))
   (lambda restriction
     (let* ((pattern (if (null? restriction) "" (car restriction)))
            (brushes (cadr (gimp-brushes-get-list (string-escape pattern)))))
@@ -147,7 +149,7 @@
 ;;; NOTE:
 ;;;   Calls a function implimented as a GIMP plugin
 (define/contract context-list-color-names
-  (-> string? (listof string?))
+  (->* () (string?) (listof string?))
   (lambda args
     (if (null? args)
         all-color-names
@@ -180,7 +182,7 @@
 ;;; Produces:
 ;;;   font-list, a list of strings
 (define/contract context-list-fonts
-  (-> string? (listof string?))
+  (->* () (string?) (listof string?))
   (lambda restriction
     (cond
       ((null? restriction)
@@ -221,11 +223,12 @@
 ;;;     flag
 ;;;   If called with one parameter, sets the current state of the flag
 ;;;     to that parameter.
-(define _context-immediate-updates
+(define/contract context-immediate-updates
+  (->* () (boolean?) boolean?)
   (make-flag))
 
-(define context-immediate-updates
-  (guard-flag 'context-immediate-updates _context-immediate-updates))
+;(define context-immediate-updates
+;  (guard-flag 'context-immediate-updates _context-immediate-updates))
 
 ;;; Procedure:
 ;;;   context-immediate-updates?
@@ -238,13 +241,15 @@
 ;;;   immediate-updates?, a Boolean
 ;;; Preconditions:
 ;;;   [No additional]
-(define _context-immediate-updates? _context-immediate-updates)
+(define/contract context-immediate-updates? 
+  (-> boolean?)
+   context-immediate-updates)
 
-(define context-immediate-updates?
-  (guard-proc 'context-immediate-updates?
-              _context-immediate-updates?
-              null
-              null))
+;(define context-immediate-updates?
+;  (guard-proc 'context-immediate-updates?
+;              _context-immediate-updates?
+;              null
+;              null))
 
 ;;; Procedure:
 ;;;   context-immediate-updates-on!
@@ -255,12 +260,13 @@
 ;;;   displays.
 ;;; Produces:
 ;;;   [Nothing; called for the side effect.]
-(define _context-immediate-updates-on!
+(define/contract context-immediate-updates-on!
+  (-> void)
   (lambda ()
     (context-update-displays!)
     (context-immediate-updates #t)))
 
-(define context-immediate-updates-on! _context-immediate-updates-on!)
+;(define context-immediate-updates-on! _context-immediate-updates-on!)
 
 ;;; Procedure:
 ;;;   context-immediate-updates-off!
@@ -272,11 +278,12 @@
 ;;;   not be visible until one calls (context-update-displays!)
 ;;; Produces:
 ;;;   [Nothing; called for the side effect.]
-(define _context-immediate-updates-off!
+(define/contract context-immediate-updates-off!
+  (-> void)
   (lambda ()
     (context-immediate-updates #f)))
 
-(define context-immediate-updates-off! _context-immediate-updates-off!)
+;(define context-immediate-updates-off! _context-immediate-updates-off!)
 
 ;;; Procedure:
 ;;;   context-update-displays!
@@ -291,12 +298,13 @@
 ;;;   [None]
 ;;; Postconditions
 ;;;   All completed image operations should be visible.
-(define _context-update-displays! 
+(define/contract context-update-displays! 
+  (-> void)
   (lambda ()
     (gimp-displays-flush)
     (void)))
 
-(define context-update-displays! _context-update-displays!)
+;(define context-update-displays! _context-update-displays!)
 
 
 ; +------------------------------------------+----------------------------------
@@ -319,11 +327,12 @@
 ;;;     flag
 ;;;   If called with one parameter, sets the current state of the flag
 ;;;     to that parameter.
-(define _context-preserve
+(define/contract context-preserve
+  (->* () (boolean?) boolean?)
   (make-flag))
 
-(define context-preserve
-  (guard-flag 'context-preserve _context-preserve))
+;(define context-preserve
+;  (guard-flag 'context-preserve _context-preserve))
 
 ;;; Procedure:
 ;;;   context-preserve?
@@ -336,13 +345,13 @@
 ;;;   preserved?, a Boolean
 ;;; Preconditions:
 ;;;   [No additional]
-(define _context-preserve? _context-preserve)
+(define context-preserve? context-preserve)
 
-(define context-preserve?
-  (guard-proc 'context-preserve?
-              _context-preserve?
-              null
-              null))
+;(define context-preserve?
+;  (guard-proc 'context-preserve?
+;              _context-preserve?
+;              null
+;              null))
 
 ;;; Procedure:
 ;;;   context-preserve-on!
@@ -352,11 +361,12 @@
 ;;;   Indicate that varous operations should preserve the color and brush.
 ;;; Produces:
 ;;;   [Nothing; called for the side effect.]
-(define _context-preserve-on!
+(define/contract context-preserve-on!
+  (-> void)
   (lambda ()
     (context-preserve #t)))
 
-(define context-preserve-on! _context-preserve-on!)
+;(define context-preserve-on! _context-preserve-on!)
 
 ;;; Procedure:
 ;;;   context-preserve-off!
@@ -367,11 +377,12 @@
 ;;;   color.
 ;;; Produces:
 ;;;   [Nothing; called for the side effect.]
-(define _context-preserve-off!
+(define/contract context-preserve-off!
+  (-> void)
   (lambda ()
     (context-preserve #f)))
 
-(define context-preserve-off! _context-preserve-off!)
+;(define context-preserve-off! _context-preserve-off!)
 
 ; By default, we don't preserve context.  The ugly code is so that we
 ; don't get output.

@@ -154,7 +154,7 @@
 (define/contract image-transform!
   (-> image? (-> irgb? irgb?) image?)
   (lambda (image transform)
-    (_drawable-transform! image (image-get-layer image) transform)))
+    (drawable-transform! image (image-get-layer image) transform)))
       
 ;(define image-transform!
 ;  (guard-proc 'image-transform

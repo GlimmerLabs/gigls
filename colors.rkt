@@ -60,25 +60,6 @@
          (< val 360)
          (> val 0))))
 
-;;; Procedure:
-;;;   saturation?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determines if val is between 0 and 1
-;;; Produces:
-;;;   is-between?, a Boolean
-;;; Preconditions
-;;;   [No additional]
-;;; Postconditions
-;;;   returns #t if val is betwen 0 and 1, and #f otherwise.
-(define/contract 0val1? 
-  (-> any/c boolean?)
-  (lambda (val)
-    (and (number? val)
-         (< val 1)
-         (> val 0))))
-
 ; +--------+----------------------------------------------------------
 ; | Guards |
 ; +--------+
@@ -440,7 +421,8 @@
 ;;; Preconditions:
 ;;;   [No additional]
 (define/contract irgb->saturation
-  (-> irgb? 0val1?)
+  (-> irgb? (flat-named-contract 'a-number-between-0-and-1
+                                 (lambda (x) (and (<= x 1) (>= x 0)))))
   (lambda (col)
     (let* ((color (color->rgb-list col))
           (cmax (apply max color))
@@ -489,7 +471,8 @@
 ;;; Preconditions:
 ;;;   [No additional]
 (define/contract irgb->value
-  (-> irgb? 0val1?)
+  (-> irgb? (flat-named-contract 'a-number-between-0-and-1
+                                 (lambda (x) (and (<= x 1) (>= x 0)))))
   (lambda (col)
     (let ((color (color->rgb-list col)))
       (/ (apply max color) 255))))
@@ -535,7 +518,7 @@
 ;;; Produces:
 ;;;   representation, a symbol (or #f)
 (define/contract color-representation
-  (-> color? boolean?)
+  (-> color? (or/c symbol? boolean?))
   (lambda (color)
     (cond
       ((irgb? color) 'IRGB)

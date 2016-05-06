@@ -36,7 +36,8 @@
 ;;; Postconditions:
 ;;;   The only colors in swatch are color1 ... color6.
 ;;;   All of the specified colors are in swatch
-(define _color-swatch
+(define/contract color-swatch
+  (->* (color?) (color? color? color? color? color?) image?)
   (let ((width 60)
         (height 16))
     (lambda colors
@@ -47,17 +48,17 @@
                          (list-ref rgbs (quotient col wid)))
                        width height)))))
 
-(define color-swatch
-  (lambda colors
-    (cond
-      ((null? colors)
-       (error/arity 'image-color-swatch "1 to 6" colors))
-      ((< 6 (length colors))
-       (error/arity 'image-color-swatch "1 to 6" colors))
-      ((not (all color? colors))
-       (error/misc 'image-color-swatch "encountered non-color" colors))
-      (else 
-       (apply _color-swatch colors)))))
+;(define color-swatch
+;  (lambda colors
+;    (cond
+;      ((null? colors)
+;       (error/arity 'image-color-swatch "1 to 6" colors))
+;      ((< 6 (length colors))
+;       (error/arity 'image-color-swatch "1 to 6" colors))
+;      ((not (all color? colors))
+;       (error/misc 'image-color-swatch "encountered non-color" colors))
+;      (else 
+;       (apply _color-swatch colors)))))
 
 ;;; Procedure:
 ;;;   color-grid
@@ -75,8 +76,10 @@
 ;;;   cols >= n
 ;;; Postconditions:
 ;;;   grid contains the described grid.
-(define _color-grid 
-  (lambda (box-width box-height cols colors)
+(define/contract color-grid 
+  (->* ((and/c integer? positive?) (and/c integer? positive?) (and/c integer? positive?) color?)
+       () #:rest (listof color?) image?)
+  (lambda (box-width box-height cols . colors)
     (let* ([ncolors (length colors)]
            [lastrow (modulo ncolors cols)]
            [rows (if (zero? lastrow) 
@@ -99,21 +102,21 @@
       (image-select-nothing! grid)
       grid)))
 
-(define color-grid
-  (lambda (box-width box-height cols . colors)
-    (let ([params (cons box-width (cons box-height (cons cols colors)))])
-      (cond
-        [(or (not (integer? box-width)) (not (positive? box-width)))
-         (error/parameter-type 'color-grid 1 'positive-integer params)]
-        [(or (not (integer? box-height)) (not (positive? box-height)))
-         (error/parameter-type 'color-grid 2 'positive-integer params)]
-        [(or (not (integer? cols)) (not (positive? cols)))
-         (error/parameter-type 'color-grid 3 'positive-integer params)]
-        [(null? colors) 
-         (error "color-grid: Expects at least one color")]
-        [(not (pair? (car colors)))
-         (color-grid box-width box-height cols colors)]
-        [(not (all color? (car colors)))
-         (error "color-grid: Non-color in" (car colors))]
-        [else
-         (_color-grid box-width box-height cols (car colors))]))))
+;(define color-grid
+;  (lambda (box-width box-height cols . colors)
+;    (let ([params (cons box-width (cons box-height (cons cols colors)))])
+;      (cond
+;        [(or (not (integer? box-width)) (not (positive? box-width)))
+;         (error/parameter-type 'color-grid 1 'positive-integer params)]
+;        [(or (not (integer? box-height)) (not (positive? box-height)))
+;         (error/parameter-type 'color-grid 2 'positive-integer params)]
+;        [(or (not (integer? cols)) (not (positive? cols)))
+;         (error/parameter-type 'color-grid 3 'positive-integer params)]
+;        [(null? colors) 
+;         (error "color-grid: Expects at least one color")]
+;        [(not (pair? (car colors)))
+;         (color-grid box-width box-height cols colors)]
+;        [(not (all color? (car colors)))
+;         (error "color-grid: Non-color in" (car colors))]
+;        [else
+;         (_color-grid box-width box-height cols (car colors))]))))

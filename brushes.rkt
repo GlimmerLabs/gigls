@@ -64,9 +64,8 @@
 ;;;   The #t at the end may seem a bit odd, since it's pointless.  However,
 ;;;   it ensures that brush? returns a Boolean.
 (define/contract brush?
-  (-> any/c (-> any/c boolean?))
-  (lambda (val)
-    (and string? (or brush-name? brush-info?))))
+  (-> any/c boolean?)
+  (^or brush-name? brush-info?))
 
 ;;; Procedure:
 ;;;   brush-generated?
@@ -97,7 +96,8 @@
 ;;; Postconditions:
 ;;;   If mutable?, then it is safe to call brush-set-ATTRIBUTE, where
 ;;;   ATTRIBUTE is one of the key attributes (shape, size, radius, etc.)
-(define brush-mutable?
+(define/contract brush-mutable?
+  (-> string? boolean?)
   brush-generated?)
 
 ;;; Procedure:
@@ -122,9 +122,9 @@
 ;;; Produces:
 ;;;   is-valid?, a boolean
 (define/contract brush-valid-aspect-ratio?
-  (-> real? boolean?)
+  (-> any/c boolean?)
   (lambda (val)
-    (and (real? val (<= 1 val 1000)))))
+    (and (real? val) (<= 1 val 1000))))
 
 (define brush-valid-aspect-ratio 'real-between-1-and-1000)
 
@@ -136,7 +136,8 @@
 ;;;   Determines if radius is a valid radius for a brush
 ;;; Produces:
 ;;;   is-valid?, a boolean
-(define brush-valid-radius?
+(define/contract brush-valid-radius?
+  (-> any/c boolean?)
   (^and real? positive? (r-s <= 1000)))
 
 (define brush-valid-radius 'positive-real-less-than-1000)
@@ -149,7 +150,8 @@
 ;;;   Determine if shape is a valid brush shape
 ;;; Produces:
 ;;;   is-valid?, a boolean value
-(define brush-valid-shape?
+(define/contract brush-valid-shape?
+  (-> any/c boolean?)
   (r-s member? '(0 1 2 square circle diamond other)))
 
 ;;; Procedure
@@ -160,7 +162,8 @@
 ;;;   Determines if spikes is a valid number of spikes
 ;;; Produces:
 ;;;   is-valid?, a boolean
-(define brush-valid-spikes?
+(define/contract brush-valid-spikes?
+  (-> integer? boolean?)
   (^and integer? (l-s <= 2)))
 
 (define brush-valid-spikes 'integer-greater-than-1)
@@ -427,7 +430,11 @@
 ;;; Produces:
 ;;;   num, a shape number
 (define/contract brush-shape-to-number
-  (-> brush-valid-shape? number?)
+  (-> (flat-named-contract
+       'valid-shape 
+       (lambda (x)
+         (brush-valid-shape? x)))
+      number?)
   (lambda (shape)
     (cond
       ([eq? shape 'circle] 0)
@@ -450,7 +457,10 @@
 ;;; Produces:
 ;;;   shapename, a symbol
 (define/contract brush-shape-number-to-name
-  (-> (and/c number? integer?) symbol?)
+  (-> (flat-named-contract
+       'a-number-between-0-and-2
+       (lambda (x) (and (integer? x) (<= x 2) (>= x 0))))
+        symbol?)
   (lambda (shape)
     (vector-ref #(circle square diamond) shape)))
 
@@ -507,11 +517,12 @@
 ;;;   brush is a mutable brush
 ;;; Postconditions:
 ;;;   (brush-get-angle brush) correspondes to angle mod 180.
-(define _brush-set-angle!
+(define/contract brush-set-angle!
+  (-> brush? real? brush?)
   (lambda (brush angle)
     (cond
       [(< angle 0)
-       (_brush-set-angle! brush (+ angle 360))]
+       (brush-set-angle! brush (+ angle 360))]
       [(brush-name? brush)
        (let ([editable (brush-make-editable brush)])
          (gimp-brush-set-angle brush angle)
@@ -521,11 +532,11 @@
       [else
        (error/parameter-type 'brush-set-angle! 1 'brush (list brush angle))])))
 
-(define brush-set-angle!
-  (guard-proc 'brush-set-angle!
-              _brush-set-angle!
-              (list 'brush 'real)
-              (list brush? real?)))
+;(define brush-set-angle!
+;  (guard-proc 'brush-set-angle!
+;              _brush-set-angle!
+;              (list 'brush 'real)
+;              (list brush? real?)))
 
 ;;; Procedure:
 ;;;   brush-set-aspect-ratio
@@ -541,7 +552,8 @@
 ;;;   brush is a mutable brush
 ;;; Postconditions:
 ;;;   (brush-get-aspect-ratio brush) is aspect-ratio
-(define _brush-set-aspect-ratio!
+(define/contract brush-set-aspect-ratio!
+  (-> brush? real? brush?)
   (lambda (brush aspect-ratio)
     (cond
       [(not (brush-valid-aspect-ratio aspect-ratio))
@@ -561,7 +573,7 @@
                              'brush
                              (list brush aspect-ratio))])))
 
-(define brush-set-aspect-ratio! _brush-set-aspect-ratio!)
+;(define brush-set-aspect-ratio! _brush-set-aspect-ratio!)
 
 ;;; Procedure:
 ;;;   brush-set-radius!
@@ -572,7 +584,8 @@
 ;;;   Sets the radius of the brush to radius
 ;;; Produces;
 ;;;   brush, the same brush
-(define _brush-set-radius!
+(define/contract brush-set-radius!
+  (-> brush? real? void)
   (lambda (brush radius)
     (cond
       [(brush-name? brush)
@@ -584,11 +597,11 @@
       [else
        (error/parameter-type 'brush-set-radius! 1 'brush (list brush radius))])))
 
-(define brush-set-radius!
-  (guard-proc 'brush-set-radius!
-              _brush-set-radius!
-              (list 'brush 'positive-real)
-              (list brush? (^and real? positive?))))
+;(define brush-set-radius!
+;  (guard-proc 'brush-set-radius!
+;              _brush-set-radius!
+;              (list 'brush 'positive-real)
+;              (list brush? (^and real? positive?))))
 
 ;;; Procedure:
 ;;;   brush-set-shape!
@@ -604,7 +617,11 @@
 ;;;   brush is a mutable brush
 ;;; Postconditions:
 ;;;   (brush-get-shape brush) is equivalent to shape
-(define _brush-set-shape!
+(define/contract brush-set-shape!
+  (-> brush? (flat-named-contract
+       'a-number-between-0-and-2
+       (lambda (x) (and (integer? x) (<= x 2) (>= x 0))))
+      brush?)
   (lambda (brush shape)
     (cond
       [(not (brush-valid-shape? shape))
@@ -622,7 +639,7 @@
        (error/parameter-type 'brush-set-shape! 1 'brush 
                              (list brush shape))])))
 
-(define brush-set-shape! _brush-set-shape!)
+;(define brush-set-shape! _brush-set-shape!)
 
 ;;; Procedure:
 ;;;   brush-set-spikes!
@@ -638,7 +655,8 @@
 ;;;   brush is a mutable brush
 ;;; Postconditions:
 ;;;   (brush-get-spikes brush) is spikes
-(define _brush-set-spikes
+(define/contract brush-set-spikes
+  (-> brush? (and/c integer? positive?) brush?)
   (lambda (brush spikes)
     (cond
       [(not (brush-valid-spikes? spikes))

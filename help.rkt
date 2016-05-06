@@ -190,7 +190,7 @@
 ;;; Postconditions:
 ;;;   data is str with the leading semicolons and spaces stripped
 (define/contract sixps-extract-data
-  (-> string? string?)
+  (-> sixps-line? string?)
   (let ([cleanup (o (r-s string-remove-trailing-chars char-whitespace?)
                     (r-s string-remove-leading-chars char-whitespace?)
                     (r-s string-remove-leading-chars (l-s char=? #\;)))])
@@ -216,7 +216,7 @@
 ;;; Postconditions:
 ;;;   header is the header (e.g., "Procedure")
 (define/contract sixps-extract-header
-  (-> string? string?)
+  (-> sixps-header? string?)
   (let ([cleanup (o (r-s string-remove-trailing-chars (l-s char=? #\:))
                     (r-s string-remove-trailing-chars char-whitespace?)
                     (r-s string-remove-leading-chars char-whitespace?)

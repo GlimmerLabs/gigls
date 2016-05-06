@@ -12,6 +12,7 @@
          gigls/point
          gigls/utils)
 
+
 ;;; Procedure:
 ;;;   turtle-new
 ;;; Parameters:
@@ -28,7 +29,8 @@
 ;;; Phoo:
 ;;;   The body of the object should probably be generated automatically.
 
-(define _turtle-new
+(define/contract turtle-new 
+  (-> (or/c integer? image?) any/c)
   (lambda (image)
     (let ((world image)
           (col 0) 
@@ -97,11 +99,11 @@
                                         (cons message
                                               params)))))))))))
 
-(define turtle-new
-  (guard-unary-proc 'turtle-new
-                    _turtle-new
-                    'image
-                    image?))
+;(define turtle-new
+;  (guard-unary-proc 'turtle-new
+;                    _turtle-new
+;                    'image
+;                    image?))
 
 
 ;;; Procedure:
@@ -119,13 +121,15 @@
 ;;;   as strings.  Two anonymous procedures created by the same procedure
 ;;;   will have the same string.  Two anonymous procedures created by
 ;;;   different procedures will have different strings.
-(define _turtle?
-  (let ((sample (value->string (_turtle-new 0))))
+(define/contract turtle?
+  (-> any/c boolean?)
+  (let ((sample (value->string (turtle-new 0))))
     (lambda (val)
       (and (procedure? val)
            (string=? (value->string val) sample)))))
 
-(define turtle? _turtle?)
+;(define turtle? _turtle?)
+
 
 ;;; Procedure:
 ;;;   guard-turtle-proc
@@ -153,7 +157,8 @@
 ;;;   clone is oriented in the same direction as turtle
 ;;;   clone has the same color and brush as turtle
 ;;;   clone is on the same image as turtle
-(define _turtle-clone
+(define/contract turtle-clone
+  (-> turtle? turtle?)
   (lambda (turtle)
     (let ((clone (turtle-new (turtle ':world))))
       (clone ':set-col! (turtle ':col))
@@ -167,8 +172,8 @@
           (clone ':hide!))
       clone)))
 
-(define turtle-clone 
-  (guard-turtle-proc 'turtle-clone _turtle-clone))
+;(define turtle-clone 
+;  (guard-turtle-proc 'turtle-clone _turtle-clone))
 
 ;;; Procedure:
 ;;;   turtle-angle
@@ -178,12 +183,13 @@
 ;;;   Determine the angle in which the turtle is facing.
 ;;; Produces:
 ;;;   angle, a real number.
-(define _turtle-angle
+(define/contract turtle-angle
+  (-> turtle? real?)
   (lambda (turtle)
     (turtle ':angle)))
 
-(define turtle-angle
-  (guard-turtle-proc 'turtle-angle _turtle-angle))
+;(define turtle-angle
+;  (guard-turtle-proc 'turtle-angle _turtle-angle))
 
 ;;; Procedure:
 ;;;   turtle-brush
@@ -193,12 +199,13 @@
 ;;;   Determine the brush that the turtle uses to draw
 ;;; Produces:
 ;;;   brush, a string that names a Gimp brush.
-(define _turtle-brush
+(define/contract turtle-brush
+  (-> turtle? brush?)
   (lambda (turtle)
     (turtle ':brush)))
 
-(define turtle-brush
-  (guard-turtle-proc 'turtle-brush _turtle-brush))
+;(define turtle-brush
+;  (guard-turtle-proc 'turtle-brush _turtle-brush))
  
 ;;; Procedure:
 ;;;   turtle-brush-size
@@ -208,12 +215,13 @@
 ;;;   Determine the size of the brush that the turtle uses to draw
 ;;; Produces:
 ;;;   size, an integer
-(define _turtle-brush-size
+(define/contract turtle-brush-size
+  (-> turtle? integer?)
   (lambda (turtle)
     (turtle ':brush-size)))
 
-(define turtle-brush-size
-  (guard-turtle-proc 'turtle-brush-size _turtle-brush-size))
+;(define turtle-brush-size
+;  (guard-turtle-proc 'turtle-brush-size _turtle-brush-size))
  
 ;;; Procedure:
 ;;;   turtle-col
@@ -223,12 +231,13 @@
 ;;;   Determine the column on which the turtle resides
 ;;; Produces:
 ;;;   col, a real number
-(define _turtle-col
+(define/contract turtle-col
+  (-> turtle? real?)
   (lambda (turtle)
     (turtle ':col)))
 
-(define turtle-col
-  (guard-turtle-proc 'turtle-col _turtle-col))
+;(define turtle-col
+;  (guard-turtle-proc 'turtle-col _turtle-col))
 
 ;;; Procedure:
 ;;;   turtle-color
@@ -238,12 +247,13 @@
 ;;;   Determine the color the turtle uses to draw
 ;;; Produces:
 ;;;   color, an integer-encoded RGB color
-(define _turtle-color
+(define/contract turtle-color
+  (-> turtle? color?)
   (lambda (turtle)
     (turtle ':color)))
 
-(define turtle-color
-  (guard-turtle-proc 'turtle-color _turtle-color))
+;(define turtle-color
+;  (guard-turtle-proc 'turtle-color _turtle-color))
 
 ;;; Procedure:
 ;;;   turtle-display
@@ -254,7 +264,8 @@
 ;;;   Diplsyss the turtle on the screen
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-display
+(define/contract turtle-display
+  (->* (turtle?) ((listof symbol?)) turtle?)
   (let ((d2r (/ pi 180)))
     (lambda (turtle . rest)
       (let ((col (turtle ':col))
@@ -280,16 +291,16 @@
               (context-set-brush! saved-brush)))))
       turtle)))
 
-(define turtle-display
-  (lambda (turtle . rest)
-    (cond
-      ((not (turtle? turtle))
-       (error/parameter-type 'turtle-display 1 'turtle (cons turtle rest)))
-      ((and (not (null? rest)) (not (null? (cdr rest))))
-       (error/arity 'turtle-display "one or two" (cons turtle rest)))
-      ((and (not (null? rest)) (not (arrow-type? (car rest))))
-       (error/parameter-type 'turtle-display 2 'arrow-type (cons turtle rest)))
-      (else (apply _turtle-display (cons turtle rest))))))
+;(define turtle-display
+;  (lambda (turtle . rest)
+;    (cond
+;      ((not (turtle? turtle))
+;       (error/parameter-type 'turtle-display 1 'turtle (cons turtle rest)))
+;      ((and (not (null? rest)) (not (null? (cdr rest))))
+;       (error/arity 'turtle-display "one or two" (cons turtle rest)))
+;      ((and (not (null? rest)) (not (arrow-type? (car rest))))
+;       (error/parameter-type 'turtle-display 2 'arrow-type (cons turtle rest)))
+;      (else (apply _turtle-display (cons turtle rest))))))
 
 ;;; Procedure:
 ;;;   turtle-direction
@@ -299,12 +310,13 @@
 ;;;   Determine the direction in which the turtle is facint
 ;;; Produces:
 ;;;   direction, a real
-(define _turtle-direction
+(define/contract turtle-direction
+  (-> turtle? real?)
   (lambda (turtle)
     (turtle ':angle)))
 
-(define turtle-direction
-  (guard-turtle-proc 'turtle-direction _turtle-direction))
+;(define turtle-direction
+;  (guard-turtle-proc 'turtle-direction _turtle-direction))
 
 ;;; Procedure:
 ;;;   turtle-down!
@@ -314,13 +326,14 @@
 ;;;   Puts the turtle's brush down
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-down!
+(define/contract turtle-down!
+  (-> turtle? turtle?)
   (lambda (turtle)
     (turtle ':down!)
     turtle))
 
-(define turtle-down!
-  (guard-turtle-proc 'turtle-down!  _turtle-down!))
+;(define turtle-down!
+;  (guard-turtle-proc 'turtle-down!  _turtle-down!))
 
 ;;; Procedure:
 ;;;   turtle-face!
@@ -334,18 +347,19 @@
 ;;; Postconditions:
 ;;;   The turtle is now facing in the direction specified by angle
 ;;;   (clockwise from right).
-(define _turtle-face!
+(define/contract turtle-face!
+  (-> turtle? integer? void)
   (lambda (turtle angle)
     (turtle ':set-angle! angle)
     (when (turtle ':visible?)
       (turtle-display turtle))
     turtle))
 
-(define turtle-face!
-  (guard-proc 'turtle-face!
-              _turtle-face!
-              (list 'turtle 'integer)
-              (list turtle? integer?)))
+;(define turtle-face!
+;  (guard-proc 'turtle-face!
+;              _turtle-face!
+;              (list 'turtle 'integer)
+;              (list turtle? integer?)))
 
 ;;; Procedure:
 ;;;   turtle-forward!
@@ -356,7 +370,8 @@
 ;;;   Moves the turtle forward by the given distance.
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-forward!
+(define/contract turtle-forward!
+  (-> turtle? real? turtle?)
   (let ((d2r (/ pi 180)))
     (lambda (turtle distance)
       (let ((col (turtle ':col))
@@ -390,11 +405,11 @@
             (turtle-display turtle))))
       turtle)))
 
-(define turtle-forward!
-  (guard-proc 'turtle-forward!
-              _turtle-forward!
-              (list 'turtle 'real)
-              (list turtle? real?)))
+;(define turtle-forward!
+;  (guard-proc 'turtle-forward!
+;              _turtle-forward!
+;              (list 'turtle 'real)
+;              (list turtle? real?)))
 
 ;;; Procedure:
 ;;;   turtle-hide!
@@ -408,13 +423,14 @@
 ;;;   [No additional.]
 ;;; Postconditions:
 ;;;   The turtle is no longer shown.
-(define _turtle-hide!
+(define/contract turtle-hide!
+  (-> turtle? turtle?)
   (lambda (turtle)
     (turtle ':hide!)
     turtle))
 
-(define turtle-hide!
-  (guard-turtle-proc 'turtle-hide!  _turtle-hide!))
+;(define turtle-hide!
+;  (guard-turtle-proc 'turtle-hide!  _turtle-hide!))
 
 ;;; Procedure:
 ;;;   turtle-point
@@ -424,12 +440,13 @@
 ;;;   Get the point at which the turtle resides.
 ;;; Produces:
 ;;;   pt, a point
-(define _turtle-point
+(define/contract turtle-point
+  (-> turtle? point?)
   (lambda (turtle)
     (point (turtle ':col) (turtle ':row))))
 
-(define turtle-point
-  (guard-turtle-proc 'turtle_point _turtle-point))
+;(define turtle-point
+;  (guard-turtle-proc 'turtle_point _turtle-point))
 
 ;;; Procedure:
 ;;;   turtle-row
@@ -439,12 +456,13 @@
 ;;;   Determine the row on which the turtle resides
 ;;; Produces:
 ;;;   row, a real number
-(define _turtle-row
+(define/contract turtle-row
+  (-> turtle? real?)
   (lambda (turtle)
     (turtle ':row)))
 
-(define turtle-row
-  (guard-turtle-proc 'turtle-row _turtle-row))
+;(define turtle-row
+;  (guard-turtle-proc 'turtle-row _turtle-row))
 
 ;;; Procedure:
 ;;;   turtle-set-brush!
@@ -456,28 +474,29 @@
 ;;;   Set the brush with which the turtle draws.
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-set-brush! 
+(define/contract turtle-set-brush! 
+  (-> turtle? brush? real? turtle?)
   (lambda (turtle brush . rest)
     (turtle ':set-brush! brush)
     (when (not (null? rest))
       (turtle ':set-brush-size! (car rest)))))
 
-(define turtle-set-brush!
-  (lambda (turtle brush . rest)
-    (let ([params (cons turtle (cons brush rest))])
-      (cond 
-        [(not (turtle? turtle))
-         (error/parameter-type 'turtle-set-brush! 1 'turtle params)]
-        [(not (brush-name? brush))
-         (error/parameter-type 'turtle-set-brush! 2 'brush params)]
-        [(and (not (brush-generated? brush)) (not (null? rest)))
-         (error "turtle-set-brush! cannot set size for a non-mutable brush")]
-        [(and (not (null? rest))
-              (or (not (real? (car rest)))
-                  (not (positive? (car rest)))))
-         (error/parameter-type 'turtle-set-brush! 3 'positive-real params)]
-        [else
-         (apply _turtle-set-brush! params)]))))
+;(define turtle-set-brush!
+;  (lambda (turtle brush . rest)
+;    (let ([params (cons turtle (cons brush rest))])
+;      (cond 
+;        [(not (turtle? turtle))
+;         (error/parameter-type 'turtle-set-brush! 1 'turtle params)]
+;        [(not (brush-name? brush))
+;         (error/parameter-type 'turtle-set-brush! 2 'brush params)]
+;        [(and (not (brush-generated? brush)) (not (null? rest)))
+;         (error "turtle-set-brush! cannot set size for a non-mutable brush")]
+;        [(and (not (null? rest))
+;              (or (not (real? (car rest)))
+;                  (not (positive? (car rest)))))
+;         (error/parameter-type 'turtle-set-brush! 3 'positive-real params)]
+;        [else
+;         (apply _turtle-set-brush! params)]))))
 
 ;;; Procedure:
 ;;;   turtle-set-color!
@@ -488,16 +507,17 @@
 ;;;   Set the color with which the turtle draws.
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-set-color!
+(define/contract turtle-set-color!
+  (-> turtle? color? turtle?)
   (lambda (turtle color)
     (turtle ':set-color! (color->rgb color))
     turtle))
 
-(define turtle-set-color!
-  (guard-proc 'turtle-set-color!
-              _turtle-set-color!
-              (list 'turtle 'color)
-              (list turtle? color?)))
+;(define turtle-set-color!
+;  (guard-proc 'turtle-set-color!
+;              _turtle-set-color!
+;              (list 'turtle 'color)
+;              (list turtle? color?)))
 
 
 ; Produces:
@@ -505,16 +525,17 @@
 ; Ponderings:
 ;   Probably not very useful, but included just in case I find
 ;   a reason for it.
-(define _turtle-set-image!
+(define/contract turtle-set-image!
+  (-> turtle? image? turtle?)
   (lambda (turtle image)
     (turtle ':set-world! image)
     turtle))
 
-(define turtle-set-image!
-  (guard-proc 'turtle-set-image!
-              _turtle-set-image!
-              (list 'turtle 'image)
-              (list turtle? image?)))
+;(define turtle-set-image!
+;  (guard-proc 'turtle-set-image!
+;              _turtle-set-image!
+;              (list 'turtle 'image)
+;              (list turtle? image?)))
 
 ;;; Procedure:
 ;;;   turtle-show!
@@ -529,14 +550,15 @@
 ;;; Postconditions:
 ;;;   The turtle is shown after each call to forward, turn, teleport, and
 ;;;   such.
-(define _turtle-show!
+(define/contract turtle-show!
+  (-> turtle? turtle?)
   (lambda (turtle)
     (turtle ':show!)
     (turtle-display turtle)
     turtle))
 
-(define turtle-show!
-  (guard-turtle-proc 'turtle-show! _turtle-show!))
+;(define turtle-show!
+;  (guard-turtle-proc 'turtle-show! _turtle-show!))
 
 ;;; Procedure:
 ;;;   turtle-teleport!
@@ -548,7 +570,8 @@
 ;;;   Move the turtle to (col,row).
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-teleport!
+(define/contract turtle-teleport!
+  (-> turtle? real? real? turtle?)
   (lambda (turtle col row)
     (turtle ':set-col! col)
     (turtle ':set-row! row)
@@ -556,11 +579,11 @@
       (turtle-display turtle))
     turtle))
 
-(define turtle-teleport!
-  (guard-proc 'turtle-teleport!
-              _turtle-teleport!
-              (list 'turtle 'real 'real)
-              (list turtle? real? real?)))
+;(define turtle-teleport!
+;  (guard-proc 'turtle-teleport!
+;              _turtle-teleport!
+;              (list 'turtle 'real 'real)
+;              (list turtle? real? real?)))
 
 
 ;;; Procedure:
@@ -572,7 +595,8 @@
 ;;;   Rotate turtle clockwise by angle (expressed in degrees)
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-turn!
+(define/contract turtle-turn!
+  (-> turtle? real? turtle?)
   (letrec ((fixangle 
             (lambda (angle)
               (if (>= angle 360) (fixangle (- angle 360))
@@ -585,11 +609,11 @@
         (turtle-display turtle))
       turtle)))
 
-(define turtle-turn!
-  (guard-proc 'turtle-turn!
-              _turtle-turn!
-              (list 'turtle 'real)
-              (list turtle? real?)))
+;(define turtle-turn!
+;  (guard-proc 'turtle-turn!
+;              _turtle-turn!
+;              (list 'turtle 'real)
+;              (list turtle? real?)))
 
 ;;; Procedure:
 ;;;   turtle-up!
@@ -599,13 +623,14 @@
 ;;;   Puts the turtle's brush up
 ;;; Produces:
 ;;;   turtle, the same turtle
-(define _turtle-up!
+(define/contract turtle-up!
+  (-> turtle? turtle?)
   (lambda (turtle)
     (turtle ':up!)
     turtle))
 
-(define turtle-up!
-  (guard-turtle-proc 'turtle-up!  _turtle-up!))
+;(define turtle-up!
+;  (guard-turtle-proc 'turtle-up!  _turtle-up!))
 
 ;;; Procedure:
 ;;;   turtle-world
@@ -615,12 +640,13 @@
 ;;;   Determine the world on which turtle resides
 ;;; Produces:
 ;;;   world, an image id
-(define _turtle-world
+(define/contract turtle-world
+  (-> turtle? image-id?)
   (lambda (turtle)
     (turtle ':world)))
 
-(define turtle-world
-  (guard-turtle-proc 'turtle-world _turtle-world))
+;(define turtle-world
+;  (guard-turtle-proc 'turtle-world _turtle-world))
 
 ;;; Procedure:
 ;;;   turtle-x
@@ -630,12 +656,13 @@
 ;;;   Get the x coordinate of the turtle
 ;;; Produces:
 ;;;   x, a real number
-(define _turtle-x
+(define/contract turtle-x
+  (-> turtle? real?)
   (lambda (turtle)
     (turtle ':col)))
 
-(define turtle-x
-  (guard-turtle-proc 'turtle-x _turtle-x))
+;(define turtle-x
+;  (guard-turtle-proc 'turtle-x _turtle-x))
    
 ;;; Procedure:
 ;;;   turtle-y
@@ -645,9 +672,10 @@
 ;;;   Get the y coordinate of the turtle
 ;;; Produces:
 ;;;   y, a real number
-(define _turtle-y
+(define/contract turtle-y
+  (-> turtle? real?)
   (lambda (turtle)
     (turtle ':row)))
 
-(define turtle-y
-  (guard-turtle-proc 'turtle-y _turtle-y))
+;(define turtle-y
+;  (guard-turtle-proc 'turtle-y _turtle-y))

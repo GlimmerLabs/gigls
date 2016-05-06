@@ -25,8 +25,8 @@
 ;;;   To get the x component of a position pair
 ;;; Produces:
 ;;;   X, the column
-(define position-col
-  (guard-unary-proc 'position-col _point-col 'position position?))
+;(define position-col
+;  (guard-unary-proc 'position-col point-col 'position position?))
 
 ;;; Procedure:
 ;;;   position-row
@@ -34,8 +34,8 @@
 ;;;   To get the y component of a position pair
 ;;; Produces:
 ;;;   Y, the row
-(define position-row
-  (guard-unary-proc 'position-row _point-row 'position position?))
+;(define position-row
+;  (guard-unary-proc 'position-row point-row 'position position?))
 
 ;;; Procedure:
 ;;;   positions->floats
@@ -60,7 +60,8 @@
 ;;;   not particularly convenient or clear for novice programmers.
 ;;;   This procedure, used primarily by MediaScheme GIMP wrappers, allows
 ;;;   programmers to represent lists of positions in a more natural format.
-(define positions->floats
+(define/contract positions->floats
+  (-> (listof position?) vector?)
   (lambda (positions)
     (cond
       ((not (list? positions))
@@ -70,7 +71,7 @@
        (error/parameter-type 'positions->floats 1 'list-of-positions 
                              (list positions)))
       (else
-       (_points->floats positions)))))
+       (points->floats positions)))))
 
 ;;; Procedure:
 ;;;   position-new
@@ -87,29 +88,21 @@
 ;;;   (position? pos)
 ;;;   (position-col pos) = x
 ;;;   (position-row pos) = y
-(define position-new
-  (guard-proc 'position-new
-              _point
-              (list 'real 'real)
-              (list real? real?)))
+(define/contract position-new
+  (-> real? real? position?)
+  point)
 
 ; The following procedures were in the documentation, but did not get
 ; moved from the old gimplib to gigls.  This is an intermediate update
 ; as we get ready to get rid of positions.
-(define position-distance
-  (guard-proc 'position-distance
-              _point-distance
-              (list 'position 'position)
-              (list position? position?)))
+(define/contract position-distance
+  (-> position? position? (not/c negative?))
+  point-distance)
 
-(define position-interpolate
-  (guard-proc 'position-interpolate
-              _point-interpolate
-              (list 'position 'position 'real)
-              (list position? position? real?)))
+(define/contract position-interpolate
+  (-> position? position? real? position?)
+  point-interpolate)
 
-(define position-offset
-   (guard-proc 'position-offset
-               _point-offset
-               (list 'position 'real 'real)
-               (list position? real? real?)))
+(define/contract position-offset
+  (-> position? real? real? position?)
+  point-offset)

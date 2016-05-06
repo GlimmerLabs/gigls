@@ -5,6 +5,28 @@
 
 (provide (all-defined-out))
 
+;;; Procedure:
+;;;   tree?
+;;; Parameters:
+;;;   val, a Scheme value
+;;; Purpose:
+;;;   Determines if val represents a tree
+;;; Produces:
+;;;   is-tree?, a Boolean value
+;;; Preconditions:
+;;;   [No additional]
+;;; Postconditions:
+;;;   If val is either nil or a node whose left and right children
+;;;     are trees, then is-tree? is #t.
+;;;   Otherwise, is-tree? is #f.
+(define/contract tree?
+  (-> any/c boolean?)
+  (lambda (val)
+    (or (nil? val)
+        (and (node? val)
+             (tree? (node-left val))
+             (tree? (node-right val))))))
+
 ; +-------+-----------------------------------------------------------
 ; | Notes |
 ; +-------+
@@ -49,7 +71,8 @@
 ;;; Postconditions:
 ;;;   is-nil? is true (#t) if and only if val can be interpreted as
 ;;;   the empty tree.
-(define nil? 
+(define/contract nil? 
+  (-> any/c boolean?)
   (lambda (val)
     (eq? val nil)))
 
@@ -74,7 +97,8 @@
 ;;;   (node-left tree) = left.
 ;;;   (node-right tree) = right.
 ;;;   (node-value tree) = val.
-(define node
+(define/contract node
+  (-> any/c tree? tree? tree?)
   (lambda (val left right)
     (vector 'node val left right)))
 
@@ -86,7 +110,8 @@
 ;;;   Determine if val can be used as a tree node.
 ;;; Produces:
 ;;;   is-tree?, a Boolean
-(define node?
+(define/contract node?
+  (-> any/c boolean?)
   (lambda (val)
     (and (vector? val)
          (= (vector-length val) 4)
@@ -104,7 +129,8 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   is-leaf? is true iff the left subtree and the right subtree are nil.
-(define leaf?
+(define/contract leaf?
+  (-> node? boolean?)
   (lambda (nod)
     (and (nil? (node-left nod))
          (nil? (node-right nod)))))
@@ -121,7 +147,8 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (node-left (node val l r)) = l
-(define node-left
+(define/contract node-left
+  (-> node? any/c)
   (lambda (nod)
     (when (not (node? nod))
       (error "node-left: expected a node, received " nod))
@@ -139,7 +166,8 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (node-right (node val l r)) = r 
-(define node-right
+(define/contract node-right
+  (-> node? any/c)
   (lambda (nod)
     (when (not (node? nod))
       (error "node-right: expected a node, received " nod))
@@ -157,32 +185,12 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   (node-value (node val left right)) = val
-(define node-value
+(define/contract node-value
+  (-> node? any/c)
   (lambda (nod)
     (when (not (node? nod))
       (error "node-value: expected a node, received " nod))
     (vector-ref nod 1)))
-
-;;; Procedure:
-;;;   tree?
-;;; Parameters:
-;;;   val, a Scheme value
-;;; Purpose:
-;;;   Determines if val represents a tree
-;;; Produces:
-;;;   is-tree?, a Boolean value
-;;; Preconditions:
-;;;   [No additional]
-;;; Postconditions:
-;;;   If val is either nil or a node whose left and right children
-;;;     are trees, then is-tree? is #t.
-;;;   Otherwise, is-tree? is #f.
-(define tree?
-  (lambda (val)
-    (or (nil? val)
-        (and (node? val)
-             (tree? (node-left val))
-             (tree? (node-right val))))))
 
 ; +----------+--------------------------------------------------------
 ; | Mutators |
@@ -205,7 +213,8 @@
 ;;; Postconditions:
 ;;;   depth represents the number of nodes on the path from the node-value to 
 ;;;   the furthest leaf.
-(define tree-depth
+(define/contract tree-depth
+  (-> tree? integer?)
   (lambda (tree)
     (cond
       [(nil? tree)
@@ -229,7 +238,8 @@
 ;;; Postconditions:
 ;;;   size >= 0
 ;;;   tree contains size nodes
-(define tree-size
+(define/contract tree-size
+  (-> tree? integer?)
   (lambda (tree)
     (cond
       [(nil? tree)
@@ -254,7 +264,8 @@
 ;;;   code, when evaluated, can give something like tree
 ;;; Problems:
 ;;;   Won't work for all kinds of tree values
-(define tree->code
+(define/contract tree->code
+  (-> tree? any/c)
   (lambda (tree)
     (if (nil? tree)
         'nil
@@ -280,7 +291,8 @@
 ;;;   The context may have been updated.
 ;;; Problems:
 ;;;   Doesn't do well with especially bushy trees - these may overlap.
-(define visualize-tree
+(define/contract visualize-tree
+  (-> tree? (and/c integer? (not/c negative?)) (and/c integer? (not/c negative?)) image?)
   (let ([; (draw-nil image x y)
          ;   Draw the nil tree on image, with horizontal center at x and top at y.
          draw-nil!
@@ -355,7 +367,8 @@
 ;;;   (tree? tree)
 ;;;   (tree-size tree) == size.
 ;;;   All values in the tree were produced by separate calls to (value!)
-(define random-tree
+(define/contract random-tree
+  (-> (and/c integer? (not/c negative?)) (-> any/c) tree?)
   (lambda (size value!)
     (cond
       [(zero? size)

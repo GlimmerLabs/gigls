@@ -39,10 +39,10 @@
 ;;;   If irgb is provided a component greater than 255, it
 ;;;     uses 255.
 (define/contract irgb 
-  (-> (and/c integer? positive?)
-      (and/c integer? positive?)
-      (and/c integer? positive?) 
-      (and/c integer? positive?))
+  (-> (and/c integer? (not/c negative?))
+      (and/c integer? (not/c negative?))
+      (and/c integer? (not/c negative?)) 
+      (and/c integer? (not/c negative?)))
       irgb-new)
 
 ; +------------+------------------------------------------------------

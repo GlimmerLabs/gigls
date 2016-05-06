@@ -17,7 +17,8 @@
 ;;;   If there is an i for which (integer? (list-ref lst i)) returns false,
 ;;;     all-int? is false.
 ;;;   Otherwise, all-int? is true.
-(define all-integer?
+(define/contract all-integer?
+  (-> list? boolean?)
   (lambda (lst)
     (or (null? lst)
         (and (integer? (car lst))
@@ -42,7 +43,8 @@
 ;;;     check? is false
 ;;;   Otherwise,
 ;;;     check? is true
-(define check-list?
+(define/contract check-list?
+  (-> (listof (-> any/c any/c)) (listof any/c) boolean?)
   (lambda (preds vals)
     (or (and (null? preds) (null? vals))
         (and (pair? preds) (pair? vals)
@@ -58,7 +60,8 @@
 ;;;   Determines if vec contains val.
 ;;; Produces:
 ;;;   contained?, a boolean
-(define sequence-contains?
+(define/contract sequence-contains?
+  (-> (or/c list? vector?) any/c boolean?)
   (lambda (sequence val)
     (or (and (vector? sequence) (vector-contains? sequence val))
         (member? val sequence))))
@@ -74,7 +77,8 @@
 ;;;   val, a value
 ;;; Preconditions:
 ;;;   0 <= n < (length of squence-ref)
-(define sequence-ref
+(define/contract sequence-ref
+  (-> (or/c list? vector?) (and/c integer? (not/c negative?)) any/c)
   (lambda (sequence n)
     (if (vector? sequence)
         (vector-ref sequence n)
@@ -92,7 +96,8 @@
 ;;;   [No additional]
 ;;; Postconditions:
 ;;;   For all reasonable i, (sequence-ref seq i) = (list-ref lst i)
-(define sequence->list
+(define/contract sequence->list
+  (-> (or/c list? vector?) list?)
   (lambda (seq)
     (cond
      [(vector? seq)
@@ -110,7 +115,8 @@
 ;;;   Build a string that simply describes n as an ordinal value
 ;;; Produces:
 ;;;   ordinal, a string
-(define integer->ordinal
+(define/contract integer->ordinal
+  (-> integer? string?)
   (lambda (n)
     (let ((last-digit (modulo (abs n) 10))
           (last-two-digits (modulo (abs n) 100)))
@@ -142,7 +148,8 @@
 ;;;     then is-member? is true (#t)
 ;;;   Otherwise,
 ;;;     is-member? is false (#f)
-(define member?
+(define/contract member?
+  (-> any/c list? boolean?)
   (lambda (val lst)
     (and (member val lst) #t)))
 
@@ -166,7 +173,8 @@
 ;;;     policy.  For example, gimp-image-get-pixel returns a triplet.
 ;;;   * Some procedures return multiple values.  In those cases, it makes
 ;;;     sense to leave them as a list.
-(define process-gimp-result
+(define/contract process-gimp-result
+  (-> any/c any/c)
   (lambda (result)
     (if (and (pair? result) (null? (cdr result)))
         (car result)
@@ -184,7 +192,8 @@
 ;;; Philosophy:
 ;;;   For some reason, Script-Fu defines SUBTRACT as 8 rather than 1.
 ;;;   This procedure helps us ensure that we get the right values.
-(define selection-op
+(define/contract selection-op
+  (-> any/c integer?)
   (lambda (op)
     (cond
       ((and (integer? op) (= op SUBTRACT))
@@ -221,7 +230,8 @@
 ;;;   matcher would likely be more efficient.  We could even make it slightly 
 ;;;   more efficient by restricting our seach to the positions in which the 
 ;;;   first character of patterns occurs.
-(define _string-contains?
+(define/contract string-contains?
+  (-> string? string? boolean?)
   (lambda (str pattern)
     (or (string=? pattern "")
         (let ((str-len (string-length str))
@@ -232,15 +242,15 @@
                  (or (string=? (substring str start after) pattern)
                      (kernel (+ start 1) (+ after 1)))))))))
 
-(define string-contains?
-  (lambda (str pattern)
-    (cond
-      ((not (string? str))
-       (error "string-contains?: first parameter must be a string, received" str))
-      ((not (string? pattern))
-       (error "string-contains?: second parameters must be a string, received" pattern))
-      (else
-       (_string-contains? str pattern)))))
+;(define string-contains?
+;  (lambda (str pattern)
+;    (cond
+;      ((not (string? str))
+;       (error "string-contains?: first parameter must be a string, received" str))
+;      ((not (string? pattern))
+;       (error "string-contains?: second parameters must be a string, received" pattern))
+;      (else
+;       (_string-contains? str pattern)))))
 
 ;;; Procedure:
 ;;;   string-escape
@@ -258,7 +268,8 @@
 ;;;   (0 ())
 ;;;   > (gimp-brushes-get-list "Circle \\(09\\)")
 ;;;   (1 ("Circle (09)"))
-(define string-escape
+(define/contract string-escape
+  (-> string? string?)
   (let ((escaped-chars (list #\( #\))))
     (letrec ((charlist-escape
               (lambda (lst)
@@ -281,7 +292,8 @@
 ;;;   convert val to a string
 ;;; Produces:
 ;;;   str, a string representation of value
-(define value->string
+(define/contract value->string
+  (->* (any/c) (integer?) string?) 
   (letrec
        ; Convert a list of values to a string.
        ((list-to-string
@@ -362,7 +374,8 @@
 ;;;   Determines if vec contains val.
 ;;; Produces:
 ;;;   contained?, a boolean
-(define vector-contains?
+(define/contract vector-contains?
+  (-> vector? any/c boolean?)
   (lambda (vec val)
     (let kernel ((pos (- (vector-length vec) 1)))
       (and (>= pos 0)
